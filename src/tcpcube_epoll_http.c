@@ -11,11 +11,21 @@ int tcpcube_epoll_module_init(struct tcpcube_module_args* module_args, struct tc
     GONC_LIST_APPEND(module_list, module);
     return 0;
 }
-
+#include <stdio.h>
 int tcpcube_epoll_module_service(struct tcpcube_module* module, int* client_socket)
 {
-    write(*client_socket, "HTTP/1.1 200 OK\r\nServer: tcpcube\r\nContent-Length: 5\r\nContent-Type: text/plain\r\n\r\nHELLO\r\n", sizeof("HTTP/1.1 200 OK\r\nServer: tcpcube\r\nContent-Length: 5\r\nContent-Type: text/plain\r\n\r\nHELLO\r\n"));
-    return 0;
+    ssize_t buffer_size = 10;
+    char* buffer = malloc(buffer_size);
+    ssize_t read_size;
+    while((read_size = read(*client_socket, buffer, buffer_size - 1)) > 0)
+    {
+        buffer[read_size] = '\0';
+        printf("READ(%d): (%s)\n", read_size, buffer);
+    }
+    if(read_size == -1)
+        return 1;
+    else if(read_size == 0)
+        return 0;
 }
 
 int tcpcube_epoll_module_destroy(struct tcpcube_module* module)
