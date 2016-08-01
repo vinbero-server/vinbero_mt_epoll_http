@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <tcpcube/tcpcube_module.h>
 #include <libgonc/gonc_list.h>
+#include "tcpcube_epoll_http.h"
 
 int tcpcube_epoll_module_init(struct tcpcube_module_args* module_args, struct tcpcube_module_list* module_list)
 {
