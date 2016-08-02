@@ -34,33 +34,17 @@ int tcpcube_epoll_module_init(struct tcpcube_module_args* module_args, struct tc
 {
     struct tcpcube_module* module = malloc(sizeof(struct tcpcube_module));
     GONC_LIST_ELEMENT_INIT(module);
-    module->object = malloc(sizeof(struct tcpcube_epoll_http_module));
-    module->object_size = sizeof(struct tcpcube_epoll_http_module);
-
-    pthread_key_create(&TCPCUBE_MODULE_CAST(module->object, struct tcpcube_epoll_http_module*)->http_parser_key, NULL);
-    http_parser* parser = malloc(sizeof(http_parser));
-    http_parser_init(parser, HTTP_REQUEST);
-    pthread_setspecific(TCPCUBE_MODULE_CAST(module->object, struct tcpcube_epoll_http_module*)->http_parser_key, parser);
-
-    pthread_key_create(&TCPCUBE_MODULE_CAST(module->object, struct tcpcube_epoll_http_module*)->http_parser_settings_key, NULL);
-    http_parser_settings* parser_settings = malloc(sizeof(http_parser_settings));
-    parser_settings->on_header_field = on_header_field_callback;
-    parser_settings->on_header_value = on_header_value_callback;
-    pthread_setspecific(TCPCUBE_MODULE_CAST(module->object, struct tcpcube_epoll_http_module*)->http_parser_settings_key, parser_settings);
-
-    pthread_key_create(&TCPCUBE_MODULE_CAST(module->object, struct tcpcube_epoll_http_module*)->http_parser_settings_key, NULL);
-
     GONC_LIST_APPEND(module_list, module);
     return 0;
 }
 
-int tcpcube_epoll_module_service(struct tcpcube_module* module, int* client_socket)
+int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_epoll_data* client_data)
 {
     http_parser parser;
     ssize_t buffer_size = 10;
     char* buffer = malloc(buffer_size);
     ssize_t read_size;
-    while((read_size = read(*client_socket, buffer, buffer_size)) > 0)
+    while((read_size = read(client_data->fd, buffer, buffer_size)) > 0)
     {
         warnx("%s", buffer);
     }
@@ -86,9 +70,6 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, int* client_sock
 
 int tcpcube_epoll_module_destroy(struct tcpcube_module* module)
 {
-    pthread_key_delete(TCPCUBE_MODULE_CAST(module->object, struct tcpcube_epoll_http_module*)->http_parser_settings_key);
-    pthread_key_delete(TCPCUBE_MODULE_CAST(module->object, struct tcpcube_epoll_http_module*)->http_parser_key);
-    free(module->object);
     free(module);
     return 0;
 }
