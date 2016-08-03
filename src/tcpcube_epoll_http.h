@@ -1,7 +1,7 @@
 #ifndef _TCPCUBE_EPOLL_HTTP_H
 #define _TCPCUBE_EPOLL_HTTP_H
 
-#include <http_parser.h>
+#include "tcpcube_epoll_http_parser.h"
 
 struct tcpcube_epoll_data
 {
@@ -11,10 +11,7 @@ struct tcpcube_epoll_data
 
 struct tcpcube_epoll_http_client_data
 {
-    struct http_parser* http_parser;
-    struct http_parser_settings* http_parser_settings;
-    char* http_buffer;
-    ssize_t http_buffer_size;
+    struct tcpcube_epoll_http_parser* http_parser;
 };
 
 int tcpcube_epoll_module_init(struct tcpcube_module_args* module_args, struct tcpcube_module_list* module_list);
