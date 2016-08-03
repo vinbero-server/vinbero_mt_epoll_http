@@ -21,15 +21,37 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
     {
         warnx("client_data->ptr not initialized");
         client_data->ptr = malloc(sizeof(struct tcpcube_epoll_http_client_data));
-        ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser = malloc(sizeof(struct tcpcube_epoll_http_parser));
-        ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer = malloc(1024 * sizeof(char));
-        ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer_size = 1024;
+        ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser = calloc(1, sizeof(struct tcpcube_epoll_http_parser));
+        ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer = malloc(32 * sizeof(char));
+        ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer_capacity = 32;
     }
     ssize_t read_size;
-    while((read_size = read(client_data->fd, ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer, ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer_size)) > 0)
+    while((read_size = read(client_data->fd,
+         ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer +
+         ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset,
+         ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer_capacity -
+         ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset)) > 0)
     {
-        warnx("read chars: %d", read_size);
-        tcpcube_epoll_http_parser_parse(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser, read_size);
+//        warnx("read chars: %d", read_size);
+        if(tcpcube_epoll_http_parser_parse(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser,
+             ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset + read_size) <= 0)
+        {
+            if(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->state == TCPCUBE_EPOLL_HTTP_PARSER_ERROR)
+                warnx("%s: %u: parser error", __FILE__, __LINE__);
+            break;
+        }
+        else
+        {
+            memmove(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer,
+                 ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token,
+                 ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset);
+        }
+/*
+        warnx("read src:%u, read size:%d", ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer +
+         ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset,
+         ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer_capacity -
+         ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset);
+*/
     }
     if(read_size == -1)
     {
@@ -38,21 +60,25 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
             warnx("%s: %u: client socket EAGAIN", __FILE__, __LINE__);
             return 1;
         }
+        else if(errno == EFAULT)
+        {
+            warnx("%s: %u: a token is bigger than http_buffer", __FILE__, __LINE__);
+            return -1;
+        }
         else
         {
             warn("%s: %u", __FILE__, __LINE__);
             return -1;
         }
     }
-    else if(read_size == 0)
-    {
-        warnx("%s: %u: client socket EOF", __FILE__, __LINE__);
-        free(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer);
-        free(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser);
-        free(client_data->ptr);
-        client_data->ptr = NULL;
-        return 0;
-    }
+
+    warnx("%s: %u: end of http request", __FILE__, __LINE__);
+    free(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->buffer);
+    free(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser);
+    free(client_data->ptr);
+    client_data->ptr = NULL;
+
+    return 0;
 }
 
 int tcpcube_epoll_module_destroy(struct tcpcube_module* module)
