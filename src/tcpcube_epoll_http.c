@@ -15,6 +15,11 @@ int tcpcube_epoll_module_init(struct tcpcube_module_args* module_args, struct tc
     return 0;
 }
 
+int tcpcube_epoll_module_tlinit(struct tcpcube_module* module)
+{
+    return 0;
+}
+
 int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_epoll_data* client_data)
 {
     if(client_data->ptr == 0)
