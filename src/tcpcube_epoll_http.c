@@ -33,7 +33,7 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
          ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset)) > 0)
     {
 //        warnx("read chars: %d", read_size);
-        if(tcpcube_epoll_http_parser_parse(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser,
+        if(tcpcube_epoll_http_parser_parse_message_header(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser,
              ((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->token_offset + read_size) <= 0)
         {
             if(((struct tcpcube_epoll_http_client_data*)client_data->ptr)->http_parser->state == TCPCUBE_EPOLL_HTTP_PARSER_ERROR)

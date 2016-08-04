@@ -32,6 +32,7 @@ struct tcpcube_epoll_http_parser
     ssize_t token_offset;
 };
 
-int tcpcube_epoll_http_parser_parse(struct tcpcube_epoll_http_parser* parser, ssize_t buffer_size);
+int tcpcube_epoll_http_parser_parse_message_header(struct tcpcube_epoll_http_parser* parser, ssize_t buffer_size);
+int tcpcube_epoll_http_parser_parse_message_body(struct tcpcube_epoll_http_parser* parser, ssize_t buffer_size);
 
 #endif

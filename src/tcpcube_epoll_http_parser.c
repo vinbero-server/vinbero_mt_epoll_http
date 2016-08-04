@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "tcpcube_epoll_http_parser.h"
 
-int tcpcube_epoll_http_parser_parse(struct tcpcube_epoll_http_parser* parser, ssize_t buffer_size)
+int tcpcube_epoll_http_parser_parse_message_header(struct tcpcube_epoll_http_parser* parser, ssize_t buffer_size)
 {
     parser->buffer_offset = 0;
     parser->token = parser->buffer + parser->buffer_offset;
@@ -176,3 +176,9 @@ int tcpcube_epoll_http_parser_parse(struct tcpcube_epoll_http_parser* parser, ss
     }
     return 1;
 }
+
+int tcpcube_epoll_http_parser_parse_message_body(struct tcpcube_epoll_http_parser* parser, ssize_t buffer_size)
+{
+    return 0;
+}
+
