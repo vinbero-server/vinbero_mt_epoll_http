@@ -81,6 +81,12 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
     return 0;
 }
 
+int tcpcube_epoll_module_tldestroy(struct tcpcube_module* module)
+{
+    warnx("tcpcube_epoll_module_tldestroy()");
+    return 0;
+}
+
 int tcpcube_epoll_module_destroy(struct tcpcube_module* module)
 {
     free(module);
