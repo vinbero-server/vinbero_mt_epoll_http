@@ -15,7 +15,7 @@ struct tcpcube_epoll_http_client_data
 };
 
 int tcpcube_epoll_module_init(struct tcpcube_module_args* module_args, struct tcpcube_module_list* module_list);
-int tcpcube_epoll_module_tlinit(struct tcpcube_module* module);
+int tcpcube_epoll_module_tlinit(struct tcpcube_module* module, struct tcpcube_module_args* module_args);
 int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_epoll_data*);
 int tcpcube_epoll_module_tldestroy(struct tcpcube_module* module);
 int tcpcube_epoll_module_destroy(struct tcpcube_module* module);
