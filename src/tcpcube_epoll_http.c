@@ -27,8 +27,8 @@ int tcpcube_epoll_module_clinit(struct tcpcube_epoll_cldata_list* cldata_list, i
     cldata->data = malloc(sizeof(struct tcpcube_epoll_http_cldata));
     ((struct tcpcube_epoll_http_cldata*)cldata->data)->client_socket = client_socket;
     ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser = calloc(1, sizeof(struct tcpcube_epoll_http_parser));
-    ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer = malloc(32 * sizeof(char));
-    ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity = 32;
+    ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer = malloc(256 * sizeof(char));
+    ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity = 256;
     GONC_LIST_APPEND(cldata_list, cldata);
     return 0;
 }
@@ -76,11 +76,6 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
     }
 
     warnx("%s: %u: end of http request", __FILE__, __LINE__);
-    free(((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer);
-    free(((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser);
-    free(cldata->data);
-    cldata->data = NULL;
-
     return 0;
 }
 
