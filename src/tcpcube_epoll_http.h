@@ -2,7 +2,7 @@
 #define _TCPCUBE_EPOLL_HTTP_H
 
 #include "tcpcube_epoll_http_parser.h"
-#include "../../tcpcube_epoll/src/tcpcube_epoll.h"
+#include "../../tcpcube_epoll/src/tcpcube_epoll_cldata.h"
 
 struct tcpcube_epoll_http_cldata
 {

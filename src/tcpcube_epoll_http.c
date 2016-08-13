@@ -6,6 +6,7 @@
 #include <libgonc/gonc_list.h>
 #include "tcpcube_epoll_http.h"
 #include "tcpcube_epoll_http_parser.h"
+#include "../../tcpcube_epoll/src/tcpcube_epoll_cldata.h"
 
 int tcpcube_epoll_module_init(struct tcpcube_module_args* module_args, struct tcpcube_module_list* module_list)
 {
