@@ -1,9 +1,9 @@
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "tucube_ehttp_parser.h"
+#include "tucube_epoll_http_parser.h"
 
-int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser, ssize_t buffer_size)
+int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parser* parser, ssize_t buffer_size)
 {
     parser->buffer_offset = 0;
     parser->token = parser->buffer + parser->buffer_offset;
@@ -12,21 +12,21 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
     {
         switch(parser->state)
         {
-        case TUCUBE_EHTTP_PARSER_METHOD_BEGIN:
+        case TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN:
             fprintf(stderr, "METHOD_BEGIN\n");
             parser->token = parser->buffer + parser->buffer_offset;
             parser->token_offset = 0;
-            parser->state = TUCUBE_EHTTP_PARSER_METHOD;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_METHOD;
             break;
-        case TUCUBE_EHTTP_PARSER_METHOD:
+        case TUCUBE_EPOLL_HTTP_PARSER_METHOD:
 //            fprintf(stderr, "METHOD");
 	    if(parser->buffer[parser->buffer_offset] == ' ')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_METHOD_END;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_METHOD_END;
             }
             else if(parser->buffer[parser->buffer_offset] < 'A' || parser->buffer[parser->buffer_offset] > 'z')
-                parser->state = TUCUBE_EHTTP_PARSER_ERROR;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
             else
             {
                 fputc(parser->buffer[parser->buffer_offset], stderr);
@@ -34,22 +34,22 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
                 ++parser->buffer_offset;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_METHOD_END:
+        case TUCUBE_EPOLL_HTTP_PARSER_METHOD_END:
             fprintf(stderr, "\nMETHOD_END\n");
-            parser->state = TUCUBE_EHTTP_PARSER_URL_BEGIN;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_URL_BEGIN;
             break;
-        case TUCUBE_EHTTP_PARSER_URL_BEGIN:
+        case TUCUBE_EPOLL_HTTP_PARSER_URL_BEGIN:
             fprintf(stderr, "URL_BEGIN\n");
             parser->token = parser->buffer + parser->buffer_offset;
             parser->token_offset = 0;
-            parser->state = TUCUBE_EHTTP_PARSER_URL;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_URL;
             break;
-        case TUCUBE_EHTTP_PARSER_URL:
+        case TUCUBE_EPOLL_HTTP_PARSER_URL:
 //            fprintf(stderr, "URL");
             if(parser->buffer[parser->buffer_offset] == ' ')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_URL_END;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_URL_END;
             }
             else
             {
@@ -58,22 +58,22 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
                 ++parser->buffer_offset;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_URL_END:
+        case TUCUBE_EPOLL_HTTP_PARSER_URL_END:
             fprintf(stderr, "\nURL_END\n");
-            parser->state = TUCUBE_EHTTP_PARSER_VERSION_BEGIN;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN;
             break;
-        case TUCUBE_EHTTP_PARSER_VERSION_BEGIN:
+        case TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN:
             fprintf(stderr, "VERSION_BEGIN\n");
             parser->token = parser->buffer + parser->buffer_offset;
             parser->token_offset = 0;
-            parser->state = TUCUBE_EHTTP_PARSER_VERSION;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION;
             break;
-        case TUCUBE_EHTTP_PARSER_VERSION:
+        case TUCUBE_EPOLL_HTTP_PARSER_VERSION:
 //            fprintf(stderr, "VERSION");
             if(parser->buffer[parser->buffer_offset] == '\r')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_VERSION_END;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION_END;
             }
             else
             {
@@ -82,38 +82,38 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
                 ++parser->buffer_offset;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_VERSION_END:
+        case TUCUBE_EPOLL_HTTP_PARSER_VERSION_END:
             fprintf(stderr, "\nVERSION_END\n");
             if(parser->buffer[parser->buffer_offset] == '\n')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_HEADER_FIELD_BEGIN;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN;
             }
             else
             {
-                parser->state = TUCUBE_EHTTP_PARSER_ERROR;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_HEADER_FIELD_BEGIN:
+        case TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN:
             fprintf(stderr, "HEADER_FIELD_BEGIN\n");
             if(parser->buffer[parser->buffer_offset] == '\r')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_HEADER_END;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_END;
             }
             else
             {
                 parser->token = parser->buffer + parser->buffer_offset;
                 parser->token_offset = 0;
-                parser->state = TUCUBE_EHTTP_PARSER_HEADER_FIELD;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_HEADER_FIELD:
+        case TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD:
 //            fprintf(stderr, "HEADER_FIELD");
             if(parser->buffer[parser->buffer_offset] == ':')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_HEADER_FIELD_END;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_END;
             }
             else
             {
@@ -122,7 +122,7 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
                 ++parser->buffer_offset;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_HEADER_FIELD_END:
+        case TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_END:
             fprintf(stderr, "\nHEADER_FIELD_END\n");
             if(parser->buffer[parser->buffer_offset] == ' ')
             {
@@ -130,21 +130,21 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
             }
             else
             {
-                parser->state = TUCUBE_EHTTP_PARSER_HEADER_VALUE_BEGIN;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_BEGIN;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_HEADER_VALUE_BEGIN:
+        case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_BEGIN:
             fprintf(stderr, "HEADER_VALUE_BEGIN\n");
             parser->token = parser->buffer + parser->buffer_offset;
             parser->token_offset = 0;
-            parser->state = TUCUBE_EHTTP_PARSER_HEADER_VALUE;            
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE;            
             break;
-        case TUCUBE_EHTTP_PARSER_HEADER_VALUE:
+        case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE:
 //            fprintf(stderr, "HEADER_VALUE");
             if(parser->buffer[parser->buffer_offset] == '\r')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_HEADER_VALUE_END;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_END;
             }
             else
             {
@@ -153,15 +153,15 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
                 ++parser->buffer_offset;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_HEADER_VALUE_END:
+        case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_END:
             fprintf(stderr, "\nHEADER_VALUE_END\n");
             if(parser->buffer[parser->buffer_offset] == '\n')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EHTTP_PARSER_HEADER_FIELD_BEGIN;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_HEADER_END:
+        case TUCUBE_EPOLL_HTTP_PARSER_HEADER_END:
             fprintf(stderr, "\nHEADER_END\n");
             if(parser->buffer[parser->buffer_offset] == '\n')
             {
@@ -170,10 +170,10 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
             }
             else
             {
-                parser->state = TUCUBE_EHTTP_PARSER_ERROR;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
             }
             break;
-        case TUCUBE_EHTTP_PARSER_ERROR:
+        case TUCUBE_EPOLL_HTTP_PARSER_ERROR:
             return -1;
             break;
         }
@@ -181,7 +181,7 @@ int tucube_ehttp_parser_parse_message_header(struct tucube_ehttp_parser* parser,
     return 1;
 }
 
-int tucube_ehttp_parser_parse_message_body(struct tucube_ehttp_parser* parser, ssize_t buffer_size)
+int tucube_epoll_http_parser_parse_message_body(struct tucube_epoll_http_parser* parser, ssize_t buffer_size)
 {
     return 0;
 }
