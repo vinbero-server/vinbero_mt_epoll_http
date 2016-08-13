@@ -22,7 +22,6 @@ int tcpcube_epoll_module_tlinit(struct tcpcube_module* module, struct tcpcube_mo
 
 int tcpcube_epoll_module_clinit(struct tcpcube_epoll_cldata_list* cldata_list, int client_socket)
 {
-    warnx("clinit()");
     struct tcpcube_epoll_cldata* cldata = malloc(sizeof(struct tcpcube_epoll_cldata));
     GONC_LIST_ELEMENT_INIT(cldata);
     cldata->data = malloc(sizeof(struct tcpcube_epoll_http_cldata));
@@ -31,7 +30,6 @@ int tcpcube_epoll_module_clinit(struct tcpcube_epoll_cldata_list* cldata_list, i
     ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer = malloc(32 * sizeof(char));
     ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity = 32;
     GONC_LIST_APPEND(cldata_list, cldata);
-
     return 0;
 }
 
@@ -44,7 +42,6 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
          ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity -
          ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->token_offset)) > 0)
     {
-//        warnx("read chars: %d", read_size);
         if(tcpcube_epoll_http_parser_parse_message_header(((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser,
              ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->token_offset + read_size) <= 0)
         {
@@ -58,12 +55,6 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
                  ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->token,
                  ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->token_offset);
         }
-/*
-        warnx("read src:%u, read size:%d", ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer +
-         ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->token_offset,
-         ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity -
-         ((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->token_offset);
-*/
     }
     if(read_size == -1)
     {
@@ -96,6 +87,13 @@ int tcpcube_epoll_module_service(struct tcpcube_module* module, struct tcpcube_e
 int tcpcube_epoll_module_cldestroy(struct tcpcube_epoll_cldata* cldata)
 {
     warnx("cldestroy()");
+
+    free(((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser->buffer);
+    free(((struct tcpcube_epoll_http_cldata*)cldata->data)->http_parser);
+//    close(((struct tcpcube_epoll_http_cldata*)cldata->data)->client_socket);
+    free(cldata->data);
+    free(cldata);
+
     return 0;
 }
 
