@@ -4,6 +4,16 @@
 #include "tucube_epoll_http_parser.h"
 #include "../../tucube_tcp_epoll/src/tucube_tcp_epoll_cldata.h"
 
+struct tucube_epoll_http_module
+{
+    void* dl_handle;
+    int (*tucube_epoll_http_module_on_method)(char* buffer, ssize_t buffer_offset, char* token, ssize_t token_offset);
+    int (*tucube_epoll_http_module_on_url)(char* buffer, ssize_t buffer_offset, char* token, ssize_t token_offset);
+    int (*tucube_epoll_http_modue_on_protocol)(char* buffer, ssize_t buffer_offset, char* token, ssize_t token_offset);
+    int (*tucube_epoll_http_module_on_header_field)(char* buffer, ssize_t buffer_offset, char* token, ssize_t token_offset);
+    int (*tucube_epoll_http_module_on_header_value)(char* buffer, ssize_t buffer_offset, char* token, ssize_t token_offset);
+};
+
 struct tucube_epoll_http_cldata
 {
     int client_socket;
