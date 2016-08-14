@@ -9,9 +9,9 @@ enum tucube_epoll_http_parser_state
     TUCUBE_EPOLL_HTTP_PARSER_URL_BEGIN,
     TUCUBE_EPOLL_HTTP_PARSER_URL,
     TUCUBE_EPOLL_HTTP_PARSER_URL_END,
-    TUCUBE_EPOLL_HTTP_PARSER_PROTOCOL_BEGIN,
-    TUCUBE_EPOLL_HTTP_PARSER_PROTOCOL,
-    TUCUBE_EPOLL_HTTP_PARSER_PROTOCOL_END,
+    TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN,
+    TUCUBE_EPOLL_HTTP_PARSER_VERSION,
+    TUCUBE_EPOLL_HTTP_PARSER_VERSION_END,
     TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN,
     TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD,
     TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_END,
@@ -33,7 +33,7 @@ struct tucube_epoll_http_parser
 
     int (*on_method)(char* token, ssize_t token_offset);
     int (*on_url)(char* token, ssize_t token_offset);
-    int (*on_protocol)(char* token, ssize_t token_offset);
+    int (*on_version)(char* token, ssize_t token_offset);
     int (*on_header_field)(char* token, ssize_t token_offset);
     int (*on_header_value)(char* token, ssize_t token_offset);
 };
