@@ -12,7 +12,7 @@ struct tucube_epoll_http_module
     int (*tucube_epoll_http_module_clinit)(struct tucube_module*, struct tucube_tcp_epoll_cldata_list*);
 
     int (*tucube_epoll_http_module_on_method)(char*, ssize_t);
-    int (*tucube_epoll_http_module_on_url)(char*, ssize_t);
+    int (*tucube_epoll_http_module_on_uri)(char*, ssize_t);
     int (*tucube_epoll_http_module_on_version)(char*, ssize_t);
     int (*tucube_epoll_http_module_on_header_field)(char*, ssize_t);
     int (*tucube_epoll_http_module_on_header_value)(char*, ssize_t);

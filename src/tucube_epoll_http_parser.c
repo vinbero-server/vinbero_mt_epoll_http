@@ -6,6 +6,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
 {
     parser->buffer_offset = 0;
     parser->token = parser->buffer + parser->buffer_offset;
+    parser->token_offset = 0;
 
     while(parser->buffer_offset < buffer_size)
     {
@@ -34,18 +35,18 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             parser->on_method(
                  parser->token,
                  parser->token_offset);
-            parser->state = TUCUBE_EPOLL_HTTP_PARSER_URL_BEGIN;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_URI_BEGIN;
             break;
-        case TUCUBE_EPOLL_HTTP_PARSER_URL_BEGIN:
+        case TUCUBE_EPOLL_HTTP_PARSER_URI_BEGIN:
             parser->token = parser->buffer + parser->buffer_offset;
             parser->token_offset = 0;
-            parser->state = TUCUBE_EPOLL_HTTP_PARSER_URL;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_URI;
             break;
-        case TUCUBE_EPOLL_HTTP_PARSER_URL:
+        case TUCUBE_EPOLL_HTTP_PARSER_URI:
             if(parser->buffer[parser->buffer_offset] == ' ')
             {
                 ++parser->buffer_offset;
-                parser->state = TUCUBE_EPOLL_HTTP_PARSER_URL_END;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_URI_END;
             }
             else
             {
@@ -53,8 +54,8 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
                 ++parser->buffer_offset;
             }
             break;
-        case TUCUBE_EPOLL_HTTP_PARSER_URL_END:
-            parser->on_url(
+        case TUCUBE_EPOLL_HTTP_PARSER_URI_END:
+            parser->on_uri(
                  parser->token,
                  parser->token_offset);
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN;
@@ -171,6 +172,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             break;
         }
     }
+    warnx("%s: %u: Parser needs more characters", __FILE__, __LINE__);
     return 1;
 }
 

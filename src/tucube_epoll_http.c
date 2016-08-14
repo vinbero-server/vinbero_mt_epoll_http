@@ -51,11 +51,11 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_method()", __FILE__, __LINE__);
          
     if((TUCUBE_MODULE_CAST(module->object,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_url =
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri =
               dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
-                        "tucube_epoll_http_module_on_url")) == NULL)
-        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_url", __FILE__, __LINE__);
+                        "tucube_epoll_http_module_on_uri")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_uri", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_version =
@@ -134,8 +134,8 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
     ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity = 256;
     ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_method =
          TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method;
-    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_url =
-         TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_url;
+    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_uri =
+         TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri;
     ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_version =
          TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_version;
     ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_header_field =
