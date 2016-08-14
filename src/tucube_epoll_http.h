@@ -17,11 +17,11 @@ struct tucube_epoll_http_module
     int (*tucube_epoll_http_module_on_header_field)(char*, ssize_t);
     int (*tucube_epoll_http_module_on_header_value)(char*, ssize_t);
 
-    int (*tucube_epoll_http_module_service)(struct tucube_module* module);
+    int (*tucube_epoll_http_module_service)(struct tucube_module*, struct tucube_tcp_epoll_cldata*);
 
-    int (*tucube_epoll_http_module_cldestroy)();
-    int (*tucube_epoll_http_module_tldestroy)(struct tucube_module* module);
-    int (*tucube_epoll_http_module_destroy)(struct tucube_module* module);
+    int (*tucube_epoll_http_module_cldestroy)(struct tucube_module*, struct tucube_tcp_epoll_cldata*);
+    int (*tucube_epoll_http_module_tldestroy)(struct tucube_module*);
+    int (*tucube_epoll_http_module_destroy)(struct tucube_module*);
 
 };
 
