@@ -11,11 +11,11 @@ struct tucube_epoll_http_module
     int (*tucube_epoll_http_module_tlinit)(struct tucube_module*, struct tucube_module_args*);
     int (*tucube_epoll_http_module_clinit)(struct tucube_module*, struct tucube_tcp_epoll_cldata_list*, int);
 
-    int (*tucube_epoll_http_module_on_method)(struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_uri)(struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_version)(struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_header_field)(struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_header_value)(struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_on_method)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_on_uri)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_on_version)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_on_header_field)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_on_header_value)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
 
     int (*tucube_epoll_http_module_service)(struct tucube_module*, struct tucube_tcp_epoll_cldata*);
 

@@ -131,19 +131,8 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
     cldata->pointer = malloc(sizeof(struct tucube_epoll_http_cldata));
     ((struct tucube_epoll_http_cldata*)cldata->pointer)->client_socket = client_socket;
     ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser = calloc(1, sizeof(struct tucube_epoll_http_parser));
-    ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->cldata = cldata;
     ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->buffer = malloc(256 * sizeof(char));
     ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->buffer_capacity = 256;
-    ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->on_method =
-         TUCUBE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method;
-    ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->on_uri =
-         TUCUBE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri;
-    ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->on_version =
-         TUCUBE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_version;
-    ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->on_header_field =
-         TUCUBE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field;
-    ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->on_header_value =
-         TUCUBE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value;
 
     GONC_LIST_APPEND(cldata_list, cldata);
 
@@ -163,7 +152,7 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
          ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->buffer_capacity -
          ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->token_size)) > 0)
     {
-        if(tucube_epoll_http_parser_parse_message_header(((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser,
+        if(tucube_epoll_http_parser_parse_message_header(module, cldata, ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser,
              ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->token_size + read_size) <= 0)
         {
             if(((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR)

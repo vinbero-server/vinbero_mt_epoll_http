@@ -1,6 +1,7 @@
 #ifndef _TUCUBE_EPOLL_HTTP_PARSER_H
 #define _TUCUBE_EPOLL_HTTP_PARSER_H
 
+#include <tucube/tucube_module.h>
 #include "../../tucube_tcp_epoll/src/tucube_tcp_epoll.h"
 
 enum tucube_epoll_http_parser_state
@@ -26,7 +27,6 @@ enum tucube_epoll_http_parser_state
 
 struct tucube_epoll_http_parser
 {
-    struct tucube_tcp_epoll_cldata* cldata;
     enum tucube_epoll_http_parser_state state;
     char* buffer;
     ssize_t buffer_offset;
@@ -34,14 +34,14 @@ struct tucube_epoll_http_parser
     char* token;
     ssize_t token_size;
 
-    int (*on_method)(struct tucube_tcp_epoll_cldata* cldata, char* token, ssize_t token_size);
-    int (*on_uri)(struct tucube_tcp_epoll_cldata* cldata, char* token, ssize_t token_size);
-    int (*on_version)(struct tucube_tcp_epoll_cldata* cldata, char* token, ssize_t token_size);
-    int (*on_header_field)(struct tucube_tcp_epoll_cldata* cldata, char* token, ssize_t token_size);
-    int (*on_header_value)(struct tucube_tcp_epoll_cldata* cldata, char* token, ssize_t token_size);
+    int (*on_method)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*on_uri)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*on_version)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*on_header_field)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*on_header_value)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
 };
 
-int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parser* parser, ssize_t buffer_size);
-int tucube_epoll_http_parser_parse_message_body(struct tucube_epoll_http_parser* parser, ssize_t buffer_size);
+int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t buffer_size);
+int tucube_epoll_http_parser_parse_message_body(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t buffer_size);
 
 #endif
