@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <err.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -10,6 +11,8 @@
 
 int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct tucube_module_list* module_list)
 {
+    if(GONC_LIST_ELEMENT_NEXT(module_args) == NULL)
+        errx(EXIT_FAILURE, "tucube_epoll_http requires another module");
     struct tucube_module* module = malloc(sizeof(struct tucube_module));
     GONC_LIST_ELEMENT_INIT(module);
     module->object = malloc(sizeof(struct tucube_epoll_http_module));
@@ -19,36 +22,36 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method
-              = dlsym(TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_method")) == NULL)
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
          
     if((TUCUBE_MODULE_CAST(module->object,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_url
-              = dlsym(TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_url =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_url")) == NULL)
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_protocol
-              = dlsym(TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_protocol =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_protocol")) == NULL)
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field
-              = dlsym(TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_header_field")) == NULL)
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value
-              = dlsym(TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_header_value")) == NULL)
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
@@ -71,16 +74,16 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
     ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser = calloc(1, sizeof(struct tucube_epoll_http_parser));
     ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->buffer = malloc(256 * sizeof(char));
     ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity = 256;
-    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_method
-         = (TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method;
-    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_url
-         = (TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_url;
-    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_protocol
-         = (TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_protocol;
-    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_header_field
-         = (TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field;
-    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_header_value
-         = (TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value;
+    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_method =
+         TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method;
+    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_url =
+         TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_url;
+    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_protocol =
+         TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_protocol;
+    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_header_field =
+         TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field;
+    ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->on_header_value =
+         TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value;
 
     GONC_LIST_APPEND(cldata_list, cldata);
     return 0;
@@ -149,7 +152,7 @@ int tucube_tcp_epoll_module_tldestroy(struct tucube_module* module)
 
 int tucube_tcp_epoll_module_destroy(struct tucube_module* module)
 {
-    free(TUCUBE_MODULE_CAST(module->object->dl_handle, struct tucube_epoll_http_module*));
+    dlclose(TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->dl_handle);
     free(module->object);
     free(module);
     return 0;
