@@ -22,46 +22,104 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_init =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
+                   struct tucube_epoll_http_module*)->dl_handle,
+                        "tucube_epoll_http_module_init")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u, Unable to find tucube_epoll_http_module_init()", __FILE__, __LINE__);
+
+    if((TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_tlinit =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
+                   struct tucube_epoll_http_module*)->dl_handle,
+                        "tucube_epoll_http_module_tlinit")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_tlinit()", __FILE__, __LINE__);
+
+    if((TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_clinit =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
+                   struct tucube_epoll_http_module*)->dl_handle,
+                        "tucube_epoll_http_module_clinit")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_clinit()", __FILE__, __LINE__);
+
+
+    if((TUCUBE_MODULE_CAST(module->object,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method =
               dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_method")) == NULL)
-        err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_method()", __FILE__, __LINE__);
          
     if((TUCUBE_MODULE_CAST(module->object,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_url =
               dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_url")) == NULL)
-        err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_url", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_protocol =
               dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_protocol")) == NULL)
-        err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_protocol()", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field =
               dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_header_field")) == NULL)
-        err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_header_field()", __FILE__, __LINE__);
 
     if((TUCUBE_MODULE_CAST(module->object,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value =
               dlsym(TUCUBE_MODULE_CAST(module->object,
                    struct tucube_epoll_http_module*)->dl_handle,
                         "tucube_epoll_http_module_on_header_value")) == NULL)
-        err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_header_value()", __FILE__, __LINE__);
+
+    if((TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_service =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
+                   struct tucube_epoll_http_module*)->dl_handle,
+                        "tucube_epoll_http_module_service")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_module_service()", __FILE__, __LINE__);
+
+    if((TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
+                   struct tucube_epoll_http_module*)->dl_handle,
+                        "tucube_epoll_http_module_cldestroy")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_cldestroy()", __FILE__, __LINE__);
+
+    if((TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_tldestroy =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
+                   struct tucube_epoll_http_module*)->dl_handle,
+                        "tucube_epoll_http_module_tldestroy")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_tldestroy()", __FILE__, __LINE__);
+
+    if((TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_destroy =
+              dlsym(TUCUBE_MODULE_CAST(module->object,
+                   struct tucube_epoll_http_module*)->dl_handle,
+                        "tucube_epoll_http_module_destroy")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_destroy", __FILE__, __LINE__);
 
     GONC_LIST_APPEND(module_list, module);
+
+    if(TUCUBE_MODULE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_init(GONC_LIST_ELEMENT_NEXT(module_args), module_list) == -1)
+        errx(EXIT_FAILURE, "%s: %u: tucube_epoll_http_module_init() failed", __FILE__, __LINE__);
+
     return 0;
 }
 
 int tucube_tcp_epoll_module_tlinit(struct tucube_module* module, struct tucube_module_args* module_args)
 {
+    TUCUBE_MODULE_CAST(module->object,
+        struct tucube_epoll_http_module*)->tucube_epoll_http_module_tlinit(GONC_LIST_ELEMENT_NEXT(module),
+             GONC_LIST_ELEMENT_NEXT(module_args));
     return 0;
 }
 
@@ -86,6 +144,11 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
          TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value;
 
     GONC_LIST_APPEND(cldata_list, cldata);
+
+    TUCUBE_MODULE_CAST(module->object,
+        struct tucube_epoll_http_module*)->tucube_epoll_http_module_clinit(GONC_LIST_ELEMENT_NEXT(module),
+             cldata_list);
+
     return 0;
 }
 
@@ -136,6 +199,10 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
 
 int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata)
 {
+    TUCUBE_MODULE_CAST(module->object,
+        struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
+            GONC_LIST_ELEMENT_NEXT(cldata));
+
     free(((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->buffer);
     free(((struct tucube_epoll_http_cldata*)cldata->data)->http_parser);
 //    close(*((struct tucube_epoll_http_cldata*)cldata->data)->client_socket);
@@ -147,11 +214,17 @@ int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucub
 
 int tucube_tcp_epoll_module_tldestroy(struct tucube_module* module)
 {
+    TUCUBE_MODULE_CAST(module->object,
+        struct tucube_epoll_http_module*)->tucube_epoll_http_module_tldestroy(GONC_LIST_ELEMENT_NEXT(module));
+
     return 0;
 }
 
 int tucube_tcp_epoll_module_destroy(struct tucube_module* module)
 {
+    TUCUBE_MODULE_CAST(module->object,
+        struct tucube_epoll_http_module*)->tucube_epoll_http_module_destroy(GONC_LIST_ELEMENT_NEXT(module));
+
     dlclose(TUCUBE_MODULE_CAST(module->object, struct tucube_epoll_http_module*)->dl_handle);
     free(module->object);
     free(module);
