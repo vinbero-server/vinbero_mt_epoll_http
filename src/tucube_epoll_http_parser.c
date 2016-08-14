@@ -90,7 +90,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             {
                 ++parser->buffer_offset;
                 TUCUBE_CAST(module->object,
-                     struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri(GONC_LIST_ELEMENT_NEXT(module),
+                     struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_version(GONC_LIST_ELEMENT_NEXT(module),
                           cldata,
                           parser->token,
                           parser->token_size);
