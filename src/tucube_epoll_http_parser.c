@@ -6,7 +6,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
 {
     parser->buffer_offset = 0;
     parser->token = parser->buffer + parser->buffer_offset;
-    parser->token_offset = 0;
+    parser->token_size = 0;
 
     while(parser->buffer_offset < buffer_size)
     {
@@ -14,7 +14,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
         {
         case TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN:
             parser->token = parser->buffer + parser->buffer_offset;
-            parser->token_offset = 0;
+            parser->token_size = 0;
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_METHOD;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_METHOD:
@@ -27,19 +27,19 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
             else
             {
-                ++parser->token_offset;
+                ++parser->token_size;
                 ++parser->buffer_offset;
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_METHOD_END:
             parser->on_method(
                  parser->token,
-                 parser->token_offset);
+                 parser->token_size);
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_URI_BEGIN;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_URI_BEGIN:
             parser->token = parser->buffer + parser->buffer_offset;
-            parser->token_offset = 0;
+            parser->token_size = 0;
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_URI;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_URI:
@@ -50,19 +50,19 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             }
             else
             {
-                ++parser->token_offset;
+                ++parser->token_size;
                 ++parser->buffer_offset;
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_URI_END:
             parser->on_uri(
                  parser->token,
-                 parser->token_offset);
+                 parser->token_size);
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN:
             parser->token = parser->buffer + parser->buffer_offset;
-            parser->token_offset = 0;
+            parser->token_size = 0;
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_VERSION:
@@ -73,7 +73,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             }
             else
             {
-                ++parser->token_offset;
+                ++parser->token_size;
                 ++parser->buffer_offset;
             }
             break;
@@ -83,7 +83,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
                 ++parser->buffer_offset;
                 parser->on_version(
                      parser->token,
-                     parser->token_offset);
+                     parser->token_size);
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN;
             }
             else
@@ -100,7 +100,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             else
             {
                 parser->token = parser->buffer + parser->buffer_offset;
-                parser->token_offset = 0;
+                parser->token_size = 0;
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD;
             }
             break;
@@ -112,7 +112,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             }
             else
             {
-                ++parser->token_offset;
+                ++parser->token_size;
                 ++parser->buffer_offset;
             }
             break;
@@ -125,13 +125,13 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             {
                 parser->on_header_field(
                      parser->token,
-                     parser->token_offset);
+                     parser->token_size);
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_BEGIN;
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_BEGIN:
             parser->token = parser->buffer + parser->buffer_offset;
-            parser->token_offset = 0;
+            parser->token_size = 0;
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE;            
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE:
@@ -142,7 +142,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
             }
             else
             {
-                ++parser->token_offset;
+                ++parser->token_size;
                 ++parser->buffer_offset;
             }
             break;
@@ -152,7 +152,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parse
                 ++parser->buffer_offset;
                 parser->on_header_value(
                      parser->token,
-                     parser->token_offset);
+                     parser->token_size);
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN;
             }
             break;

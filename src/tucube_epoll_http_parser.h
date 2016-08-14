@@ -29,13 +29,13 @@ struct tucube_epoll_http_parser
     ssize_t buffer_offset;
     ssize_t buffer_capacity;
     char* token;
-    ssize_t token_offset;
+    ssize_t token_size;
 
-    int (*on_method)(char* token, ssize_t token_offset);
-    int (*on_uri)(char* token, ssize_t token_offset);
-    int (*on_version)(char* token, ssize_t token_offset);
-    int (*on_header_field)(char* token, ssize_t token_offset);
-    int (*on_header_value)(char* token, ssize_t token_offset);
+    int (*on_method)(char* token, ssize_t token_size);
+    int (*on_uri)(char* token, ssize_t token_size);
+    int (*on_version)(char* token, ssize_t token_size);
+    int (*on_header_field)(char* token, ssize_t token_size);
+    int (*on_header_value)(char* token, ssize_t token_size);
 };
 
 int tucube_epoll_http_parser_parse_message_header(struct tucube_epoll_http_parser* parser, ssize_t buffer_size);

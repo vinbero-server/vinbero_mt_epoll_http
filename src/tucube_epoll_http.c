@@ -157,12 +157,12 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
     ssize_t read_size;
     while((read_size = read(((struct tucube_epoll_http_cldata*)cldata->data)->client_socket,
          ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->buffer +
-         ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_offset,
+         ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_size,
          ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->buffer_capacity -
-         ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_offset)) > 0)
+         ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_size)) > 0)
     {
         if(tucube_epoll_http_parser_parse_message_header(((struct tucube_epoll_http_cldata*)cldata->data)->http_parser,
-             ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_offset + read_size) <= 0)
+             ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_size + read_size) <= 0)
         {
             if(((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR)
                 warnx("%s: %u: parser error", __FILE__, __LINE__);
@@ -172,7 +172,7 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
         {
             memmove(((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->buffer,
                  ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token,
-                 ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_offset);
+                 ((struct tucube_epoll_http_cldata*)cldata->data)->http_parser->token_size);
         }
     }
     warnx("read() loop finished");
