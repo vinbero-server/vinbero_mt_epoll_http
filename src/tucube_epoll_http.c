@@ -148,7 +148,7 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
 
     TUCUBE_CAST(module->object,
         struct tucube_epoll_http_module*)->tucube_epoll_http_module_clinit(GONC_LIST_ELEMENT_NEXT(module),
-             cldata_list);
+             cldata_list, client_socket);
 
     return 0;
 }
