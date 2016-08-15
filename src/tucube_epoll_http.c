@@ -157,7 +157,7 @@ int tucube_tcp_epoll_module_tlinit(struct tucube_module* module, struct tucube_m
     return 0;
 }
 
-int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_tcp_epoll_cldata_list* cldata_list, int client_socket)
+int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_tcp_epoll_cldata_list* cldata_list, int* client_socket)
 {
     struct tucube_tcp_epoll_cldata* cldata = malloc(1 * sizeof(struct tucube_tcp_epoll_cldata));
     GONC_LIST_ELEMENT_INIT(cldata);
@@ -183,7 +183,7 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
 int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata)
 {
     ssize_t read_size;
-    while((read_size = read(TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket,
+    while((read_size = read(*TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket,
          TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer +
          TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size,
          TUCUBE_CAST(module->pointer, struct tucube_epoll_http_module*)->parser_header_buffer_capacity -
