@@ -193,7 +193,7 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
              TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size + read_size) <= 0)
         {
             if(TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR)
-                warnx("%s: %u: parser error", __FILE__, __LINE__);
+                warnx("%s: %u: Parser error", __FILE__, __LINE__);
             break;
         }
         else
@@ -201,6 +201,15 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
             memmove(TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer,
                  TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token,
                  TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size * sizeof(char));
+        }
+        if(TUCUBE_CAST(module->pointer,
+             struct tucube_epoll_http_module*)->parser_header_buffer_capacity -
+                  TUCUBE_CAST(cldata->pointer,
+                       struct tucube_epoll_http_cldata*)->parser->token_size == 0)
+        {
+            read_size = -1;
+            errno = EFAULT;
+            break;
         }
     }
     if(read_size == -1)
@@ -222,7 +231,10 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
         }
     }
     else if(read_size == 0)
+    {
+        warnx("%s: %u: Client socket has been closed", __FILE__, __LINE__);
         return 0;
+    }
     
     TUCUBE_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_service(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata));
