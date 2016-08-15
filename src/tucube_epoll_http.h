@@ -23,12 +23,14 @@ struct tucube_epoll_http_module
     int (*tucube_epoll_http_module_tldestroy)(struct tucube_module*);
     int (*tucube_epoll_http_module_destroy)(struct tucube_module*);
 
+    size_t parser_header_buffer_capacity;
+    size_t parser_body_buffer_capacity;
 };
 
 struct tucube_epoll_http_cldata
 {
     int client_socket;
-    struct tucube_epoll_http_parser* http_parser;
+    struct tucube_epoll_http_parser* parser;
 };
 
 int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct tucube_module_list* module_list);

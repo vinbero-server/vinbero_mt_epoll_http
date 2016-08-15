@@ -29,19 +29,18 @@ struct tucube_epoll_http_parser
 {
     enum tucube_epoll_http_parser_state state;
     char* buffer;
-    ssize_t buffer_offset;
-    ssize_t buffer_capacity;
+    size_t buffer_offset;
     char* token;
-    ssize_t token_size;
+    size_t token_size;
 
-    int (*on_method)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*on_uri)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*on_version)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*on_header_field)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
-    int (*on_header_value)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, ssize_t);
+    int (*on_method)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, size_t);
+    int (*on_uri)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, size_t);
+    int (*on_version)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, size_t);
+    int (*on_header_field)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, size_t);
+    int (*on_header_value)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, char*, size_t);
 };
 
-int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t buffer_size);
-int tucube_epoll_http_parser_parse_message_body(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t buffer_size);
+int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata, struct tucube_epoll_http_parser* parser, size_t buffer_size);
+int tucube_epoll_http_parser_parse_message_body(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata, struct tucube_epoll_http_parser* parser, size_t buffer_size);
 
 #endif
