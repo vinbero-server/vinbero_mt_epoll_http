@@ -186,7 +186,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             break;
         }
     }
-    warnx("%s: %u: Parser needs more characters", __FILE__, __LINE__);
+
     return 1;
 }
 
