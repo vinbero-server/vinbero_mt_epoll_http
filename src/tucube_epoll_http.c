@@ -2,6 +2,7 @@
 #include <err.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <tucube/tucube_module.h>
 #include <tucube/tucube_cast.h>
@@ -19,7 +20,7 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
     module->pointer = malloc(sizeof(struct tucube_epoll_http_module));
     if((TUCUBE_CAST(module->pointer,
          struct tucube_epoll_http_module*)->dl_handle
-              = dlopen(GONC_LIST_ELEMENT_NEXT(module_args)->module_path.chars, RTLD_LAZY)) == NULL)
+              = dlopen(GONC_LIST_ELEMENT_NEXT(module_args)->module_path, RTLD_LAZY)) == NULL)
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
 
     if((TUCUBE_CAST(module->pointer,
