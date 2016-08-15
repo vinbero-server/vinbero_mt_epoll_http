@@ -119,8 +119,8 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
 int tucube_tcp_epoll_module_tlinit(struct tucube_module* module, struct tucube_module_args* module_args)
 {
     TUCUBE_CAST(module->object,
-        struct tucube_epoll_http_module*)->tucube_epoll_http_module_tlinit(GONC_LIST_ELEMENT_NEXT(module),
-             GONC_LIST_ELEMENT_NEXT(module_args));
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_tlinit(GONC_LIST_ELEMENT_NEXT(module),
+              GONC_LIST_ELEMENT_NEXT(module_args));
     return 0;
 }
 
@@ -137,8 +137,8 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
     GONC_LIST_APPEND(cldata_list, cldata);
 
     TUCUBE_CAST(module->object,
-        struct tucube_epoll_http_module*)->tucube_epoll_http_module_clinit(GONC_LIST_ELEMENT_NEXT(module),
-             cldata_list, client_socket);
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_clinit(GONC_LIST_ELEMENT_NEXT(module),
+              cldata_list, client_socket);
 
     return 0;
 }
@@ -166,7 +166,6 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
                  ((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->token_size);
         }
     }
-    warnx("read() loop finished");
     if(read_size == -1)
     {
         if(errno == EAGAIN)
@@ -185,6 +184,11 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
             return -1;
         }
     }
+    else if(read_size == 0)
+        return 0;
+    
+    TUCUBE_CAST(module->object,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_service(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata));
 
     return 0;
 }
@@ -192,8 +196,8 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
 int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata)
 {
     TUCUBE_CAST(module->object,
-        struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
-            GONC_LIST_ELEMENT_NEXT(cldata));
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
+              GONC_LIST_ELEMENT_NEXT(cldata));
     warnx("tucube_tcp_epoll_module_cldestroy()");
 
     free(((struct tucube_epoll_http_cldata*)cldata->pointer)->http_parser->buffer);
@@ -208,7 +212,7 @@ int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucub
 int tucube_tcp_epoll_module_tldestroy(struct tucube_module* module)
 {
     TUCUBE_CAST(module->object,
-        struct tucube_epoll_http_module*)->tucube_epoll_http_module_tldestroy(GONC_LIST_ELEMENT_NEXT(module));
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_tldestroy(GONC_LIST_ELEMENT_NEXT(module));
 
     return 0;
 }
@@ -216,7 +220,7 @@ int tucube_tcp_epoll_module_tldestroy(struct tucube_module* module)
 int tucube_tcp_epoll_module_destroy(struct tucube_module* module)
 {
     TUCUBE_CAST(module->object,
-        struct tucube_epoll_http_module*)->tucube_epoll_http_module_destroy(GONC_LIST_ELEMENT_NEXT(module));
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_destroy(GONC_LIST_ELEMENT_NEXT(module));
 
     dlclose(TUCUBE_CAST(module->object, struct tucube_epoll_http_module*)->dl_handle);
     free(module->object);
