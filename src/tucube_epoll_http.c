@@ -247,11 +247,11 @@ int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucub
     TUCUBE_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
               GONC_LIST_ELEMENT_NEXT(cldata));
-    warnx("tucube_tcp_epoll_module_cldestroy()");
 
     free(TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer);
     free(TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser);
-//    close(*TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket);
+    close(*(int*)TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket);
+    *(int*)TUCUBE_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket = -1;
     free(cldata->pointer);
     free(cldata);
 
