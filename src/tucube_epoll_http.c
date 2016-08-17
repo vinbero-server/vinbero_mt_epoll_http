@@ -12,77 +12,77 @@
 #include "tucube_epoll_http_parser.h"
 #include "../../tucube_tcp_epoll/src/tucube_tcp_epoll_cldata.h"
 
-static const char* status_codes[600];
+static const char* reason_phrases[600];
 
 int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct tucube_module_list* module_list)
 {
-status_codes[100] = "Continue";
-status_codes[101] = "Switching Protocols";
-status_codes[102] = "Processing";
+reason_phrases[100] = "Continue";
+reason_phrases[101] = "Switching Protocols";
+reason_phrases[102] = "Processing";
 
-status_codes[200] = "OK";
-status_codes[201] = "Created";
-status_codes[202] = "Accepted";
-status_codes[203] = "Non-authoritative Information";
-status_codes[204] = "No Content";
-status_codes[205] = "Reset Content";
-status_codes[206] = "Partial Content";
-status_codes[207] = "Multi-Status";
-status_codes[208] = "Already Reported";
-status_codes[226] = "IM Used";
+reason_phrases[200] = "OK";
+reason_phrases[201] = "Created";
+reason_phrases[202] = "Accepted";
+reason_phrases[203] = "Non-authoritative Information";
+reason_phrases[204] = "No Content";
+reason_phrases[205] = "Reset Content";
+reason_phrases[206] = "Partial Content";
+reason_phrases[207] = "Multi-Status";
+reason_phrases[208] = "Already Reported";
+reason_phrases[226] = "IM Used";
 
-status_codes[300] = "Multiple Choices";
-status_codes[301] = "Moved Permanently";
-status_codes[302] = "Found";
-status_codes[303] = "See Other";
-status_codes[304] = "Not Modified";
-status_codes[305] = "Use Proxy";
-status_codes[307] = "Temporary Redirect";
-status_codes[308] = "Permanent Redirect";
+reason_phrases[300] = "Multiple Choices";
+reason_phrases[301] = "Moved Permanently";
+reason_phrases[302] = "Found";
+reason_phrases[303] = "See Other";
+reason_phrases[304] = "Not Modified";
+reason_phrases[305] = "Use Proxy";
+reason_phrases[307] = "Temporary Redirect";
+reason_phrases[308] = "Permanent Redirect";
 
-status_codes[400] = "Bad Request";
-status_codes[401] = "Unauthorized";
-status_codes[402] = "Payment Required";
-status_codes[403] = "Forbidden";
-status_codes[404] = "Not Found";
-status_codes[405] = "Method Not Allowed";
-status_codes[406] = "Not Acceptable";
-status_codes[407] = "Proxy Authentication Required";
-status_codes[408] = "Request Timeout";
-status_codes[409] = "Conflict";
-status_codes[410] = "Gone";
-status_codes[411] = "Length Required";
-status_codes[412] = "Precondition Failed";
-status_codes[413] = "Payload Too Large";
-status_codes[414] = "Request-URI Too Long";
-status_codes[415] = "Unsupported Media Type";
-status_codes[416] = "Requested Range Not Satisfiable";
-status_codes[417] = "Expectation Failed";
-status_codes[418] = "I'm a teapot";
-status_codes[421] = "Misdirected Request";
-status_codes[422] = "Unprocessable Entity";
-status_codes[423] = "Locked";
-status_codes[424] = "Failed Dependency";
-status_codes[426] = "Upgrade Required";
-status_codes[428] = "Precondition Required";
-status_codes[429] = "Too Many Requests";
-status_codes[431] = "Request Header Fields Too Large";
-status_codes[444] = "Connection Closed Without Response";
-status_codes[451] = "Unavailable For Legal Reasons";
-status_codes[499] = "Client Closed Request";
+reason_phrases[400] = "Bad Request";
+reason_phrases[401] = "Unauthorized";
+reason_phrases[402] = "Payment Required";
+reason_phrases[403] = "Forbidden";
+reason_phrases[404] = "Not Found";
+reason_phrases[405] = "Method Not Allowed";
+reason_phrases[406] = "Not Acceptable";
+reason_phrases[407] = "Proxy Authentication Required";
+reason_phrases[408] = "Request Timeout";
+reason_phrases[409] = "Conflict";
+reason_phrases[410] = "Gone";
+reason_phrases[411] = "Length Required";
+reason_phrases[412] = "Precondition Failed";
+reason_phrases[413] = "Payload Too Large";
+reason_phrases[414] = "Request-URI Too Long";
+reason_phrases[415] = "Unsupported Media Type";
+reason_phrases[416] = "Requested Range Not Satisfiable";
+reason_phrases[417] = "Expectation Failed";
+reason_phrases[418] = "I'm a teapot";
+reason_phrases[421] = "Misdirected Request";
+reason_phrases[422] = "Unprocessable Entity";
+reason_phrases[423] = "Locked";
+reason_phrases[424] = "Failed Dependency";
+reason_phrases[426] = "Upgrade Required";
+reason_phrases[428] = "Precondition Required";
+reason_phrases[429] = "Too Many Requests";
+reason_phrases[431] = "Request Header Fields Too Large";
+reason_phrases[444] = "Connection Closed Without Response";
+reason_phrases[451] = "Unavailable For Legal Reasons";
+reason_phrases[499] = "Client Closed Request";
 
-status_codes[500] = "Internal Server Error";
-status_codes[501] = "Not Implemented";
-status_codes[502] = "Bad Gateway";
-status_codes[503] = "Service Unavailable";
-status_codes[504] = "Gateway Timeout";
-status_codes[505] = "HTTP Version Not Supported";
-status_codes[506] = "Variant Also Negotiates";
-status_codes[507] = "Insufficient Storage";
-status_codes[508] = "Loop Detected";
-status_codes[510] = "Not Extended";
-status_codes[511] = "Network Authentication Required";
-status_codes[599] = "Network Connect Timeout Error";
+reason_phrases[500] = "Internal Server Error";
+reason_phrases[501] = "Not Implemented";
+reason_phrases[502] = "Bad Gateway";
+reason_phrases[503] = "Service Unavailable";
+reason_phrases[504] = "Gateway Timeout";
+reason_phrases[505] = "HTTP Version Not Supported";
+reason_phrases[506] = "Variant Also Negotiates";
+reason_phrases[507] = "Insufficient Storage";
+reason_phrases[508] = "Loop Detected";
+reason_phrases[510] = "Not Extended";
+reason_phrases[511] = "Network Authentication Required";
+reason_phrases[599] = "Network Connect Timeout Error";
 
     if(GONC_LIST_ELEMENT_NEXT(module_args) == NULL)
         errx(EXIT_FAILURE, "tucube_epoll_http requires another module");
@@ -166,11 +166,11 @@ status_codes[599] = "Network Connect Timeout Error";
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_get_status_code()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_next_header =
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_header =
               dlsym(GONC_CAST(module->pointer,
                    struct tucube_epoll_http_module*)->dl_handle,
-                        "tucube_epoll_http_module_get_next_header")) == NULL)
-        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_get_next_header()", __FILE__, __LINE__);
+                        "tucube_epoll_http_module_get_header")) == NULL)
+        errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_get_header()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_body =
@@ -343,7 +343,7 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
             write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, status_code_string, status_code_string_length);
             free(status_code_string);
             write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, " ", sizeof(" ") - 1);
-            write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, status_codes[status_code], strlen(status_codes[status_code]));
+            write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, reason_phrases[status_code], strlen(reason_phrases[status_code]));
             write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, "\r\n", sizeof("\r\n") - 1);
         }
         else if(result == -1)
@@ -358,7 +358,7 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
         do
         {
             if((result = GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_next_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &header_field, &header_field_size, &header_value, &header_value_size)) == -1)
+                 struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &header_field, &header_field_size, &header_value, &header_value_size)) == -1)
                 return -1;
             write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, header_field, header_field_size);
             write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, ": ", sizeof(": ") - 1);
