@@ -19,6 +19,13 @@ struct tucube_epoll_http_module
 
     int (*tucube_epoll_http_module_service)(struct tucube_module*, struct tucube_tcp_epoll_cldata*);
 
+    int (*tucube_epoll_http_module_get_status_code)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, int*);
+
+    int (*tucube_epoll_http_module_get_next_header)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, const char**, size_t*, const char**, size_t*);
+
+    int (*tucube_epoll_http_module_get_body)(struct tucube_module*, struct tucube_tcp_epoll_cldata*, const char**, size_t*);
+
+
     int (*tucube_epoll_http_module_cldestroy)(struct tucube_module*, struct tucube_tcp_epoll_cldata*);
     int (*tucube_epoll_http_module_tldestroy)(struct tucube_module*);
     int (*tucube_epoll_http_module_destroy)(struct tucube_module*);

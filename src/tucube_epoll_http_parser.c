@@ -1,7 +1,7 @@
 #include <err.h>
 #include <stdlib.h>
 #include <tucube/tucube_module.h>
-#include <tucube/tucube_cast.h>
+#include <libgonc/gonc_cast.h>
 #include "../../tucube_tcp_epoll/src/tucube_tcp_epoll_cldata.h"
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_parser.h"
@@ -36,7 +36,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_METHOD_END:
-            TUCUBE_CAST(module->pointer,
+            GONC_CAST(module->pointer,
                  struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method(GONC_LIST_ELEMENT_NEXT(module),
                       GONC_LIST_ELEMENT_NEXT(cldata),
                       parser->token,
@@ -61,7 +61,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_URI_END:
-            TUCUBE_CAST(module->pointer,
+            GONC_CAST(module->pointer,
                  struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri(GONC_LIST_ELEMENT_NEXT(module),
                       GONC_LIST_ELEMENT_NEXT(cldata),
                       parser->token,
@@ -89,7 +89,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             if(parser->buffer[parser->buffer_offset] == '\n')
             {
                 ++parser->buffer_offset;
-                TUCUBE_CAST(module->pointer,
+                GONC_CAST(module->pointer,
                      struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_version(GONC_LIST_ELEMENT_NEXT(module),
                           GONC_LIST_ELEMENT_NEXT(cldata),
                           parser->token,
@@ -133,7 +133,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             }
             else
             {
-                TUCUBE_CAST(module->pointer,
+                GONC_CAST(module->pointer,
                      struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field(GONC_LIST_ELEMENT_NEXT(module),
                           GONC_LIST_ELEMENT_NEXT(cldata),
                           parser->token,
@@ -162,7 +162,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             if(parser->buffer[parser->buffer_offset] == '\n')
             {
                 ++parser->buffer_offset;
-                TUCUBE_CAST(module->pointer,
+                GONC_CAST(module->pointer,
                      struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value(GONC_LIST_ELEMENT_NEXT(module),
                           GONC_LIST_ELEMENT_NEXT(cldata),
                           parser->token,
