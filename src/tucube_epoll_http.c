@@ -89,114 +89,99 @@ reason_phrases[599] = "Network Connect Timeout Error";
     struct tucube_module* module = malloc(1 * sizeof(struct tucube_module));
     GONC_LIST_ELEMENT_INIT(module);
     module->pointer = malloc(1 * sizeof(struct tucube_epoll_http_module));
-    if((GONC_CAST(module->pointer,
-         struct tucube_epoll_http_module*)->dl_handle
+    if((module->dl_handle
               = dlopen(GONC_LIST_ELEMENT_NEXT(module_args)->module_path, RTLD_LAZY)) == NULL)
         err(EXIT_FAILURE, "%s: %u", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_init =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_init")) == NULL)
         errx(EXIT_FAILURE, "%s: %u, Unable to find tucube_epoll_http_module_init()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_tlinit =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_tlinit")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_tlinit()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_clinit =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_clinit")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_clinit()", __FILE__, __LINE__);
 
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_on_method")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_method()", __FILE__, __LINE__);
          
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_on_uri")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_uri", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_version =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_on_version")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_version()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_on_header_field")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_header_field()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_on_header_value")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_on_header_value()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_service =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_service")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_module_service()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_status_code =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_get_status_code")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_get_status_code()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_header =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_get_header")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_get_header()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_body =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_get_body")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_get_body()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_cldestroy")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_cldestroy()", __FILE__, __LINE__);
 
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_tldestroy =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_tldestroy")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_tldestroy()", __FILE__, __LINE__);
 
+
     if((GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_destroy =
-              dlsym(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->dl_handle,
+              dlsym(module->dl_handle,
                         "tucube_epoll_http_module_destroy")) == NULL)
         errx(EXIT_FAILURE, "%s: %u: Unable to find tucube_epoll_http_module_destroy", __FILE__, __LINE__);
 
@@ -412,7 +397,7 @@ int tucube_tcp_epoll_module_destroy(struct tucube_module* module)
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_destroy(GONC_LIST_ELEMENT_NEXT(module));
 
-    dlclose(GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->dl_handle);
+    dlclose(module->dl_handle);
     free(module->pointer);
     free(module);
     return 0;

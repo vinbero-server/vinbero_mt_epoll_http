@@ -6,7 +6,6 @@
 
 struct tucube_epoll_http_module
 {
-    void* dl_handle;
     int (*tucube_epoll_http_module_init)(struct tucube_module_args*, struct tucube_module_list*);
     int (*tucube_epoll_http_module_tlinit)(struct tucube_module*, struct tucube_module_args*);
     int (*tucube_epoll_http_module_clinit)(struct tucube_module*, struct tucube_tcp_epoll_cldata_list*, int*);
