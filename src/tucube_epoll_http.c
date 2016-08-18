@@ -5,12 +5,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <tucube/tucube_module.h>
+#include <tucube/tucube_cldata.h>
 #include <libgonc/gonc_cast.h>
 #include <libgonc/gonc_list.h>
 #include <libgonc/gonc_ltostr.h>
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_parser.h"
-#include "../../tucube_tcp_epoll/src/tucube_tcp_epoll_cldata.h"
 
 static const char* reason_phrases[600];
 
@@ -159,9 +159,9 @@ int tucube_tcp_epoll_module_tlinit(struct tucube_module* module, struct tucube_m
     return 0;
 }
 
-int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_tcp_epoll_cldata_list* cldata_list, int* client_socket)
+int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_cldata_list* cldata_list, int* client_socket)
 {
-    struct tucube_tcp_epoll_cldata* cldata = malloc(1 * sizeof(struct tucube_tcp_epoll_cldata));
+    struct tucube_cldata* cldata = malloc(1 * sizeof(struct tucube_cldata));
     GONC_LIST_ELEMENT_INIT(cldata);
     cldata->pointer = malloc(1 * sizeof(struct tucube_epoll_http_cldata));
 
@@ -182,7 +182,7 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_t
     return 0;
 }
 
-static int tucube_epoll_http_read_request(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata)
+static int tucube_epoll_http_read_request(struct tucube_module* module, struct tucube_cldata* cldata)
 {
     ssize_t read_size;
 
@@ -237,7 +237,7 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
     return 0;
 }
 
-static int tucube_epoll_http_write_response(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata)
+static int tucube_epoll_http_write_response(struct tucube_module* module, struct tucube_cldata* cldata)
 {
     int result;
     int status_code;
@@ -300,7 +300,7 @@ static int tucube_epoll_http_write_response(struct tucube_module* module, struct
     return 0; 
 }
 
-int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata)
+int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_cldata* cldata)
 {
     int result = tucube_epoll_http_read_request(module, cldata);
     if(result != 0)
@@ -319,7 +319,7 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
     return 0;
 }
 
-int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_tcp_epoll_cldata* cldata)
+int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_cldata* cldata)
 {
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
