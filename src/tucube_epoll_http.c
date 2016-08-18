@@ -93,21 +93,21 @@ reason_phrases[599] = "Network Connect Timeout Error";
 
     TUCUBE_MODULE_DLOPEN(module, module_args);
 
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_init);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_tlinit);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_clinit);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_on_method);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_on_uri);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_on_version);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_on_header_field);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_on_header_value);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_service);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_get_status_code);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_get_header);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_get_body);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_cldestroy);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_tldestroy);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module*, tucube_epoll_http_module_destroy);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_init);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_tlinit);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_clinit);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_method);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_uri);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_version);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_header_field);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_header_value);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_service);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_get_status_code);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_get_header);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_get_body);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_cldestroy);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_tldestroy);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_destroy);
 
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->parser_header_buffer_capacity =
