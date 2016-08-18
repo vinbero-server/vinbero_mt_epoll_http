@@ -281,14 +281,6 @@ static int tucube_epoll_http_write_response(struct tucube_module* module, struct
     if(tucube_epoll_http_write_status_code(module, cldata) == -1)
         return -1;
     int result;
-    const char* header_field;
-    size_t header_field_size;
-    const char* header_value;
-    size_t header_value_size;
-    const char* body;
-    size_t body_size;
-    char* body_size_string;
-    size_t body_size_string_size;
     do
     {
         if(GONC_CAST(module->pointer,
@@ -296,6 +288,11 @@ static int tucube_epoll_http_write_response(struct tucube_module* module, struct
         {
             return -1;
         }
+
+        const char* header_field;
+        size_t header_field_size;
+        const char* header_value;
+        size_t header_value_size;
         
         if((result = GONC_CAST(module->pointer,
              struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &header_field, &header_field_size, &header_value, &header_value_size)) == -1)
@@ -305,15 +302,21 @@ static int tucube_epoll_http_write_response(struct tucube_module* module, struct
         tucube_epoll_http_write_header(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, header_field, header_field_size, header_value, header_value_size);
     }
     while(result == 1);
+
     if(GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) == -1)
     {
         return -1;
     }
+
+    const char* body;
+    size_t body_size;
+    char* body_size_string;
+    size_t body_size_string_size;
+
     if((result = GONC_CAST(module->pointer,
         struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
     {
-
         return -1;
     }
     else if(result == 0)
