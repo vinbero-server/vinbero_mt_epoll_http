@@ -62,31 +62,29 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_URI_END:
-//warnx("%s", GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->script_name);
             if(strncmp(GONC_CAST(module->pointer,
                  struct tucube_epoll_http_module*)->script_name,
-                 parser->token,
-                 parser->token_size) != 0 &&
+                 parser->token, GONC_CAST(module->pointer,
+                 struct tucube_epoll_http_module*)->script_name_length) == 0 ||
                  strncmp(GONC_CAST(module->pointer,
                  struct tucube_epoll_http_module*)->script_name_match,
                  parser->token, GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->script_name_length + 1) < 0 &&
+                 struct tucube_epoll_http_module*)->script_name_length + 1) == 0 ||
                  strncmp(GONC_CAST(module->pointer,
                  struct tucube_epoll_http_module*)->script_name_match2,
                  parser->token, GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->script_name_length + 1) < 0)
+                 struct tucube_epoll_http_module*)->script_name_length + 1) == 0)
             {
-                parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
-                return -1;
+                GONC_CAST(module->pointer,
+                     struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri(GONC_LIST_ELEMENT_NEXT(module),
+                          GONC_LIST_ELEMENT_NEXT(cldata),
+                          parser->token,
+                          parser->token_size);
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN;
+                break;
             }
-
-            GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri(GONC_LIST_ELEMENT_NEXT(module),
-                      GONC_LIST_ELEMENT_NEXT(cldata),
-                      parser->token,
-                      parser->token_size);
-            parser->state = TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN;
-            break;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+            return -1;
         case TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN:
             parser->token = parser->buffer + parser->buffer_offset;
             parser->token_size = 0;
