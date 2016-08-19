@@ -116,16 +116,33 @@ reason_phrases[599] = "Network Connect Timeout Error";
               GONC_CAST(module->pointer,
                    struct tucube_epoll_http_module*)->parser_body_buffer_capacity = 0;
 
+    GONC_CAST(module->pointer,
+         struct tucube_epoll_http_module*)->script_name = NULL;
+
     GONC_LIST_FOR_EACH(module_args, struct tucube_module_arg, module_arg)
     {
-        if(strncmp("parser-header-buffer-capacity", module_arg->name, sizeof("parser-header-buffer-capacity")) == 0)
+        if(strncmp("script-name", module_arg->name, sizeof("script-name")) == 0)
         {
-            GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->parser_header_buffer_capacity = strtol(module_arg->value, NULL, 10);
+            GONC_CAST(module->pointer,
+                 struct tucube_epoll_http_module*)->script_name = module_arg->value;
+        }
+        else if(strncmp("parser-header-buffer-capacity", module_arg->name, sizeof("parser-header-buffer-capacity")) == 0)
+        {
+            GONC_CAST(module->pointer,
+                 struct tucube_epoll_http_module*)->parser_header_buffer_capacity = strtol(module_arg->value, NULL, 10);
         }
         else if(strncmp("parser-body-buffer-capacity", module_arg->name, sizeof("parser-body-buffer-capacity")) == 0)
         {
-            GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->parser_body_buffer_capacity = strtol(module_arg->value, NULL, 10);
+            GONC_CAST(module->pointer,
+                 struct tucube_epoll_http_module*)->parser_body_buffer_capacity = strtol(module_arg->value, NULL, 10);
         }
+    }
+
+    if(GONC_CAST(module->pointer,
+         struct tucube_epoll_http_module*)->script_name == NULL)
+    {
+        GONC_CAST(module->pointer,
+         struct tucube_epoll_http_module*)->script_name = "";
     }
 
     if(GONC_CAST(module->pointer,
@@ -143,6 +160,12 @@ reason_phrases[599] = "Network Connect Timeout Error";
     }
 
     GONC_LIST_APPEND(module_list, module);
+
+    struct tucube_module_arg* module_arg = malloc(1 * sizeof(struct tucube_module_arg));
+    GONC_LIST_ELEMENT_INIT(module_arg);
+    module_arg->name = strdup("tucube-epoll-http-script-name");
+    module_arg->value = strdup(GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->script_name);
+    GONC_LIST_APPEND(GONC_LIST_ELEMENT_NEXT(module_args), module_arg);
 
     if(GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_init(GONC_LIST_ELEMENT_NEXT(module_args), module_list) == -1)
@@ -196,7 +219,10 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
              GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size + read_size) <= 0)
         {
             if(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR)
+            {
                 warnx("%s: %u: Parser error", __FILE__, __LINE__);
+                return -1;
+            }
             break;
         }
         else

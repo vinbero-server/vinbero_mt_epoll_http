@@ -1,5 +1,6 @@
 #include <err.h>
 #include <stdlib.h>
+#include <string.h>
 #include <tucube/tucube_module.h>
 #include <tucube/tucube_cldata.h>
 #include <libgonc/gonc_cast.h>
@@ -61,6 +62,15 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_URI_END:
+            if(strncmp(GONC_CAST(module->pointer,
+                 struct tucube_epoll_http_module*)->script_name,
+                 parser->token, strlen(GONC_CAST(module->pointer,
+                 struct tucube_epoll_http_module*)->script_name)) != 0)
+            {
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+                return -1;
+            }
+
             GONC_CAST(module->pointer,
                  struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri(GONC_LIST_ELEMENT_NEXT(module),
                       GONC_LIST_ELEMENT_NEXT(cldata),
