@@ -1,0 +1,21 @@
+HTTP Header X-Script-Name을 이용해 SCRIPT_NAME을 설정
+HTTP Header X-Scheme을 이용해 원래 요청이 http인지 https인지 알아낸다 (로컬에서는 굳이 https를 쓸 필요가 없으므로 nginx에서 https를 사용 후 애플리케이션 쪽으로 http를 이용해 reverse proxying 한다 이 때 원래 요청이 https인지 http인지 알기 위해 X-Scheme)
+HTTP Header X-Forwarded-For을 이용해 클라이언트의 원래 ip를 알아낸다
+
+http://flask.pocoo.org/snippets/35/
+Flask의 경우 위와 같은 방법을 이용해 https://example.com/myprefix/myapp -> http://192.168.0.1:5001/myapp 로 reverse proxying을 할 수 있다
+이 때 X-Script-Name: /myprefix이다
+
+Django 는 하나의 project 안에 여러 개의 app을 가지고 있다
+url routing을 담당하는 urls.py는 project, app마다 존재한다
+project1
+-urls.py
+-app1
+--urls.py
+-app2
+--urls.py
+
+아마 X-Script-Name: /project1과 함께 /project1/app1 으로 request를 보내면
+먼저 여러 프로젝트 중에 project1을 선택하고 project1의 urls.py에서 X_SCRIPT_NAME을 /project1/app1으로 바꾼 뒤 app1으로 routing 하지 않을까 하는 것이 나의 추측이다
+
+Flask는 project단위가 아니라 app단위지만 Werkzeug 를 이용하여 여러개의 app을 라우팅한다.
