@@ -6,11 +6,6 @@
 
 struct tucube_epoll_http_module
 {
-    char* script_name; // empty or starts with '/', ends with empty 
-    size_t script_name_length;
-    char* script_name_match;
-    char* script_name_match2;
-
     int (*tucube_epoll_http_module_init)(struct tucube_module_args*, struct tucube_module_list*);
     int (*tucube_epoll_http_module_tlinit)(struct tucube_module*, struct tucube_module_args*);
     int (*tucube_epoll_http_module_clinit)(struct tucube_module*, struct tucube_cldata_list*, int*);
