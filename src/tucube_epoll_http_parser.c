@@ -4,6 +4,7 @@
 #include <tucube/tucube_module.h>
 #include <tucube/tucube_cldata.h>
 #include <libgonc/gonc_cast.h>
+#include <libgonc/gonc_nstrncmp.h>
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_parser.h"
 
@@ -146,8 +147,59 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             }
             else
             {
-                if(GONC_CAST(module->pointer,
-                     struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field(GONC_LIST_ELEMENT_NEXT(module),
+                if(gonc_nstrncmp("X-Script-Name", sizeof("X-Script-Name") - 1, parser->token, parser->token_size) == 0)
+                {
+                    if(GONC_CAST(module->pointer,
+                         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field(GONC_LIST_ELEMENT_NEXT(module),
+                              GONC_LIST_ELEMENT_NEXT(cldata),
+                              parser->token,
+                              parser->token_size) == -1)
+                    {
+                        parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+                    }
+                    else
+                        parser->state = TUCUBE_EPOLL_HTTP_PARSER_X_SCRIPT_NAME_VALUE_BEGIN;
+                }
+                else
+                {
+                    if(GONC_CAST(module->pointer,
+                         struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field(GONC_LIST_ELEMENT_NEXT(module),
+                              GONC_LIST_ELEMENT_NEXT(cldata),
+                              parser->token,
+                              parser->token_size) == -1)
+                    {
+                        parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+                    }
+                    else
+                        parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_BEGIN;
+                }
+            }
+            break;
+        case TUCUBE_EPOLL_HTTP_PARSER_X_SCRIPT_NAME_VALUE_BEGIN:
+            parser->token = parser->buffer + parser->buffer_offset;
+            parser->token_size = 0;
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_X_SCRIPT_NAME_VALUE;            
+            break;
+        case TUCUBE_EPOLL_HTTP_PARSER_X_SCRIPT_NAME_VALUE:
+            if(parser->buffer[parser->buffer_offset] == '\r')
+            {
+                ++parser->buffer_offset;
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_X_SCRIPT_NAME_VALUE_END;
+            }
+            else
+            {
+                ++parser->token_size;
+                ++parser->buffer_offset;
+            }
+            break;
+        case TUCUBE_EPOLL_HTTP_PARSER_X_SCRIPT_NAME_VALUE_END:
+            if(parser->buffer[parser->buffer_offset] == '\n')
+            {
+                ++parser->buffer_offset;
+                if(strncmp(parser->token, "/", sizeof("/") - 1) != 0)
+                    parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+                else if(GONC_CAST(module->pointer,
+                     struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value(GONC_LIST_ELEMENT_NEXT(module),
                           GONC_LIST_ELEMENT_NEXT(cldata),
                           parser->token,
                           parser->token_size) == -1)
@@ -155,7 +207,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                 }
                 else
-                    parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_BEGIN;
+                    parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN;
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_BEGIN:
@@ -163,6 +215,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             parser->token_size = 0;
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE;            
             break;
+        
         case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE:
             if(parser->buffer[parser->buffer_offset] == '\r')
             {
