@@ -4,6 +4,7 @@
 #include <tucube/tucube_module.h>
 #include <tucube/tucube_cldata.h>
 #include <libgonc/gonc_cast.h>
+#include <libgonc/gonc_nstrncmp.h>
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_parser.h"
 
@@ -62,18 +63,21 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_URI_END:
-            if(strncmp(GONC_CAST(module->pointer,
+            if(gonc_nstrncmp(GONC_CAST(module->pointer,
                  struct tucube_epoll_http_module*)->script_name,
-                 parser->token, GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->script_name_length) == 0 ||
+                     GONC_CAST(module->pointer,
+                     struct tucube_epoll_http_module*)->script_name_length,
+                     parser->token, parser->token_size) == 0 ||
                  strncmp(GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->script_name_match,
-                 parser->token, GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->script_name_length + 1) == 0 ||
+                      struct tucube_epoll_http_module*)->script_name_match,
+                      parser->token,
+                      GONC_CAST(module->pointer,
+                      struct tucube_epoll_http_module*)->script_name_length + 1) == 0 ||
                  strncmp(GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->script_name_match2,
-                 parser->token, GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->script_name_length + 1) == 0)
+                      struct tucube_epoll_http_module*)->script_name_match2,
+                      parser->token,
+                      GONC_CAST(module->pointer,
+                      struct tucube_epoll_http_module*)->script_name_length + 1) == 0)
             {
                 GONC_CAST(module->pointer,
                      struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri(GONC_LIST_ELEMENT_NEXT(module),
