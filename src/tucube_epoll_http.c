@@ -227,6 +227,11 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
             warnx("%s: %u: Client socket EAGAIN", __FILE__, __LINE__);
             return 1;
         }
+        else if (errno == EWOULDBLOCK)
+        {
+            warnx("%s: %u: Client socket EWOULDBLOCK", __FILE__, __LINE__);
+            return 1;
+        }
         else if(errno == EFAULT)
             warnx("%s: %u: A token is bigger than http_buffer", __FILE__, __LINE__);
         else
