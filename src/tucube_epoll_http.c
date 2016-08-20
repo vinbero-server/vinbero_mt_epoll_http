@@ -424,6 +424,7 @@ int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucub
 
 int tucube_tcp_epoll_module_tldestroy(struct tucube_module* module)
 {
+warnx("tldestroy");
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_tldestroy(GONC_LIST_ELEMENT_NEXT(module));
 
