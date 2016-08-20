@@ -334,7 +334,6 @@ static int tucube_epoll_http_write_body(struct tucube_module* module, struct tuc
                   "Content-Length", sizeof("Content-Length") - 1, body_size_string, body_size_string_size);
         free(body_size_string);
         tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket);
-        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket);
 
         write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, body, body_size);
     }
