@@ -435,7 +435,7 @@ int tucube_tcp_epoll_module_destroy(struct tucube_module* module)
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_destroy(GONC_LIST_ELEMENT_NEXT(module));
 
-    dlclose(module->dl_handle);
+//    dlclose(module->dl_handle);
     free(module->pointer);
     free(module);
     return 0;
