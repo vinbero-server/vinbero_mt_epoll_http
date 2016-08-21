@@ -12,6 +12,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
 {
     parser->buffer_offset = 0;
     parser->token = parser->buffer + parser->buffer_offset;
+    parser->token_offset = 0;
 
     while(parser->buffer_offset < buffer_size)
     {
