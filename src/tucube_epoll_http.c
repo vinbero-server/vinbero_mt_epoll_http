@@ -16,74 +16,6 @@ static const char* reason_phrases[600];
 
 int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct tucube_module_list* module_list)
 {
-reason_phrases[100] = "Continue";
-reason_phrases[101] = "Switching Protocols";
-reason_phrases[102] = "Processing";
-
-reason_phrases[200] = "OK";
-reason_phrases[201] = "Created";
-reason_phrases[202] = "Accepted";
-reason_phrases[203] = "Non-authoritative Information";
-reason_phrases[204] = "No Content";
-reason_phrases[205] = "Reset Content";
-reason_phrases[206] = "Partial Content";
-reason_phrases[207] = "Multi-Status";
-reason_phrases[208] = "Already Reported";
-reason_phrases[226] = "IM Used";
-
-reason_phrases[300] = "Multiple Choices";
-reason_phrases[301] = "Moved Permanently";
-reason_phrases[302] = "Found";
-reason_phrases[303] = "See Other";
-reason_phrases[304] = "Not Modified";
-reason_phrases[305] = "Use Proxy";
-reason_phrases[307] = "Temporary Redirect";
-reason_phrases[308] = "Permanent Redirect";
-
-reason_phrases[400] = "Bad Request";
-reason_phrases[401] = "Unauthorized";
-reason_phrases[402] = "Payment Required";
-reason_phrases[403] = "Forbidden";
-reason_phrases[404] = "Not Found";
-reason_phrases[405] = "Method Not Allowed";
-reason_phrases[406] = "Not Acceptable";
-reason_phrases[407] = "Proxy Authentication Required";
-reason_phrases[408] = "Request Timeout";
-reason_phrases[409] = "Conflict";
-reason_phrases[410] = "Gone";
-reason_phrases[411] = "Length Required";
-reason_phrases[412] = "Precondition Failed";
-reason_phrases[413] = "Payload Too Large";
-reason_phrases[414] = "Request-URI Too Long";
-reason_phrases[415] = "Unsupported Media Type";
-reason_phrases[416] = "Requested Range Not Satisfiable";
-reason_phrases[417] = "Expectation Failed";
-reason_phrases[418] = "I'm a teapot";
-reason_phrases[421] = "Misdirected Request";
-reason_phrases[422] = "Unprocessable Entity";
-reason_phrases[423] = "Locked";
-reason_phrases[424] = "Failed Dependency";
-reason_phrases[426] = "Upgrade Required";
-reason_phrases[428] = "Precondition Required";
-reason_phrases[429] = "Too Many Requests";
-reason_phrases[431] = "Request Header Fields Too Large";
-reason_phrases[444] = "Connection Closed Without Response";
-reason_phrases[451] = "Unavailable For Legal Reasons";
-reason_phrases[499] = "Client Closed Request";
-
-reason_phrases[500] = "Internal Server Error";
-reason_phrases[501] = "Not Implemented";
-reason_phrases[502] = "Bad Gateway";
-reason_phrases[503] = "Service Unavailable";
-reason_phrases[504] = "Gateway Timeout";
-reason_phrases[505] = "HTTP Version Not Supported";
-reason_phrases[506] = "Variant Also Negotiates";
-reason_phrases[507] = "Insufficient Storage";
-reason_phrases[508] = "Loop Detected";
-reason_phrases[510] = "Not Extended";
-reason_phrases[511] = "Network Authentication Required";
-reason_phrases[599] = "Network Connect Timeout Error";
-
     if(GONC_LIST_ELEMENT_NEXT(module_args) == NULL)
         errx(EXIT_FAILURE, "tucube_epoll_http requires another module");
 
@@ -270,9 +202,7 @@ static int tucube_epoll_http_write_status_code(struct tucube_module* module, str
     write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, status_code_string, status_code_string_length);
     free(status_code_string);
 
-    write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, " ", sizeof(" ") - 1);
-
-    write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, reason_phrases[status_code], strlen(reason_phrases[status_code]));
+    write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, " ", sizeof(" ") - 1); // reason phrase is optional but blank space after status code is necessary
 
     tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket);
     return 0;
