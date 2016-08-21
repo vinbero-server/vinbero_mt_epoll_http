@@ -190,12 +190,13 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
 
     while((read_size = read(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket,
          GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer +
-         GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size,
+         GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset,
          GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->parser_header_buffer_capacity -
-         GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size)) > 0)
+         GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset)) > 0)
     {
+write(STDERR_FILENO, GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer + GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset, read_size);
         if(tucube_epoll_http_parser_parse_message_header(module, cldata, GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser,
-             GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size + read_size) <= 0)
+             GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset + read_size) <= 0)
         {
             if(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR)
             {
@@ -208,12 +209,12 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
         {
             memmove(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer,
                  GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token,
-                 GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_size * sizeof(char));
+                 GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset * sizeof(char));
         }
         if(GONC_CAST(module->pointer,
              struct tucube_epoll_http_module*)->parser_header_buffer_capacity -
                   GONC_CAST(cldata->pointer,
-                       struct tucube_epoll_http_cldata*)->parser->token_size == 0)
+                       struct tucube_epoll_http_cldata*)->parser->token_offset == 0)
         {
             read_size = -1;
             errno = EFAULT;
