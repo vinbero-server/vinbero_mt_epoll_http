@@ -34,7 +34,7 @@ struct tucube_epoll_http_parser
     size_t token_offset;
 };
 
-int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, size_t buffer_size);
-int tucube_epoll_http_parser_parse_message_body(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, size_t buffer_size);
+int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size);
+int tucube_epoll_http_parser_parse_message_body(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size);
 
 #endif

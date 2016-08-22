@@ -8,8 +8,9 @@
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_parser.h"
 
-int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, size_t buffer_size)
+int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size)
 {
+    size_t buffer_size = parser->token_offset + read_size;
     parser->buffer_offset = parser->token_offset;
     parser->token = parser->buffer;
 
@@ -240,7 +241,7 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
     return 1;
 }
 
-int tucube_epoll_http_parser_parse_message_body(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, size_t buffer_size)
+int tucube_epoll_http_parser_parse_message_body(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size)
 {
     return 0;
 }
