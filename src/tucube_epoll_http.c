@@ -12,8 +12,6 @@
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_parser.h"
 
-static const char* reason_phrases[600];
-
 int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct tucube_module_list* module_list)
 {
     if(GONC_LIST_ELEMENT_NEXT(module_args) == NULL)
