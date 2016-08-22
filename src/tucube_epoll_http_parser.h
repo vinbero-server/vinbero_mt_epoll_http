@@ -30,6 +30,8 @@ struct tucube_epoll_http_parser
     enum tucube_epoll_http_parser_state state;
     char* buffer;
     size_t buffer_offset;
+    size_t header_buffer_capacity;
+    size_t body_buffer_capacity;
     char* token;
     size_t token_offset;
 };

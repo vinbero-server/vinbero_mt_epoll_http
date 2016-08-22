@@ -236,8 +236,14 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
         }
     }
 
-    memmove(parser->buffer, parser->token, parser->token_offset * sizeof(char));
+    if(parser->header_buffer_capacity - parser->token_offset == 0)
+    {
+        warnx("%s: %u: A token is bigger than http_buffer", __FILE__, __LINE__);
+        parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+        return -1;
+    }
 
+    memmove(parser->buffer, parser->token, parser->token_offset * sizeof(char));
     return 1;
 }
 

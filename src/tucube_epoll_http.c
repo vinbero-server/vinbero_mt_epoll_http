@@ -101,10 +101,15 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_c
          struct tucube_epoll_http_cldata*)->client_socket = client_socket;
     GONC_CAST(cldata->pointer,
          struct tucube_epoll_http_cldata*)->parser = calloc(1, sizeof(struct tucube_epoll_http_parser));
+
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->header_buffer_capacity =
+              GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->parser_header_buffer_capacity;
+
     GONC_CAST(cldata->pointer,
          struct tucube_epoll_http_cldata*)->parser->buffer =
-              malloc(GONC_CAST(module->pointer,
-                   struct tucube_epoll_http_module*)->parser_header_buffer_capacity * sizeof(char));
+              malloc(GONC_CAST(cldata->pointer,
+                   struct tucube_epoll_http_cldata*)->parser->header_buffer_capacity * sizeof(char));
 
     GONC_LIST_APPEND(cldata_list, cldata);
 
@@ -133,15 +138,6 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
             }
             break;
         }
-        if(GONC_CAST(module->pointer,
-             struct tucube_epoll_http_module*)->parser_header_buffer_capacity -
-                  GONC_CAST(cldata->pointer,
-                       struct tucube_epoll_http_cldata*)->parser->token_offset == 0)
-        {
-            read_size = -1;
-            errno = EFAULT;
-            break;
-        }
     }
     if(read_size == -1)
     {
@@ -155,8 +151,6 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
             warnx("%s: %u: Client socket EWOULDBLOCK", __FILE__, __LINE__);
             return 1;
         }
-        else if(errno == EFAULT)
-            warnx("%s: %u: A token is bigger than http_buffer", __FILE__, __LINE__);
         else
             warn("%s: %u", __FILE__, __LINE__);
         return -1;
