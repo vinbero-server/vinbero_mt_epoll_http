@@ -23,14 +23,6 @@ Flask는 project단위가 아니라 app단위지만 Werkzeug 를 이용하여 �
 
 일단은 바람직하지는 않지만 하나의 앱만 있다고 가정하고 프로그래밍하자
 
-아래와 같은 HTTP Request를 처리 할 때 Parser에서 버그가 발생하였다
-일단은 고쳤지만 안심할 수 없다
 
-GET / HTTP/1.1
-Host: 192.168.219.171:8080
-Connection: keep-alive
-Cache-Control: max-age=0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-User-Agent: Mozilla/5.0 (Linux; Android 4.4.4; ko-kr; SAMSUNG SM-A700L Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Version/2.0 Chrome/34.0.1847.76 Mobile Safari/537.36
-Accept-Encoding: gzip,deflate,sdch
-Accept-Language: ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4
+["wsgi.input"].read()가 꼭 진짜 소켓의 read일 필요가 없다
+단순히 호출했을 때 데이터만 돌려주는 함수이면 충분하다
