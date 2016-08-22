@@ -124,10 +124,8 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
     ssize_t read_size;
 
     while((read_size = read(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket,
-         GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer +
-         GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset,
-         GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->parser_header_buffer_capacity -
-         GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset)) > 0)
+         tucube_epoll_http_parser_get_buffer_position(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser),
+         tucube_epoll_http_parser_get_buffer_left(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser))) > 0)
     {
         if(tucube_epoll_http_parser_parse_message_header(module, cldata, GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser, read_size) <= 0)
         {
