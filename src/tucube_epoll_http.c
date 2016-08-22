@@ -140,12 +140,6 @@ static int tucube_epoll_http_read_request(struct tucube_module* module, struct t
             }
             break;
         }
-        else
-        {
-            memmove(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->buffer,
-                 GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token,
-                 GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser->token_offset * sizeof(char));
-        }
         if(GONC_CAST(module->pointer,
              struct tucube_epoll_http_module*)->parser_header_buffer_capacity -
                   GONC_CAST(cldata->pointer,

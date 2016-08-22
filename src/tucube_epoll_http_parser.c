@@ -235,6 +235,8 @@ int tucube_epoll_http_parser_parse_message_header(struct tucube_module* module, 
         }
     }
 
+    memmove(parser->buffer, parser->token, parser->token_offset * sizeof(char));
+
     return 1;
 }
 
