@@ -248,6 +248,9 @@ static inline int tucube_epoll_http_parser_parse_headers(struct tucube_module* m
         case TUCUBE_EPOLL_HTTP_PARSER_ERROR:
             return -1;
             break;
+        default:
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+            break;
         }
     }
 
@@ -264,8 +267,7 @@ static inline int tucube_epoll_http_parser_parse_headers(struct tucube_module* m
 
 static inline int tucube_epoll_http_parser_parse_body(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size)
 {
-    GONC_DEBUG("parse_body");
-warnx("original read size %d buffer offset %d", read_size, parser->buffer_offset);
+    GONC_DEBUG("parse_body()");
 
     int result;
     if(parser->state == TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
@@ -299,12 +301,10 @@ warnx("original read size %d buffer offset %d", read_size, parser->buffer_offset
 
     while(parser->body_remainder > 0)
     {
-warnx("loop");
         switch(parser->state)
         {
         case TUCUBE_EPOLL_HTTP_PARSER_BODY:
             GONC_DEBUG("BODY");
-warnx("read size %d", read_size);
             if(read_size == 0)
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
             else if(read_size < parser->body_remainder)
@@ -338,6 +338,9 @@ warnx("read size %d", read_size);
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_ERROR:
             return -1;
+        default:
+            parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+            break;
         }
     }
     return 0;
