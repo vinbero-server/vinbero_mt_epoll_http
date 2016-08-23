@@ -32,12 +32,19 @@ enum tucube_epoll_http_parser_state
 struct tucube_epoll_http_parser
 {
     enum tucube_epoll_http_parser_state state;
-    char* buffer;
-    size_t buffer_offset;
     size_t header_buffer_capacity;
     size_t body_buffer_capacity;
+    char* buffer;
+    size_t buffer_offset;
     char* token;
     size_t token_offset;
+
+    int (*on_method)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_uri)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_version)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_header_field)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_header_value)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+
 };
 
 char* tucube_epoll_http_parser_get_buffer_position(struct tucube_epoll_http_parser* parser);

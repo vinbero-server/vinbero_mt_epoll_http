@@ -26,3 +26,16 @@ Flask는 project단위가 아니라 app단위지만 Werkzeug 를 이용하여 �
 
 ["wsgi.input"].read()가 꼭 진짜 소켓의 read일 필요가 없다
 단순히 호출했을 때 데이터만 돌려주는 함수이면 충분하다
+
+
+post data를 처리하는 방법은 꽤나 골치아프다 특히 어떻게 하면 wsgi.input과 같은 인터페이스에 데이터를 넘길지가 문제이다
+
+
+wsgi.input 은 blocking io이다 이는 Content-Length를 실제 데이터보다 크게 표시할 경우 서버자체가 완전히 블로킹 되는 문제가 있다
+
+
+flask 자체 서버도 무한히 블로킹 되었고 wsgiref 서버도 마찬가지였다
+멀티프로세스 서버인 gunicorn과 uwsgi는 타임아웃을 두었지만 여전히 서버의 성능에 치명적이었다
+
+
+

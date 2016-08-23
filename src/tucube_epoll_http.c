@@ -111,6 +111,21 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_c
               malloc(GONC_CAST(cldata->pointer,
                    struct tucube_epoll_http_cldata*)->parser->header_buffer_capacity * sizeof(char));
 
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->on_method = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method;
+
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->on_uri = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_uri;
+
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->on_version = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_version;
+
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->on_header_field = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field;
+
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->on_header_value = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value;
+
     GONC_LIST_APPEND(cldata_list, cldata);
 
     GONC_CAST(module->pointer,
