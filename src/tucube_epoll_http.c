@@ -366,6 +366,7 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
 
 int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_cldata* cldata)
 {
+    GONC_DEBUG("cldestroy()");
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
               GONC_LIST_ELEMENT_NEXT(cldata));
