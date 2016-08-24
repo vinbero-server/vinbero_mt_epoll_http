@@ -275,7 +275,7 @@ static inline int tucube_epoll_http_parser_parse_body(struct tucube_module* modu
         GONC_DEBUG("BODY_BEGIN");
         if((result = parser->get_content_length(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &parser->body_remainder)) == -1)
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
-        else if(result == 0)
+        else if(parser->body_remainder == 0)
         {
             if(parser->on_request_finish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) == -1)
             {
