@@ -26,6 +26,7 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_init);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_tlinit);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_clinit);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_request_start);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_method);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_uri);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_version);
@@ -118,6 +119,9 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_c
          struct tucube_epoll_http_cldata*)->parser->buffer =
               malloc(GONC_CAST(cldata->pointer,
                    struct tucube_epoll_http_cldata*)->parser->header_buffer_capacity * sizeof(char));
+
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->on_request_start = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_request_start;
 
     GONC_CAST(cldata->pointer,
          struct tucube_epoll_http_cldata*)->parser->on_method = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method;

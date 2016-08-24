@@ -32,6 +32,7 @@ static inline int tucube_epoll_http_parser_parse_headers(struct tucube_module* m
         switch(parser->state)
         {
         case TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN:
+            parser->on_request_start(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata));
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN:

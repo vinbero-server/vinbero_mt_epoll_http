@@ -40,6 +40,7 @@ struct tucube_epoll_http_parser
     size_t token_offset;
     ssize_t body_remainder;
 
+    int (*on_request_start)(struct tucube_module*, struct tucube_cldata*);
     int (*on_method)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*on_uri)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*on_version)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);

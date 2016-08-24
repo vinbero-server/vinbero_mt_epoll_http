@@ -10,6 +10,8 @@ struct tucube_epoll_http_module
     int (*tucube_epoll_http_module_tlinit)(struct tucube_module*, struct tucube_module_args*);
     int (*tucube_epoll_http_module_clinit)(struct tucube_module*, struct tucube_cldata_list*, int*);
 
+
+    int (*tucube_epoll_http_module_on_request_start)(struct tucube_module*, struct tucube_cldata*);
     int (*tucube_epoll_http_module_on_method)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*tucube_epoll_http_module_on_uri)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*tucube_epoll_http_module_on_version)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
@@ -19,7 +21,6 @@ struct tucube_epoll_http_module
     int (*tucube_epoll_http_module_get_content_length)(struct tucube_module*, struct tucube_cldata*, ssize_t*);
     int (*tucube_epoll_http_module_on_body_chunk)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*tucube_epoll_http_module_on_body_finish)(struct tucube_module*, struct tucube_cldata*);
-
     int (*tucube_epoll_http_module_on_request_finish)(struct tucube_module*, struct tucube_cldata*);
 
     int (*tucube_epoll_http_module_get_status_code)(struct tucube_module*, struct tucube_cldata*, int*);
