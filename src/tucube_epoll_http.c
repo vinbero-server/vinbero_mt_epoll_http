@@ -7,7 +7,6 @@
 #include <tucube/tucube_module.h>
 #include <tucube/tucube_cldata.h>
 #include <libgonc/gonc_cast.h>
-#include <libgonc/gonc_debug.h>
 #include <libgonc/gonc_list.h>
 #include <libgonc/gonc_ltostr.h>
 #include "tucube_epoll_http.h"
@@ -211,7 +210,6 @@ static inline int tucube_epoll_http_write_crlf(int client_socket)
 
 static inline int tucube_epoll_http_write_status_code(struct tucube_module* module, struct tucube_cldata* cldata)
 {
-    GONC_DEBUG("write_status_code()");
     int status_code;
     if(GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_status_code(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &status_code) == -1)
@@ -244,7 +242,6 @@ static inline int tucube_epoll_http_write_header(int client_socket, const char* 
 
 static inline int tucube_epoll_http_write_headers(struct tucube_module* module, struct tucube_cldata* cldata)
 {
-    GONC_DEBUG("write_headers()");
     int result;
     do
     {
@@ -278,7 +275,6 @@ static inline int tucube_epoll_http_write_headers(struct tucube_module* module, 
 
 static inline int tucube_epoll_http_write_body(struct tucube_module* module, struct tucube_cldata* cldata)
 {
-    GONC_DEBUG("write_body()");
     int result;
     const char* body;
     size_t body_size;
@@ -338,7 +334,6 @@ static inline int tucube_epoll_http_write_body(struct tucube_module* module, str
 
 static inline int tucube_epoll_http_write_response(struct tucube_module* module, struct tucube_cldata* cldata)
 {
-    GONC_DEBUG("write_response()");
     if(tucube_epoll_http_write_status_code(module, cldata) == -1)
         return -1;
 
@@ -365,7 +360,6 @@ int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_
 
 int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_cldata* cldata)
 {
-    GONC_DEBUG("cldestroy()");
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_module*)->tucube_epoll_http_module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
               GONC_LIST_ELEMENT_NEXT(cldata));
