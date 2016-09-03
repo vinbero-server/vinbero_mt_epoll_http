@@ -179,8 +179,6 @@ static inline int tucube_epoll_http_read_request(struct tucube_module* module, s
             }
             break;
         }
-        else if(result == 1)
-            return 1;
     }
     if(read_size == -1)
     {
