@@ -248,9 +248,9 @@ static inline int tucube_epoll_http_write_headers(struct tucube_module* module, 
     do
     {
         if((result = GONC_CAST(module->pointer,
-             struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) == -1))
+             struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) <= 0))
         {
-            return -1;
+            return result;
         }
 
         const char* header_field;
@@ -266,12 +266,6 @@ static inline int tucube_epoll_http_write_headers(struct tucube_module* module, 
         tucube_epoll_http_write_header(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, header_field, header_field_size, header_value, header_value_size);
     }
     while(result == 1);
-
-    if(GONC_CAST(module->pointer,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) == -1)
-    {
-        return -1;
-    }
     return 0;
 }
 
@@ -282,6 +276,16 @@ static inline int tucube_epoll_http_write_body(struct tucube_module* module, str
     size_t body_size;
     char* body_size_string;
     size_t body_size_string_size;
+    if((result =GONC_CAST(module->pointer,
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata))) == -1)
+    {
+        return -1;
+    }
+    else if(result == 0)
+    {
+        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket);
+        return 0;
+    }
 
     if((result = GONC_CAST(module->pointer,
         struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
