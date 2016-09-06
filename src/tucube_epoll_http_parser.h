@@ -10,12 +10,21 @@ enum tucube_epoll_http_parser_state
     TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN,
     TUCUBE_EPOLL_HTTP_PARSER_METHOD,
     TUCUBE_EPOLL_HTTP_PARSER_METHOD_END,
-    TUCUBE_EPOLL_HTTP_PARSER_URI_BEGIN,
-    TUCUBE_EPOLL_HTTP_PARSER_URI,
-    TUCUBE_EPOLL_HTTP_PARSER_URI_END,
-    TUCUBE_EPOLL_HTTP_PARSER_VERSION_BEGIN,
-    TUCUBE_EPOLL_HTTP_PARSER_VERSION,
-    TUCUBE_EPOLL_HTTP_PARSER_VERSION_END,
+    TUCUBE_EPOLL_HTTP_PARSER_REQUEST_URI_BEGIN,
+    TUCUBE_EPOLL_HTTP_PARSER_REQUEST_URI,
+    TUCUBE_EPOLL_HTTP_PARSER_REQUEST_URI_END,
+    TUCUBE_EPOLL_HTTP_PARSER_PROTOCOL_BEGIN,
+    TUCUBE_EPOLL_HTTP_PARSER_PROTOCOL,
+    TUCUBE_EPOLL_HTTP_PARSER_PROTOCOL_END,
+    TUCUBE_EPOLL_HTTP_PARSER_SCRIPT_PATH_BEGIN,
+    TUCUBE_EPOLL_HTTP_PARSER_SCRIPT_PATH,
+    TUCUBE_EPOLL_HTTP_PARSER_SCRIPT_PATH_END,
+    TUCUBE_EPOLL_HTTP_PARSER_CONTENT_TYPE_BEGIN,
+    TUCUBE_EPOLL_HTTP_PARSER_CONTENT_TYPE,
+    TUCUBE_EPOLL_HTTP_PARSER_CONTENT_TYPE_END,
+    TUCUBE_EPOLL_HTTP_PARSER_CONTENT_LENGTH_BEGIN,
+    TUCUBE_EPOLL_HTTP_PARSER_CONTENT_LENGTH,
+    TUCUBE_EPOLL_HTTP_PARSER_CONTENT_LENGTH_END,
     TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN,
     TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD,
     TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_END,
@@ -42,8 +51,11 @@ struct tucube_epoll_http_parser
 
     int (*on_request_start)(struct tucube_module*, struct tucube_cldata*);
     int (*on_method)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*on_uri)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*on_version)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_request_uri)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_protocol)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_script_path)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_content_type)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*on_content_length)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*on_header_field)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*on_header_value)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
     int (*on_headers_finish)(struct tucube_module*, struct tucube_cldata*);
