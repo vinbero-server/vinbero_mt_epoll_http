@@ -1,0 +1,2 @@
+sudo mkdir -p /usr/local/lib/tucube
+sudo gcc src/tucube_epoll_http.c src/tucube_epoll_http_parser.c -o /usr/local/lib/tucube/tucube_epoll_http.so -fPIC -shared -l lua
