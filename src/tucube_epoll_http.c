@@ -250,14 +250,13 @@ static inline int tucube_epoll_http_write_header(int client_socket, const char* 
 static inline int tucube_epoll_http_write_headers(struct tucube_module* module, struct tucube_cldata* cldata)
 {
     int result;
+    if((result = GONC_CAST(module->pointer,
+             struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) <= 0))
+    {
+        return result;
+    }
     do
     {
-        if((result = GONC_CAST(module->pointer,
-             struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) <= 0))
-        {
-            return result;
-        }
-
         const char* header_field;
         size_t header_field_size;
         const char* header_value;
