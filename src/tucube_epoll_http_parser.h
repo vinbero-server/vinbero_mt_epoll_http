@@ -45,6 +45,7 @@ struct tucube_epoll_http_parser
     size_t body_buffer_capacity;
     char* buffer;
     size_t buffer_offset;
+    size_t buffer_end;
     char* token;
     size_t token_offset;
     ssize_t body_remainder;
