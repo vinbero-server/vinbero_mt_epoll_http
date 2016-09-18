@@ -179,7 +179,7 @@ static inline int tucube_epoll_http_read_request(struct tucube_module* module, s
 
     while((read_size = read(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket,
          tucube_epoll_http_parser_get_buffer_position(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser),
-         tucube_epoll_http_parser_get_buffer_size(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser))) > 0)
+         tucube_epoll_http_parser_get_available_buffer_size(GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser))) > 0)
     {
         int result;
         if((result = tucube_epoll_http_parser_parse(module, cldata, GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->parser, read_size)) <= 0)

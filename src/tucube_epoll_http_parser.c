@@ -15,7 +15,7 @@ char* tucube_epoll_http_parser_get_buffer_position(struct tucube_epoll_http_pars
     return parser->buffer;
 }
 
-size_t tucube_epoll_http_parser_get_buffer_size(struct tucube_epoll_http_parser* parser)
+size_t tucube_epoll_http_parser_get_available_buffer_size(struct tucube_epoll_http_parser* parser)
 {
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
         return parser->header_buffer_capacity - parser->token_offset;
@@ -447,7 +447,7 @@ static inline int tucube_epoll_http_parser_parse_body(struct tucube_module* modu
 
 int tucube_epoll_http_parser_parse(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size)
 {
-    parser->buffer_size  = parser->token_offset + read_size;
+    parser->buffer_size = parser->token_offset + read_size;
     int result;
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
     {

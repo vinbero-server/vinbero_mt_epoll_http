@@ -68,7 +68,7 @@ struct tucube_epoll_http_parser
 
 char* tucube_epoll_http_parser_get_buffer_position(struct tucube_epoll_http_parser* parser);
 
-size_t tucube_epoll_http_parser_get_buffer_size(struct tucube_epoll_http_parser* parser);
+size_t tucube_epoll_http_parser_get_available_buffer_size(struct tucube_epoll_http_parser* parser);
 
 int tucube_epoll_http_parser_parse(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size);
 
