@@ -26,25 +26,26 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_init);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_tlinit);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_clinit);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_request_start);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_method);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_request_uri);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_protocol);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_script_path);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_content_type);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_content_length);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_header_field);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_header_value);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_headers_finish);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_get_content_length);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_body_chunk);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_body_finish);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_on_request_finish);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_get_status_code);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_prepare_get_header);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_get_header);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_prepare_get_body);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_get_body);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestStart);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestMethod);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestUri);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestProtocol);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestScriptPath);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestContentType);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestContentLength);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onGetRequestContentLength);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestHeaderField);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestHeaderValue);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestHeadersFinish);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestBodyStart);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestBody);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestBodyFinish);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onRequestFinish);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onResponseStatusCode);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onResponseHeaderStart);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onResponseHeader);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onResponseBodyStart);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_onResponseBody);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_cldestroy);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_tldestroy);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_module, tucube_epoll_http_module_destroy);
@@ -124,46 +125,49 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_c
                    struct tucube_epoll_http_cldata*)->parser->header_buffer_capacity * sizeof(char));
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_request_start = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_request_start;
+         struct tucube_epoll_http_cldata*)->parser->onRequestStart = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestStart;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_method = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_method;
+         struct tucube_epoll_http_cldata*)->parser->onRequestMethod = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestMethod;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_request_uri = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_request_uri;
+         struct tucube_epoll_http_cldata*)->parser->onRequestUri = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestUri;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_protocol = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_protocol;
+         struct tucube_epoll_http_cldata*)->parser->onRequestProtocol = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestProtocol;
 
     GONC_CAST(cldata->pointer,
-            struct tucube_epoll_http_cldata*)->parser->on_script_path = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_script_path;
+            struct tucube_epoll_http_cldata*)->parser->onRequestScriptPath = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestScriptPath;
 
     GONC_CAST(cldata->pointer,
-            struct tucube_epoll_http_cldata*)->parser->on_content_type = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_content_type;
+            struct tucube_epoll_http_cldata*)->parser->onRequestContentType = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestContentType;
 
     GONC_CAST(cldata->pointer,
-            struct tucube_epoll_http_cldata*)->parser->on_content_length = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_content_length;
+            struct tucube_epoll_http_cldata*)->parser->onRequestContentLength = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestContentLength;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_header_field = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_field;
+         struct tucube_epoll_http_cldata*)->parser->onGetRequestContentLength = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onGetRequestContentLength;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_header_value = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_header_value;
+         struct tucube_epoll_http_cldata*)->parser->onRequestHeaderField = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestHeaderField;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_headers_finish = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_headers_finish;
+         struct tucube_epoll_http_cldata*)->parser->onRequestHeaderValue = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestHeaderValue;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->get_content_length = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_content_length;
+         struct tucube_epoll_http_cldata*)->parser->onRequestHeadersFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestHeadersFinish;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_body_chunk = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_body_chunk;
+            struct tucube_epoll_http_cldata*)->parser->onRequestBodyStart = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestBodyStart;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_body_finish = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_body_finish;
+         struct tucube_epoll_http_cldata*)->parser->onRequestBody = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestBody;
 
     GONC_CAST(cldata->pointer,
-         struct tucube_epoll_http_cldata*)->parser->on_request_finish = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_on_request_finish;
+         struct tucube_epoll_http_cldata*)->parser->onRequestBodyFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestBodyFinish;
+
+    GONC_CAST(cldata->pointer,
+         struct tucube_epoll_http_cldata*)->parser->onRequestFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_module*)->tucube_epoll_http_module_onRequestFinish;
 
     GONC_LIST_APPEND(cldata_list, cldata);
 
@@ -251,7 +255,7 @@ static inline int tucube_epoll_http_write_headers(struct tucube_module* module, 
 {
     int result;
     if((result = GONC_CAST(module->pointer,
-             struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) <= 0))
+             struct tucube_epoll_http_module*)->tucube_epoll_http_module_onResponseHeaderStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) <= 0))
     {
         return result;
     }
@@ -263,8 +267,7 @@ static inline int tucube_epoll_http_write_headers(struct tucube_module* module, 
         size_t header_value_size;
         
         if((result = GONC_CAST(module->pointer,
-             struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_header(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &header_field, &header_field_size, &header_value, &header_value_size)) == -1)
-        {
+             struct tucube_epoll_http_module*)->tucube_epoll_http_module_onResponseHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &header_field, &header_field_size, &header_value, &header_value_size)) == -1) {
             return -1;
         }
         tucube_epoll_http_write_header(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_cldata*)->client_socket, header_field, header_field_size, header_value, header_value_size);
@@ -281,7 +284,7 @@ static inline int tucube_epoll_http_write_body(struct tucube_module* module, str
     char* body_size_string;
     size_t body_size_string_size;
     if((result = GONC_CAST(module->pointer,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_prepare_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata))) == -1)
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_onResponseBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata))) == -1)
     {
         return -1;
     }
@@ -292,7 +295,7 @@ static inline int tucube_epoll_http_write_body(struct tucube_module* module, str
     }
 
     if((result = GONC_CAST(module->pointer,
-        struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
+        struct tucube_epoll_http_module*)->tucube_epoll_http_module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
     {
         return -1;
     }
@@ -325,7 +328,7 @@ static inline int tucube_epoll_http_write_body(struct tucube_module* module, str
         do
         {
             if((result = GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_body(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
+                 struct tucube_epoll_http_module*)->tucube_epoll_http_module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
             {
                 return -1;
             }
@@ -346,7 +349,7 @@ static inline int tucube_epoll_http_write_response(struct tucube_module* module,
 {
     int status_code;
     if(GONC_CAST(module->pointer,
-         struct tucube_epoll_http_module*)->tucube_epoll_http_module_get_status_code(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &status_code) == -1)
+         struct tucube_epoll_http_module*)->tucube_epoll_http_module_onResponseStatusCode(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &status_code) == -1)
     {
         return -1;
     }

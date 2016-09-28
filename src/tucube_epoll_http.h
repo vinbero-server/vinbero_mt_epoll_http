@@ -10,27 +10,28 @@ struct tucube_epoll_http_module
     int (*tucube_epoll_http_module_tlinit)(struct tucube_module*, struct tucube_module_args*);
     int (*tucube_epoll_http_module_clinit)(struct tucube_module*, struct tucube_cldata_list*, int*);
 
+    int (*tucube_epoll_http_module_onRequestStart)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_module_onRequestMethod)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestUri)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestProtocol)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestScriptPath)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestContentType)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestContentLength)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onGetRequestContentLength)(struct tucube_module*, struct tucube_cldata*, ssize_t*);
 
-    int (*tucube_epoll_http_module_on_request_start)(struct tucube_module*, struct tucube_cldata*);
-    int (*tucube_epoll_http_module_on_method)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_request_uri)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_protocol)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_script_path)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_content_type)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_content_length)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_header_field)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_header_value)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_headers_finish)(struct tucube_module*, struct tucube_cldata*);
-    int (*tucube_epoll_http_module_get_content_length)(struct tucube_module*, struct tucube_cldata*, ssize_t*);
-    int (*tucube_epoll_http_module_on_body_chunk)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
-    int (*tucube_epoll_http_module_on_body_finish)(struct tucube_module*, struct tucube_cldata*);
-    int (*tucube_epoll_http_module_on_request_finish)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_module_onRequestHeaderField)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestHeaderValue)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestHeadersFinish)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_module_onRequestBodyStart)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_module_onRequestBody)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
+    int (*tucube_epoll_http_module_onRequestBodyFinish)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_module_onRequestFinish)(struct tucube_module*, struct tucube_cldata*);
 
-    int (*tucube_epoll_http_module_get_status_code)(struct tucube_module*, struct tucube_cldata*, int*);
-    int (*tucube_epoll_http_module_prepare_get_header)(struct tucube_module*, struct tucube_cldata*);
-    int (*tucube_epoll_http_module_get_header)(struct tucube_module*, struct tucube_cldata*, const char**, size_t*, const char**, size_t*);
-    int (*tucube_epoll_http_module_prepare_get_body)(struct tucube_module*, struct tucube_cldata*);
-    int (*tucube_epoll_http_module_get_body)(struct tucube_module*, struct tucube_cldata*, const char**, size_t*);
+    int (*tucube_epoll_http_module_onResponseStatusCode)(struct tucube_module*, struct tucube_cldata*, int*);
+    int (*tucube_epoll_http_module_onResponseHeaderStart)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_module_onResponseHeader)(struct tucube_module*, struct tucube_cldata*, const char**, size_t*, const char**, size_t*);
+    int (*tucube_epoll_http_module_onResponseBodyStart)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_module_onResponseBody)(struct tucube_module*, struct tucube_cldata*, const char**, size_t*);
 
     int (*tucube_epoll_http_module_cldestroy)(struct tucube_module*, struct tucube_cldata*);
     int (*tucube_epoll_http_module_tldestroy)(struct tucube_module*);
