@@ -369,6 +369,10 @@ static inline int tucube_epoll_http_parser_parse_body(struct tucube_module* modu
                 parser->buffer = realloc(parser->buffer, parser->body_buffer_capacity * sizeof(char));
                 parser->buffer_size -= parser->buffer_offset;
                 parser->buffer_offset = 0;
+                if(parser->onRequestBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata)) == -1) {
+                    parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+                    return -1;
+                }
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_BODY;
             }
         }
