@@ -4,7 +4,7 @@
 #include <tucube/tucube_module.h>
 #include <tucube/tucube_cldata.h>
 
-enum tucube_epoll_http_parser_state
+enum tucube_epoll_http_Parser_state
 {
     TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN,
     TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN,
@@ -38,17 +38,17 @@ enum tucube_epoll_http_parser_state
     TUCUBE_EPOLL_HTTP_PARSER_ERROR
 };
 
-struct tucube_epoll_http_parser
+struct tucube_epoll_http_Parser
 {
-    enum tucube_epoll_http_parser_state state;
-    size_t header_buffer_capacity;
-    size_t body_buffer_capacity;
+    enum tucube_epoll_http_Parser_state state;
+    size_t headerBufferCapacity;
+    size_t bodyBufferCapacity;
     char* buffer;
-    size_t buffer_offset;
-    size_t buffer_size;
+    size_t bufferOffset;
+    size_t bufferSize;
     char* token;
-    size_t token_offset;
-    ssize_t body_remainder;
+    size_t tokenOffset;
+    ssize_t bodyRemainder;
 
     int (*onRequestStart)(struct tucube_module*, struct tucube_cldata*);
     int (*onRequestMethod)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
@@ -67,10 +67,10 @@ struct tucube_epoll_http_parser
     int (*onRequestFinish)(struct tucube_module*, struct tucube_cldata*);
 };
 
-char* tucube_epoll_http_parser_get_buffer_position(struct tucube_epoll_http_parser* parser);
+char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser);
 
-size_t tucube_epoll_http_parser_get_available_buffer_size(struct tucube_epoll_http_parser* parser);
+size_t tucube_epoll_http_Parser_getAvailableBufferSize(struct tucube_epoll_http_Parser* parser);
 
-int tucube_epoll_http_parser_parse(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_parser* parser, ssize_t read_size);
+int tucube_epoll_http_Parser_parse(struct tucube_module* module, struct tucube_cldata* cldata, struct tucube_epoll_http_Parser* parser, ssize_t read_size);
 
 #endif
