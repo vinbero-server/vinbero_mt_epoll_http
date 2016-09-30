@@ -7,8 +7,8 @@
 struct tucube_epoll_http_Module
 {
     int (*tucube_epoll_http_Module_init)(struct tucube_module_args*, struct tucube_module_list*);
-    int (*tucube_epoll_http_Module_tlinit)(struct tucube_module*, struct tucube_module_args*);
-    int (*tucube_epoll_http_Module_clinit)(struct tucube_module*, struct tucube_cldata_list*, int*);
+    int (*tucube_epoll_http_Module_threadLocalInit)(struct tucube_module*, struct tucube_module_args*);
+    int (*tucube_epoll_http_Module_clientLocalInit)(struct tucube_module*, struct tucube_cldata_list*, int*);
 
     int (*tucube_epoll_http_Module_onRequestStart)(struct tucube_module*, struct tucube_cldata*);
     int (*tucube_epoll_http_Module_onRequestMethod)(struct tucube_module*, struct tucube_cldata*, char*, ssize_t);
@@ -33,8 +33,8 @@ struct tucube_epoll_http_Module
     int (*tucube_epoll_http_Module_onResponseBodyStart)(struct tucube_module*, struct tucube_cldata*);
     int (*tucube_epoll_http_Module_onResponseBody)(struct tucube_module*, struct tucube_cldata*, const char**, size_t*);
 
-    int (*tucube_epoll_http_Module_cldestroy)(struct tucube_module*, struct tucube_cldata*);
-    int (*tucube_epoll_http_Module_tldestroy)(struct tucube_module*);
+    int (*tucube_epoll_http_Module_clientLocalDestroy)(struct tucube_module*, struct tucube_cldata*);
+    int (*tucube_epoll_http_Module_threadLocalDestroy)(struct tucube_module*);
     int (*tucube_epoll_http_Module_destroy)(struct tucube_module*);
 
     size_t parserHeaderBufferCapacity;
@@ -47,11 +47,11 @@ struct tucube_epoll_http_ClientLocalData {
 };
 
 int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct tucube_module_list* module_list);
-int tucube_tcp_epoll_module_tlinit(struct tucube_module* module, struct tucube_module_args* module_args);
-int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_cldata_list* cldata_list, int* client_socket);
+int tucube_tcp_epoll_module_threadLocalInit(struct tucube_module* module, struct tucube_module_args* module_args);
+int tucube_tcp_epoll_module_clientLocalInit(struct tucube_module* module, struct tucube_cldata_list* cldata_list, int* client_socket);
 int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_cldata*);
-int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_cldata* cldata);
-int tucube_tcp_epoll_module_tldestroy(struct tucube_module* module);
+int tucube_tcp_epoll_module_clientLocalDestroy(struct tucube_module* module, struct tucube_cldata* cldata);
+int tucube_tcp_epoll_module_threadLocalDestroy(struct tucube_module* module);
 int tucube_tcp_epoll_module_destroy(struct tucube_module* module);
 
 #endif

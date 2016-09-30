@@ -23,8 +23,8 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
     TUCUBE_MODULE_DLOPEN(module, module_args);
 
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_init);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_tlinit);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_clinit);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_threadLocalInit);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_clientLocalInit);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_onRequestStart);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_onRequestMethod);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_onRequestUri);
@@ -45,8 +45,8 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_onResponseHeader);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_onResponseBodyStart);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_onResponseBody);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_cldestroy);
-    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_tldestroy);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_clientLocalDestroy);
+    TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_threadLocalDestroy);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_destroy);
 
     GONC_CAST(module->pointer,
@@ -86,14 +86,14 @@ int tucube_tcp_epoll_module_init(struct tucube_module_args* module_args, struct 
     return 0;
 }
 
-int tucube_tcp_epoll_module_tlinit(struct tucube_module* module, struct tucube_module_args* module_args) {
+int tucube_tcp_epoll_module_threadLocalInit(struct tucube_module* module, struct tucube_module_args* module_args) {
     GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_tlinit(GONC_LIST_ELEMENT_NEXT(module),
+         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_threadLocalInit(GONC_LIST_ELEMENT_NEXT(module),
               GONC_LIST_ELEMENT_NEXT(module_args));
     return 0;
 }
 
-int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_cldata_list* cldata_list, int* clientSocket) {
+int tucube_tcp_epoll_module_clientLocalInit(struct tucube_module* module, struct tucube_cldata_list* cldata_list, int* clientSocket) {
     struct tucube_cldata* cldata = malloc(1 * sizeof(struct tucube_cldata));
     GONC_LIST_ELEMENT_INIT(cldata);
     cldata->pointer = malloc(1 * sizeof(struct tucube_epoll_http_ClientLocalData));
@@ -164,12 +164,12 @@ int tucube_tcp_epoll_module_clinit(struct tucube_module* module, struct tucube_c
     GONC_LIST_APPEND(cldata_list, cldata);
 
     GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_clinit(GONC_LIST_ELEMENT_NEXT(module),
+         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_clientLocalInit(GONC_LIST_ELEMENT_NEXT(module),
               cldata_list, clientSocket);
     return 0;
 }
 
-static inline int tucube_epoll_http_read_request(struct tucube_module* module, struct tucube_cldata* cldata)
+static inline int tucube_epoll_http_readRequest(struct tucube_module* module, struct tucube_cldata* cldata)
 {
     ssize_t read_size;
 
@@ -213,12 +213,12 @@ static inline int tucube_epoll_http_read_request(struct tucube_module* module, s
     return 0;
 }
 
-static inline int tucube_epoll_http_write_crlf(int clientSocket)
+static inline int tucube_epoll_http_writeCrlf(int clientSocket)
 {
     return write(clientSocket, "\r\n", sizeof("\r\n") - 1);
 }
 
-static inline int tucube_epoll_http_write_status_code(int clientSocket, int status_code)
+static inline int tucube_epoll_http_writeStatusCode(int clientSocket, int status_code)
 {
     write(clientSocket, "HTTP/1.1", sizeof("HTTP/1.1") - 1);
     write(clientSocket, " ", sizeof(" ") - 1);
@@ -230,20 +230,20 @@ static inline int tucube_epoll_http_write_status_code(int clientSocket, int stat
 
     write(clientSocket, " ", sizeof(" ") - 1); // reason phrase is optional but blank space after status code is necessary
 
-    tucube_epoll_http_write_crlf(clientSocket);
+    tucube_epoll_http_writeCrlf(clientSocket);
     return 0;
 }
 
-static inline int tucube_epoll_http_write_header(int clientSocket, const char* header_field, size_t header_field_size, const char* header_value, size_t header_value_size)
+static inline int tucube_epoll_http_writeHeader(int clientSocket, const char* header_field, size_t header_field_size, const char* header_value, size_t header_value_size)
 {
     write(clientSocket, header_field, header_field_size);
     write(clientSocket, ": ", sizeof(": ") - 1);
     write(clientSocket, header_value, header_value_size);
-    tucube_epoll_http_write_crlf(clientSocket);
+    tucube_epoll_http_writeCrlf(clientSocket);
     return 0;
 }
 
-static inline int tucube_epoll_http_write_headers(struct tucube_module* module, struct tucube_cldata* cldata)
+static inline int tucube_epoll_http_writeHeaders(struct tucube_module* module, struct tucube_cldata* cldata)
 {
     int result;
     if((result = GONC_CAST(module->pointer,
@@ -262,83 +262,74 @@ static inline int tucube_epoll_http_write_headers(struct tucube_module* module, 
              struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &header_field, &header_field_size, &header_value, &header_value_size)) == -1) {
             return -1;
         }
-        tucube_epoll_http_write_header(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, header_field, header_field_size, header_value, header_value_size);
+        tucube_epoll_http_writeHeader(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, header_field, header_field_size, header_value, header_value_size);
     }
     while(result == 1);
     return 0;
 }
 
-static inline int tucube_epoll_http_write_body(struct tucube_module* module, struct tucube_cldata* cldata)
-{
+static inline int tucube_epoll_http_writeBody(struct tucube_module* module, struct tucube_cldata* cldata) {
     int result;
     const char* body;
     size_t body_size;
     char* body_size_string;
     size_t body_size_string_size;
     if((result = GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata))) == -1)
-    {
+         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata))) == -1) {
         return -1;
     }
-    else if(result == 0)
-    {
-        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+    else if(result == 0) {
+        tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
         return 0;
     }
 
     if((result = GONC_CAST(module->pointer,
-        struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
-    {
+        struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1) {
         return -1;
     }
-    else if(result == 0)
-    {
+    else if(result == 0) {
         body_size_string_size = gonc_ltostr(body_size, 10, &body_size_string);
-        tucube_epoll_http_write_header(*GONC_CAST(cldata->pointer,
+        tucube_epoll_http_writeHeader(*GONC_CAST(cldata->pointer,
              struct tucube_epoll_http_ClientLocalData*)->clientSocket,
                   "Content-Length", sizeof("Content-Length") - 1, body_size_string, body_size_string_size);
         free(body_size_string);
-        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+        tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
 
         write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, body, body_size);
     }
-    else if(result == 1)
-    {
-        tucube_epoll_http_write_header(*GONC_CAST(cldata->pointer,
+    else if(result == 1) {
+        tucube_epoll_http_writeHeader(*GONC_CAST(cldata->pointer,
              struct tucube_epoll_http_ClientLocalData*)->clientSocket, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked"));
 
-        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+        tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
 
         body_size_string_size = gonc_ltostr(body_size, 16, &body_size_string);
         write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, body_size_string, body_size_string_size);
         free(body_size_string);
-        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+        tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
 
         write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, body, body_size);
-        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+        tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
 
-        do
-        {
+        do {
             if((result = GONC_CAST(module->pointer,
-                 struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1)
-            {
+                 struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &body, &body_size)) == -1) {
                 return -1;
             }
             body_size_string_size = gonc_ltostr(body_size, 16, &body_size_string);
             write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, body_size_string, body_size_string_size);
             free(body_size_string);
-            tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+            tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
             write(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, body, body_size);
-            tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+            tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
         }
         while(result == 1);
-        tucube_epoll_http_write_crlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
+        tucube_epoll_http_writeCrlf(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket);
     }
     return 0;
 }
 
-static inline int tucube_epoll_http_write_response(struct tucube_module* module, struct tucube_cldata* cldata)
-{
+static inline int tucube_epoll_http_writeResponse(struct tucube_module* module, struct tucube_cldata* cldata) {
     int status_code;
     if(GONC_CAST(module->pointer,
          struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseStatusCode(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(cldata), &status_code) == -1)
@@ -346,34 +337,32 @@ static inline int tucube_epoll_http_write_response(struct tucube_module* module,
         return -1;
     }
 
-    tucube_epoll_http_write_status_code(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, status_code);
+    tucube_epoll_http_writeStatusCode(*GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->clientSocket, status_code);
 
 
-    if(tucube_epoll_http_write_headers(module, cldata) == -1)
+    if(tucube_epoll_http_writeHeaders(module, cldata) == -1)
         return -1;
 
-    if(tucube_epoll_http_write_body(module, cldata) == -1)
+    if(tucube_epoll_http_writeBody(module, cldata) == -1)
         return -1;
 
     return 0; 
 }
 
-int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_cldata* cldata)
-{
-    int result = tucube_epoll_http_read_request(module, cldata);
+int tucube_tcp_epoll_module_service(struct tucube_module* module, struct tucube_cldata* cldata) {
+    int result = tucube_epoll_http_readRequest(module, cldata);
     if(result != 0)
         return result;
     
-    if(tucube_epoll_http_write_response(module, cldata) == -1)
+    if(tucube_epoll_http_writeResponse(module, cldata) == -1)
         return -1;
 
     return 0;
 }
 
-int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucube_cldata* cldata)
-{
+int tucube_tcp_epoll_module_clientLocalDestroy(struct tucube_module* module, struct tucube_cldata* cldata) {
     GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_cldestroy(GONC_LIST_ELEMENT_NEXT(module),
+         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_clientLocalDestroy(GONC_LIST_ELEMENT_NEXT(module),
               GONC_LIST_ELEMENT_NEXT(cldata));
 
     free(GONC_CAST(cldata->pointer, struct tucube_epoll_http_ClientLocalData*)->parser->buffer);
@@ -386,16 +375,14 @@ int tucube_tcp_epoll_module_cldestroy(struct tucube_module* module, struct tucub
     return 0;
 }
 
-int tucube_tcp_epoll_module_tldestroy(struct tucube_module* module)
-{
+int tucube_tcp_epoll_module_threadLocalDestroy(struct tucube_module* module) {
     GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_tldestroy(GONC_LIST_ELEMENT_NEXT(module));
+         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_threadLocalDestroy(GONC_LIST_ELEMENT_NEXT(module));
 
     return 0;
 }
 
-int tucube_tcp_epoll_module_destroy(struct tucube_module* module)
-{
+int tucube_tcp_epoll_module_destroy(struct tucube_module* module) {
     GONC_CAST(module->pointer,
          struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_destroy(GONC_LIST_ELEMENT_NEXT(module));
 
