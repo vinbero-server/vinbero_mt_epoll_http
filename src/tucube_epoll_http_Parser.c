@@ -8,13 +8,13 @@
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_Parser.h"
 
-char* tucube_epoll_http_Parser_get_buffer_position(struct tucube_epoll_http_Parser* parser) {
+char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser) {
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
         return parser->buffer + parser->tokenOffset;
     return parser->buffer;
 }
 
-size_t tucube_epoll_http_Parser_get_available_bufferSize(struct tucube_epoll_http_Parser* parser) {
+size_t tucube_epoll_http_Parser_getAvailableBufferSize(struct tucube_epoll_http_Parser* parser) {
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
         return parser->headerBufferCapacity - parser->tokenOffset;
     return parser->bodyRemainder;
