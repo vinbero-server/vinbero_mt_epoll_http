@@ -6,8 +6,8 @@
 #include "tucube_epoll_http_Parser.h"
 
 struct tucube_epoll_http_Module {
-    int (*tucube_epoll_http_Module_init)(struct tucube_Module_Args*, struct tucube_Module_List*);
-    int (*tucube_epoll_http_Module_tlInit)(struct tucube_Module*, struct tucube_Module_Args*);
+    int (*tucube_epoll_http_Module_init)(struct tucube_Module_Config*, struct tucube_Module_List*);
+    int (*tucube_epoll_http_Module_tlInit)(struct tucube_Module*, struct tucube_Module_Config*);
     int (*tucube_epoll_http_Module_clInit)(struct tucube_Module*, struct tucube_ClData_List*, int*);
 
     int (*tucube_epoll_http_Module_onRequestStart)(struct tucube_Module*, struct tucube_ClData*);
@@ -46,8 +46,8 @@ struct tucube_epoll_http_ClData {
     struct tucube_epoll_http_Parser* parser;
 };
 
-int tucube_tcp_epoll_module_init(struct tucube_Module_Args* moduleArgs, struct tucube_Module_List* moduleList);
-int tucube_tcp_epoll_module_tlInit(struct tucube_Module* module, struct tucube_Module_Args* moduleArgs);
+int tucube_tcp_epoll_module_init(struct tucube_Module_Config* moduleConfig, struct tucube_Module_List* moduleList);
+int tucube_tcp_epoll_module_tlInit(struct tucube_Module* module, struct tucube_Module_Config* moduleConfig);
 int tucube_tcp_epoll_module_clInit(struct tucube_Module* module, struct tucube_ClData_List* clDataList, int* clientSocket);
 int tucube_tcp_epoll_module_service(struct tucube_Module* module, struct tucube_ClData*);
 int tucube_tcp_epoll_module_clDestroy(struct tucube_Module* module, struct tucube_ClData* cldata);
