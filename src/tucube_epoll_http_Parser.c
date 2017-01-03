@@ -330,8 +330,15 @@ static inline int tucube_epoll_http_Parser_parseBody(struct tucube_Module* modul
             return 0;
         }
         else {
-            if(parser->bufferSize - parser->bufferOffset > parser->bodyBufferCapacity)
+            if(parser->bodyBufferCapacity < parser->bodyRemainder) {
+                warnx("%s: %u: Request body is bigger than parser body buffer", __FILE__, __LINE__);
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+                return -1;
+            }
+            else if(parser->bufferSize - parser->bufferOffset > parser->bodyBufferCapacity) {
+                parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
+                return -1;
+            }
             else {
                 memmove(parser->buffer, parser->buffer + parser->bufferOffset, (parser->bufferSize - parser->bufferOffset) * sizeof(char));
                 parser->buffer = realloc(parser->buffer, parser->bodyBufferCapacity * sizeof(char));
