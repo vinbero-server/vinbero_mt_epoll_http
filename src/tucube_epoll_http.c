@@ -172,7 +172,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     }
     if(readSize == -1) {
         if(errno == EAGAIN) {
-            warnx("%s: %u: Client socket EAGAIN", __FILE__, __LINE__);
+//            warnx("%s: %u: Client socket EAGAIN", __FILE__, __LINE__);
             return 1;
         }
         else if (errno == EWOULDBLOCK) {
