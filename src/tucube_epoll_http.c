@@ -52,13 +52,13 @@ int tucube_tcp_epoll_Module_init(struct tucube_Module_Config* moduleConfig, stru
 
 
     GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->parserHeaderBufferCapacity = 256;
+         struct tucube_epoll_http_Module*)->parserHeaderBufferCapacity = 1024;
 
     if(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserHeaderBufferCapacity") != NULL)
         GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->parserHeaderBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserHeaderBufferCapacity"));
 
     GONC_CAST(module->pointer,
-            struct tucube_epoll_http_Module*)->parserBodyBufferCapacity = 256;
+            struct tucube_epoll_http_Module*)->parserBodyBufferCapacity = 1024;
 
     if(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity") != NULL)
         GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->parserBodyBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity"));
