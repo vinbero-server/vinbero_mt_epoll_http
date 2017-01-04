@@ -322,10 +322,17 @@ static inline int tucube_epoll_http_writeResponse(struct tucube_Module* module, 
 
 int tucube_tcp_epoll_Module_service(struct tucube_Module* module, struct tucube_ClData* clData) {
     int result = tucube_epoll_http_readRequest(module, clData);
+
     if(result != 0)
         return result;
-    
+
+    if(fcntl(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, F_SETFL, fcntl(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, F_GETFL, 0) & ~O_NONBLOCK) == -1)
+        return -1;
+
     if(tucube_epoll_http_writeResponse(module, clData) == -1)
+        return -1;
+
+    if(fcntl(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, F_SETFL, fcntl(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, F_GETFL, 0) | O_NONBLOCK) == -1)
         return -1;
 
     return 0;
