@@ -37,5 +37,4 @@ wsgi.input 은 blocking io이다 이는 Content-Length를 실제 데이터보다
 flask 자체 서버도 무한히 블로킹 되었고 wsgiref 서버도 마찬가지였다
 멀티프로세스 서버인 gunicorn과 uwsgi는 타임아웃을 두었지만 여전히 서버의 성능에 치명적이었다
 
-
-
+https://stackoverflow.com/questions/2176443/is-a-return-value-of-0-from-write2-in-c-an-error/2176748#2176748
