@@ -39,3 +39,5 @@ flask 자체 서버도 무한히 블로킹 되었고 wsgiref 서버도 마찬가
 
 https://stackoverflow.com/questions/2176443/is-a-return-value-of-0-from-write2-in-c-an-error/2176748#2176748
 http://stackoverflow.com/questions/3989811/eagain-error-using-berkeley-socket-api
+
+socket 에 file을 쓸 경우 sendfile()을 사용하는 것이 훨씬 더 효율적
