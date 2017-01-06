@@ -4,6 +4,7 @@
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
 #include "tucube_epoll_http_Parser.h"
+#include "tucube_epoll_http_ResponseBody.h"
 
 struct tucube_epoll_http_Module {
     int (*tucube_epoll_http_Module_init)(struct tucube_Module_Config*, struct tucube_Module_List*);
@@ -31,7 +32,7 @@ struct tucube_epoll_http_Module {
     int (*tucube_epoll_http_Module_onResponseHeaderStart)(struct tucube_Module*, struct tucube_ClData*);
     int (*tucube_epoll_http_Module_onResponseHeader)(struct tucube_Module*, struct tucube_ClData*, const char**, size_t*, const char**, size_t*);
     int (*tucube_epoll_http_Module_onResponseBodyStart)(struct tucube_Module*, struct tucube_ClData*);
-    int (*tucube_epoll_http_Module_onResponseBody)(struct tucube_Module*, struct tucube_ClData*, const char**, size_t*);
+    int (*tucube_epoll_http_Module_onResponseBody)(struct tucube_Module*, struct tucube_ClData*, struct tucube_epoll_http_ResponseBody*);
 
     int (*tucube_epoll_http_Module_clDestroy)(struct tucube_Module*, struct tucube_ClData*);
     int (*tucube_epoll_http_Module_tlDestroy)(struct tucube_Module*);
