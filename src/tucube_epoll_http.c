@@ -252,66 +252,63 @@ static inline int tucube_epoll_http_writeContentLength(int clientSocket, size_t 
 }
 
 static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, struct tucube_ClData* clData) {
+    switch(GONC_CAST(module->pointer,
+        struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData))) {
+        case -1:
+            return -1;
+        case 0:
+            tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
+            return 0;
+    }
+
     int result;
     struct tucube_epoll_http_ResponseBody body;
-    if((result = GONC_CAST(module->pointer,
-        struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData))) == -1) {
-        return -1;
-    }
-    else if(result == 0) {
-        tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
-        return 0;
-    }
-
-    if((result = GONC_CAST(module->pointer,
-        struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &body)) == -1) {
-        return -1;
-    }
-    else if(result == 0) { // Single Body Chunk
-        tucube_epoll_http_writeContentLength(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.size);
-        switch(body.type) {
-            case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_STRING:
-                write(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.chars, body.size);
-                break;
-            case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE:
-                sendfile(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.fd, NULL, body.size);
-                break;
-            default:
-                return -1;
-                break;
-        }
-    }
-    else if(result == 1) { // Multiple Body Chunk
-        if(body.type != TUCUBE_EPOLL_HTTP_RESPONSE_BODY_STRING) {
-            if(body.type == TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE)
-                warnx("%s: %u", __FILE__, __LINE__);
+    switch(GONC_CAST(module->pointer,
+        struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &body)) {
+        case -1:
             return -1;
-        }
-
-        tucube_epoll_http_writeHeader(*GONC_CAST(clData->pointer,
-             struct tucube_epoll_http_ClData*)->clientSocket, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked"));
-        tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
-
-        tucube_epoll_http_writeContentLength(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.size);
-
-        write(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.chars, body.size);
-        tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
-
-        do {
-            if((result = GONC_CAST(module->pointer,
-                struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &body)) == -1) {
+        case 0:
+            tucube_epoll_http_writeContentLength(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.size);
+            switch(body.type) {
+                case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_STRING:
+                    write(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.chars, body.size);
+                    break;
+                case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE:
+                    sendfile(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.fd, NULL, body.size);
+                    break;
+                default:
+                    return -1;
+            }
+            return 0;
+        case 1:
+            if(body.type != TUCUBE_EPOLL_HTTP_RESPONSE_BODY_STRING) {
+                if(body.type == TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE)
+                    warnx("%s: %u", __FILE__, __LINE__);
                 return -1;
             }
+            tucube_epoll_http_writeHeader(*GONC_CAST(clData->pointer,
+                 struct tucube_epoll_http_ClData*)->clientSocket, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked"));
+            tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
 
             tucube_epoll_http_writeContentLength(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.size);
 
             write(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.chars, body.size);
             tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
-        }
-        while(result == 1);
-        tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
+            do {
+                if((result = GONC_CAST(module->pointer,
+                    struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &body)) == -1) {
+                    return -1;
+                }
+                tucube_epoll_http_writeContentLength(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.size);
+                write(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, body.chars, body.size);
+                tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
+            }
+            while(result == 1);
+            tucube_epoll_http_writeCrlf(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket);
+            return 0;
+        default:
+            return -1;
     }
-    return 0;
 }
 
 static inline int tucube_epoll_http_writeResponse(struct tucube_Module* module, struct tucube_ClData* clData) {
@@ -333,7 +330,7 @@ static inline int tucube_epoll_http_writeResponse(struct tucube_Module* module, 
 }
 
 int tucube_tcp_epoll_Module_service(struct tucube_Module* module, struct tucube_ClData* clData) {
-    int result = tucube_epoll_http_readRequest(module, clData);
+    register int result = tucube_epoll_http_readRequest(module, clData);
 
     if(result != 0)
         return result;
