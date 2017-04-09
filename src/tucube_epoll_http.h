@@ -1,6 +1,7 @@
 #ifndef _TUCUBE_EPOLL_HTTP_H
 #define _TUCUBE_EPOLL_HTTP_H
 
+#include <stdbool.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
 #include "tucube_epoll_http_Parser.h"
@@ -44,6 +45,8 @@ struct tucube_epoll_http_Module {
 
 struct tucube_epoll_http_ClData {
     int* clientSocket;
+    bool isKeepAlive;
+    int keepAliveMaxCount;
     struct tucube_epoll_http_Parser* parser;
 };
 
