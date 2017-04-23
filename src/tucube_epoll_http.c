@@ -191,8 +191,14 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         warnx("%s: %u: Client socket has been closed", __FILE__, __LINE__);
         return -1;
     }
+    /*
+    char* connectionHeaderValue;
+    GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(module, clData, "Connection", &connectionHeaderValue);
+    if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")))
+        clData->isKeepAlive = true;
+    */
 
-    return 0;
+    return 0; // request finsihed
 }
 
 static inline int tucube_epoll_http_writeCrlf(int clientSocket) {
