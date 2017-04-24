@@ -196,7 +196,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     }
     
     if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive)
-        return 2;
+        return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
     char* connectionHeaderValue;
     GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(module, clData, "Connection", &connectionHeaderValue);
     if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
