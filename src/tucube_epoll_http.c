@@ -150,6 +150,9 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
 
     GONC_CAST(clData->pointer,
          struct tucube_epoll_http_ClData*)->parser->onRequestFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestFinish;
+         
+    GONC_CAST(clData->pointer,
+         struct tucube_epoll_http_ClData*)->isKeepAlive = false;
 
     GONC_LIST_APPEND(clDataList, clData);
 
@@ -191,13 +194,17 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         warnx("%s: %u: Client socket has been closed", __FILE__, __LINE__);
         return -1;
     }
-    /*
+    
+    if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive)
+        return 2;
     char* connectionHeaderValue;
     GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(module, clData, "Connection", &connectionHeaderValue);
-    if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")))
-        clData->isKeepAlive = true;
-    */
-
+    if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
+        GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = true;
+        free(connectionHeaderValue);
+        return 2;
+    }
+    free(connectionHeaderValue);
     return 0; // request finsihed
 }
 
