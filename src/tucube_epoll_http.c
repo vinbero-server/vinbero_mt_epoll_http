@@ -241,6 +241,8 @@ static inline int tucube_epoll_http_writeHeaders(struct tucube_Module* module, s
              struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseHeaderStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) <= 0)) {
         return result;
     }
+    if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive)
+        tucube_epoll_http_writeHeader(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, "Connection", sizeof("Connection") - 1, "Keep-Alive", sizeof("Keep-Alive") - 1);
     do {
         const char* headerField;
         size_t headerFieldSize;
@@ -248,7 +250,7 @@ static inline int tucube_epoll_http_writeHeaders(struct tucube_Module* module, s
         size_t headerValueSize;
         
         if((result = GONC_CAST(module->pointer,
-             struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &headerField, &headerFieldSize, &headerValue, &headerValueSize)) == -1) {
+            struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onResponseHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &headerField, &headerFieldSize, &headerValue, &headerValueSize)) == -1) {
             return -1;
         }
         tucube_epoll_http_writeHeader(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket, headerField, headerFieldSize, headerValue, headerValueSize);
