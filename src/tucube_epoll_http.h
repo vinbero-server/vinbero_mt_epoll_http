@@ -30,9 +30,9 @@ struct tucube_epoll_http_Module {
     int (*tucube_epoll_http_Module_onRequestFinish)(struct tucube_Module*, struct tucube_ClData*);
     
     int (*tucube_epoll_http_Module_onGetRequestContentLength)(struct tucube_Module*, struct tucube_ClData*, ssize_t*);
-    int tucube_epoll_http_Module_onGetRequestIntHeader(struct tucube_Module* module, struct tucube_ClData* clData, char* headerField, int* headerValue);
-    int tucube_epoll_http_Module_onGetRequestDoubleHeader(struct tucube_Module* module, struct tucube_ClData* clData, char* headerField, double* headerValue);
-    int tucube_epoll_http_Module_onGetRequestStringHeader(struct tucube_Module* module, struct tucube_ClData* clData, char* headerField, char** headerValue);
+    int (*tucube_epoll_http_Module_onGetRequestIntHeader)(struct tucube_Module* module, struct tucube_ClData* clData, char* headerField, int* headerValue);
+    int (*tucube_epoll_http_Module_onGetRequestDoubleHeader)(struct tucube_Module* module, struct tucube_ClData* clData, char* headerField, double* headerValue);
+    int (*tucube_epoll_http_Module_onGetRequestStringHeader)(struct tucube_Module* module, struct tucube_ClData* clData, char* headerField, char** headerValue);
 
     int (*tucube_epoll_http_Module_onResponseStatusCode)(struct tucube_Module*, struct tucube_ClData*, int*);
     int (*tucube_epoll_http_Module_onResponseHeaderStart)(struct tucube_Module*, struct tucube_ClData*);
