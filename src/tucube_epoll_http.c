@@ -128,9 +128,6 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
             struct tucube_epoll_http_ClData*)->parser->onRequestContentLength = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestContentLength;
 
     GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onGetRequestContentLength = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestContentLength;
-
-    GONC_CAST(clData->pointer,
          struct tucube_epoll_http_ClData*)->parser->onRequestHeaderField = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestHeaderField;
 
     GONC_CAST(clData->pointer,
@@ -150,7 +147,10 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
 
     GONC_CAST(clData->pointer,
          struct tucube_epoll_http_ClData*)->parser->onRequestFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestFinish;
-         
+
+    GONC_CAST(clData->pointer,
+         struct tucube_epoll_http_ClData*)->parser->onGetRequestContentLength = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestContentLength;
+
     GONC_CAST(clData->pointer,
          struct tucube_epoll_http_ClData*)->isKeepAlive = false;
 
@@ -198,13 +198,14 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive)
         return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
     char* connectionHeaderValue;
-    GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(module, clData, "Connection", &connectionHeaderValue);
-    if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
-        GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = true;
+    if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue) != -1) {
+        if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
+            GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = true;
+            free(connectionHeaderValue);
+            return 2;
+        }
         free(connectionHeaderValue);
-        return 2;
     }
-    free(connectionHeaderValue);
     return 0; // request finsihed
 }
 
