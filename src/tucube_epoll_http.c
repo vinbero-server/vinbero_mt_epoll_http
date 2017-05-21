@@ -200,6 +200,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     char* connectionHeaderValue;
     if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue) != -1) {
         if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
+            warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
             GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = true;
             free(connectionHeaderValue);
             return 2;
