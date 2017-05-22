@@ -13,6 +13,13 @@ int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser) {
 }
 
 int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser) {
+    parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN;
+    parser->buffer = realloc(parser->buffer, parser->headerBufferCapacity * sizeof(char)); 
+    parser->bufferOffset = 0;
+    parser->bufferSize = 0;
+    parser->token = NULL;
+    parser->tokenOffset = 0; 
+    parser->bodyRemainder = 0;
     return 0;
 }
 
@@ -35,7 +42,8 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
     while(parser->bufferOffset < parser->bufferSize) {
         switch(parser->state) {
         case TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN:
-            parser->onRequestStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData));
+
+            GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData));
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_METHOD_BEGIN:
@@ -56,7 +64,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_METHOD_END:
-            if(parser->onRequestMethod(GONC_LIST_ELEMENT_NEXT(module),
+            if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestMethod(GONC_LIST_ELEMENT_NEXT(module),
                  GONC_LIST_ELEMENT_NEXT(clData),
                  parser->token,
                  parser->tokenOffset) == -1) {
@@ -82,7 +90,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
             }
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_REQUEST_URI_END:
-            if(parser->onRequestUri(GONC_LIST_ELEMENT_NEXT(module),
+            if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestUri(GONC_LIST_ELEMENT_NEXT(module),
                  GONC_LIST_ELEMENT_NEXT(clData),
                  parser->token,
                  parser->tokenOffset) == -1) {
@@ -110,7 +118,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
         case TUCUBE_EPOLL_HTTP_PARSER_PROTOCOL_END:
             if(parser->buffer[parser->bufferOffset] == '\n') {
                 ++parser->bufferOffset;
-                if(parser->onRequestProtocol(GONC_LIST_ELEMENT_NEXT(module),
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestProtocol(GONC_LIST_ELEMENT_NEXT(module),
                       GONC_LIST_ELEMENT_NEXT(clData),
                       parser->token,
                       parser->tokenOffset) == -1) {
@@ -161,7 +169,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
                     parser->tokenOffset = 0;
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_CONTENT_LENGTH_BEGIN;
                 }
-                else if(parser->onRequestHeaderField(GONC_LIST_ELEMENT_NEXT(module),
+                else if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestHeaderField(GONC_LIST_ELEMENT_NEXT(module),
                      GONC_LIST_ELEMENT_NEXT(clData),
                      parser->token,
                      parser->tokenOffset) == -1) {
@@ -190,7 +198,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
         case TUCUBE_EPOLL_HTTP_PARSER_SCRIPT_PATH_END:
             if(parser->buffer[parser->bufferOffset] == '\n') {
                 ++parser->bufferOffset;
-                if(parser->onRequestScriptPath(GONC_LIST_ELEMENT_NEXT(module),
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestScriptPath(GONC_LIST_ELEMENT_NEXT(module),
                      GONC_LIST_ELEMENT_NEXT(clData),
                      parser->token,
                      parser->tokenOffset) == -1)
@@ -221,7 +229,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
         case TUCUBE_EPOLL_HTTP_PARSER_CONTENT_TYPE_END:
             if(parser->buffer[parser->bufferOffset] == '\n') {
                 ++parser->bufferOffset;
-                if(parser->onRequestContentType(GONC_LIST_ELEMENT_NEXT(module),
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestContentType(GONC_LIST_ELEMENT_NEXT(module),
                      GONC_LIST_ELEMENT_NEXT(clData),
                      parser->token,
                      parser->tokenOffset) == -1) {
@@ -251,7 +259,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
         case TUCUBE_EPOLL_HTTP_PARSER_CONTENT_LENGTH_END:
             if(parser->buffer[parser->bufferOffset] == '\n') {
                 ++parser->bufferOffset;
-                if(parser->onRequestContentLength(GONC_LIST_ELEMENT_NEXT(module),
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestContentLength(GONC_LIST_ELEMENT_NEXT(module),
                      GONC_LIST_ELEMENT_NEXT(clData),
                      parser->token,
                      parser->tokenOffset) == -1) {
@@ -281,7 +289,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
         case TUCUBE_EPOLL_HTTP_PARSER_HEADER_VALUE_END:
             if(parser->buffer[parser->bufferOffset] == '\n') {
                 ++parser->bufferOffset;
-                if(parser->onRequestHeaderValue(GONC_LIST_ELEMENT_NEXT(module),
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestHeaderValue(GONC_LIST_ELEMENT_NEXT(module),
                      GONC_LIST_ELEMENT_NEXT(clData),
                      parser->token,
                      parser->tokenOffset) == -1) {
@@ -296,7 +304,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
         case TUCUBE_EPOLL_HTTP_PARSER_HEADERS_END:
             if(parser->buffer[parser->bufferOffset] == '\n') {
                 ++parser->bufferOffset;
-                if(parser->onRequestHeadersFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1)
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestHeadersFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1)
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                 else {
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN;
@@ -328,10 +336,10 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
 static inline int tucube_epoll_http_Parser_parseBody(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser) {
     int result;
     if(parser->state == TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN) {
-        if((result = parser->onGetRequestContentLength(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &parser->bodyRemainder)) == -1)
+        if((result = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestContentLength(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), &parser->bodyRemainder)) == -1)
             parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
         else if(parser->bodyRemainder == 0) {
-            if(parser->onRequestFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1) {
+            if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1) {
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                 return -1;
             }
@@ -352,7 +360,7 @@ static inline int tucube_epoll_http_Parser_parseBody(struct tucube_Module* modul
                 parser->buffer = realloc(parser->buffer, parser->bodyBufferCapacity * sizeof(char));
                 parser->bufferSize -= parser->bufferOffset;
                 parser->bufferOffset = 0;
-                if(parser->onRequestBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1) {
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestBodyStart(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1) {
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                     return -1;
                 }
@@ -365,7 +373,7 @@ static inline int tucube_epoll_http_Parser_parseBody(struct tucube_Module* modul
         switch(parser->state) {
         case TUCUBE_EPOLL_HTTP_PARSER_BODY:
             if(parser->bufferSize < parser->bodyRemainder) {
-                if(parser->onRequestBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), parser->buffer, parser->bufferSize) == -1)
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), parser->buffer, parser->bufferSize) == -1)
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                 else {
                     parser->bodyRemainder -= parser->bufferSize;
@@ -376,14 +384,14 @@ static inline int tucube_epoll_http_Parser_parseBody(struct tucube_Module* modul
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_BODY_END;
             break;
         case TUCUBE_EPOLL_HTTP_PARSER_BODY_END:
-            if(parser->onRequestBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), parser->buffer, parser->bufferSize) == -1)
+            if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestBody(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), parser->buffer, parser->bufferSize) == -1)
                 parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
             else {
                 parser->bufferSize = 0;
-                if(parser->onRequestBodyFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1)
+                if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestBodyFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1)
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                 else {
-                    if(parser->onRequestFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1) {
+                    if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestFinish(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)) == -1) {
                         parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                         return -1;
                     }

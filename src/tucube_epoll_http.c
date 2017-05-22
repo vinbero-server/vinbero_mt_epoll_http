@@ -107,51 +107,6 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
                    struct tucube_epoll_http_ClData*)->parser->headerBufferCapacity * sizeof(char));
 
     GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestStart = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestStart;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestMethod = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestMethod;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestUri = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestUri;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestProtocol = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestProtocol;
-
-    GONC_CAST(clData->pointer,
-            struct tucube_epoll_http_ClData*)->parser->onRequestScriptPath = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestScriptPath;
-
-    GONC_CAST(clData->pointer,
-            struct tucube_epoll_http_ClData*)->parser->onRequestContentType = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestContentType;
-
-    GONC_CAST(clData->pointer,
-            struct tucube_epoll_http_ClData*)->parser->onRequestContentLength = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestContentLength;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestHeaderField = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestHeaderField;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestHeaderValue = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestHeaderValue;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestHeadersFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestHeadersFinish;
-
-    GONC_CAST(clData->pointer,
-            struct tucube_epoll_http_ClData*)->parser->onRequestBodyStart = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestBodyStart;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestBody = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestBody;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestBodyFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestBodyFinish;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onRequestFinish = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestFinish;
-
-    GONC_CAST(clData->pointer,
-         struct tucube_epoll_http_ClData*)->parser->onGetRequestContentLength = GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestContentLength;
-
-    GONC_CAST(clData->pointer,
          struct tucube_epoll_http_ClData*)->isKeepAlive = false;
 
     GONC_LIST_APPEND(clDataList, clData);
@@ -195,14 +150,18 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         return -1;
     }
     
-    if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive)
+    if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive) {
+        parser->reset(parser);
         return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
+    }
     char* connectionHeaderValue;
     if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue) != -1) {
         if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
             warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
             GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = true;
             free(connectionHeaderValue);
+            parser->reset(parser);
+//TODO: reset your parser
             return 2;
         }
         free(connectionHeaderValue);
