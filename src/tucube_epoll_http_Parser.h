@@ -47,23 +47,11 @@ struct tucube_epoll_http_Parser {
     char* token;
     size_t tokenOffset;
     ssize_t bodyRemainder;
-
-    int (*onRequestStart)(struct tucube_Module*, struct tucube_ClData*);
-    int (*onRequestMethod)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestUri)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestProtocol)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestScriptPath)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestContentType)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestContentLength)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onGetRequestContentLength)(struct tucube_Module*, struct tucube_ClData*, ssize_t*);
-    int (*onRequestHeaderField)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestHeaderValue)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestHeadersFinish)(struct tucube_Module*, struct tucube_ClData*);
-    int (*onRequestBodyStart)(struct tucube_Module*, struct tucube_ClData*);
-    int (*onRequestBody)(struct tucube_Module*, struct tucube_ClData*, char*, ssize_t);
-    int (*onRequestBodyFinish)(struct tucube_Module*, struct tucube_ClData*);
-    int (*onRequestFinish)(struct tucube_Module*, struct tucube_ClData*);
 };
+
+int tucube_epoll_http_parser_init(struct tucube_epoll_http_Parser* parser);
+
+int tucube_epoll_http_parser_reset(struct tucube_epoll_http_Parser* parser);
 
 char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser);
 
