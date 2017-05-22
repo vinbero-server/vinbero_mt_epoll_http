@@ -8,6 +8,14 @@
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_Parser.h"
 
+int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser) {
+    return 0;
+}
+
+int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser) {
+    return 0;
+}
+
 char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser) {
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
         return parser->buffer + parser->tokenOffset;
