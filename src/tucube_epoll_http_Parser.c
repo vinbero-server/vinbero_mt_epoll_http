@@ -1,4 +1,5 @@
 #include <err.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tucube/tucube_Module.h>
@@ -8,7 +9,17 @@
 #include "tucube_epoll_http.h"
 #include "tucube_epoll_http_Parser.h"
 
-int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser) {
+int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_t headerBufferCapacity, size_t bodyBufferCapacity) {
+    parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN;
+    parser->buffer->headerBufferCapacity = headerBufferCapacity;
+    parser->buffer->bodyBufferCapacity = bodyBufferCapacity;
+    parser->buffer = malloc(parser->buffer, headerBufferCapacity * sizeof(char)); 
+    parser->bufferOffset = 0;
+    parser->bufferSize = 0;
+    parser->token = NULL;
+    parser->tokenOffset = 0; 
+    parser->bodyRemainder = 0;
+    parser->isKeepAlive = false; 
     return 0;
 }
 
