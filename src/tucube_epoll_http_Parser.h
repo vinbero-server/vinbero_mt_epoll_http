@@ -49,9 +49,9 @@ struct tucube_epoll_http_Parser {
     ssize_t bodyRemainder;
 };
 
-int tucube_epoll_http_parser_init(struct tucube_epoll_http_Parser* parser);
+int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser);
 
-int tucube_epoll_http_parser_reset(struct tucube_epoll_http_Parser* parser);
+int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser);
 
 char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser);
 

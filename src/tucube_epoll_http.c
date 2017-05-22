@@ -151,7 +151,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     }
     
     if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive) {
-        parser->reset(parser);
+        tucube_epoll_http_Parser_reset(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser);
         return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
     }
     char* connectionHeaderValue;
@@ -160,7 +160,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
             warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
             GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = true;
             free(connectionHeaderValue);
-            parser->reset(parser);
+            tucube_epoll_http_Parser_reset(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser);
 //TODO: reset your parser
             return 2;
         }
