@@ -1,6 +1,7 @@
 #ifndef _TUCUBE_EPOLL_HTTP_PARSER_H
 #define _TUCUBE_EPOLL_HTTP_PARSER_H
 
+#include <stdbool.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
 
@@ -47,9 +48,10 @@ struct tucube_epoll_http_Parser {
     char* token;
     size_t tokenOffset;
     ssize_t bodyRemainder;
+    bool isKeepAlive;
 };
 
-int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser);
+int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_t headerBufferCapacity, size_t bodyBufferCapacity);
 
 int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser);
 
