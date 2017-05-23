@@ -50,9 +50,8 @@ struct tucube_epoll_http_Module {
 
 struct tucube_epoll_http_ClData {
     int* clientSocket;
-    bool isKeepAlive;
-    int keepAliveMaxCount;
     struct tucube_epoll_http_Parser* parser;
+    bool isKeepAlive;
 };
 
 int tucube_tcp_epoll_module_init(struct tucube_Module_Config* moduleConfig, struct tucube_Module_List* moduleList);
