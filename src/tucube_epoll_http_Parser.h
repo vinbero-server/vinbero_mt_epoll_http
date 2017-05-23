@@ -55,9 +55,7 @@ int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_
 
 int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser);
 
-char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser);
-
-size_t tucube_epoll_http_Parser_getAvailableBufferSize(struct tucube_epoll_http_Parser* parser);
+int tucube_epoll_http_Parser_read(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser);
 
 int tucube_epoll_http_Parser_parse(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser, ssize_t readSize);
 

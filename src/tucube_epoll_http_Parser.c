@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
 #include <libgonc/gonc_cast.h>
@@ -35,16 +36,24 @@ int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser) {
     return 0;
 }
 
-char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser) {
+static inline char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser) {
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
         return parser->buffer + parser->tokenOffset;
     return parser->buffer;
 }
 
-size_t tucube_epoll_http_Parser_getAvailableBufferSize(struct tucube_epoll_http_Parser* parser) {
+static inline size_t tucube_epoll_http_Parser_getAvailableBufferSize(struct tucube_epoll_http_Parser* parser) {
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN)
         return parser->headerBufferCapacity - parser->tokenOffset;
     return parser->bodyRemainder;
+}
+
+int tucube_epoll_http_Parser_read(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser) {
+    return read(
+        *GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket,
+        tucube_epoll_http_Parser_getBufferPosition(parser),
+        tucube_epoll_http_Parser_getAvailableBufferSize(parser)
+    );
 }
 
 static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser) {

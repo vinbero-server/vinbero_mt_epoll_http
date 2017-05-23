@@ -106,9 +106,7 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
 static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, struct tucube_ClData* clData) {
     ssize_t readSize;
 
-    while((readSize = read(*GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket,
-         tucube_epoll_http_Parser_getBufferPosition(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser),
-         tucube_epoll_http_Parser_getAvailableBufferSize(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser))) > 0) {
+    while((readSize = tucube_epoll_http_Parser_read(module, clData, GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser)) > 0) {
         int result;
         if((result = tucube_epoll_http_Parser_parse(module, clData, GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser, readSize)) <= 0) {
             if(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR) {
