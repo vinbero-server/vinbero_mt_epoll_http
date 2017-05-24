@@ -20,7 +20,6 @@ int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_
     parser->token = NULL;
     parser->tokenOffset = 0; 
     parser->bodyRemainder = 0;
-    parser->isKeepAlive = false; 
     return 0;
 }
 
@@ -32,7 +31,6 @@ int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser) {
     parser->token = NULL;
     parser->tokenOffset = 0; 
     parser->bodyRemainder = 0;
-    parser->isKeepAlive = false;
     return 0;
 }
 
@@ -222,12 +220,10 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_Module* mo
                 if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onRequestScriptPath(GONC_LIST_ELEMENT_NEXT(module),
                      GONC_LIST_ELEMENT_NEXT(clData),
                      parser->token,
-                     parser->tokenOffset) == -1)
-                {
+                     parser->tokenOffset) == -1) {
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_ERROR;
                 }
-                else
-                {
+                else {
                     parser->tokenOffset = 0;
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADER_FIELD_BEGIN;
                 }
