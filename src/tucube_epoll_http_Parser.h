@@ -48,7 +48,7 @@ struct tucube_epoll_http_Parser {
     char* token;
     size_t tokenOffset;
     ssize_t bodyRemainder;
-    bool isKeepAlive;
+//    bool isKeepAlive;
 };
 
 int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_t headerBufferCapacity, size_t bodyBufferCapacity);
