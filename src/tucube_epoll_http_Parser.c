@@ -48,9 +48,9 @@ static inline size_t tucube_epoll_http_Parser_getAvailableBufferSize(struct tucu
     return parser->bodyRemainder;
 }
 
-int tucube_epoll_http_Parser_read(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser) {
+int tucube_epoll_http_Parser_read(struct tucube_epoll_http_Parser* parser, int* clientSocket) {
     return read(
-        *GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket,
+        *clientSocket,
         tucube_epoll_http_Parser_getBufferPosition(parser),
         tucube_epoll_http_Parser_getAvailableBufferSize(parser)
     );
