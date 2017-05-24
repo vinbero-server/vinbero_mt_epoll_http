@@ -16,6 +16,7 @@
 #include "tucube_epoll_http_ResponseBody.h"
 
 int tucube_tcp_epoll_Module_init(struct tucube_Module_Config* moduleConfig, struct tucube_Module_List* moduleList) {
+#define TUCUBE_LOCAL_MODULE GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)
     if(GONC_LIST_ELEMENT_NEXT(moduleConfig) == NULL)
         errx(EXIT_FAILURE, "tucube_epoll_http requires another module");
 
@@ -55,52 +56,55 @@ int tucube_tcp_epoll_Module_init(struct tucube_Module_Config* moduleConfig, stru
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_tlDestroy);
     TUCUBE_MODULE_DLSYM(module, struct tucube_epoll_http_Module, tucube_epoll_http_Module_destroy);
 
-    GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->parserHeaderBufferCapacity = 1024;
+    TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity = 1024;
 
     if(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserHeaderBufferCapacity") != NULL)
-        GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->parserHeaderBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserHeaderBufferCapacity"));
+        TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserHeaderBufferCapacity"));
 
-    GONC_CAST(module->pointer,
-            struct tucube_epoll_http_Module*)->parserBodyBufferCapacity = 1048576;
+    TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity = 1048576;
 
     if(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity") != NULL)
-        GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->parserBodyBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity"));
+        TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity"));
 
     GONC_LIST_APPEND(moduleList, module);
 
-    if(GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_init(GONC_LIST_ELEMENT_NEXT(moduleConfig), moduleList) == -1)
+    if(TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_init(GONC_LIST_ELEMENT_NEXT(moduleConfig), moduleList) == -1)
         errx(EXIT_FAILURE, "%s: %u: tucube_epoll_http_Module_init() failed", __FILE__, __LINE__);
 
     return 0;
+#undef TUCUBE_LOCAL_MODULE
 }
 
 int tucube_tcp_epoll_Module_tlInit(struct tucube_Module* module, struct tucube_Module_Config* moduleConfig) {
-    GONC_CAST(module->pointer,
-         struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_tlInit(GONC_LIST_ELEMENT_NEXT(module),
-              GONC_LIST_ELEMENT_NEXT(moduleConfig));
+#define TUCUBE_LOCAL_MODULE GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)
+    TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_tlInit(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(moduleConfig));
     return 0;
+#undef TUCUBE_LOCAL_MODULE
 }
 
 int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_ClData_List* clDataList, int* clientSocket) {
+#define TUCUBE_LOCAL_MODULE GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)
+#define TUCUBE_LOCAL_CLDATA GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)
+ 
     struct tucube_ClData* clData = malloc(1 * sizeof(struct tucube_ClData));
     GONC_LIST_ELEMENT_INIT(clData);
     clData->pointer = malloc(1 * sizeof(struct tucube_epoll_http_ClData));
 
-    GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->clientSocket = clientSocket;
+    TUCUBE_LOCAL_CLDATA->clientSocket = clientSocket;
 
-    GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser = malloc(1 * sizeof(struct tucube_epoll_http_Parser));
+    TUCUBE_LOCAL_CLDATA->parser = malloc(1 * sizeof(struct tucube_epoll_http_Parser));
     tucube_epoll_http_Parser_init(
-        GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser,
-        GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->parserHeaderBufferCapacity,
-        GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->parserBodyBufferCapacity
+        TUCUBE_LOCAL_CLDATA->parser,
+        TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity,
+        TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity
     );
 
     GONC_LIST_APPEND(clDataList, clData);
 
-    GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_clInit(GONC_LIST_ELEMENT_NEXT(module), clDataList, clientSocket);
+    TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_clInit(GONC_LIST_ELEMENT_NEXT(module), clDataList, clientSocket);
     return 0;
+#undef TUCUBE_LOCAL_CLDATA
+#undef TUCUBE_LOCAL_MODULE
 }
 
 static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, struct tucube_ClData* clData) {
