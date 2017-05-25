@@ -145,10 +145,9 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         tucube_epoll_http_Parser_reset(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser);
         return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
     }
-    char* connectionHeaderValue;
+    const char* connectionHeaderValue;
     if(GONC_CAST(module->pointer, struct tucube_epoll_http_Module*)->tucube_epoll_http_Module_onGetRequestStringHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue) != -1) {
         if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
-            free(connectionHeaderValue);
             warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
             GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = true;
             tucube_epoll_http_Parser_reset(GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->parser);
@@ -156,7 +155,6 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
             return 2;
         }
         GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)->isKeepAlive = false;
-        free(connectionHeaderValue);
     }
     return 0; // request finsihed
 }
@@ -169,10 +167,10 @@ static inline int tucube_epoll_http_writeStatusCode(int clientSocket, int status
     write(clientSocket, "HTTP/1.1", sizeof("HTTP/1.1") - 1);
     write(clientSocket, " ", sizeof(" ") - 1);
 
-    char* statusCode_string;
-    size_t statusCode_string_length = gonc_ltostr(statusCode, 10, &statusCode_string);
-    write(clientSocket, statusCode_string, statusCode_string_length);
-    free(statusCode_string);
+    char* statusCodeString;
+    size_t statusCodeStringLength = gonc_ltostr(statusCode, 10, &statusCodeString);
+    write(clientSocket, statusCodeString, statusCodeStringLength);
+    free(statusCodeString);
 
     write(clientSocket, " ", sizeof(" ") - 1); // reason phrase is optional but blank space after status code is necessary
 
