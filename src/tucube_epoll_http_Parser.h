@@ -40,6 +40,7 @@ enum tucube_epoll_http_Parser_state {
 
 struct tucube_epoll_http_Parser {
     enum tucube_epoll_http_Parser_state state;
+    int (*parse)(struct tucube_epoll_http_Parser*, ssize_t readSize);
     size_t headerBufferCapacity;
     size_t bodyBufferCapacity;
     char* buffer;
@@ -57,6 +58,6 @@ int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser);
 
 int tucube_epoll_http_Parser_read(struct tucube_epoll_http_Parser* parser, int* clientSocket);
 
-int tucube_epoll_http_Parser_parse(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser, ssize_t readSize);
+int tucube_epoll_http_Parser_parse(struct tucube_epoll_http_Parser* parser, ssize_t readSize, void* args[]);
 
 #endif

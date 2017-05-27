@@ -116,7 +116,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
                TUCUBE_LOCAL_CLDATA->parser,
                TUCUBE_LOCAL_CLDATA->clientSocket)) > 0) {
         int result;
-        if((result = tucube_epoll_http_Parser_parse(module, clData, TUCUBE_LOCAL_CLDATA->parser, readSize)) <= 0) {
+        if((result = tucube_epoll_http_Parser_parse(TUCUBE_LOCAL_CLDATA->parser, readSize, (void*[]){module, clData})) <= 0) {
             if(TUCUBE_LOCAL_CLDATA->parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR) {
                 warnx("%s: %u: Parser error", __FILE__, __LINE__);
                 return -1;
