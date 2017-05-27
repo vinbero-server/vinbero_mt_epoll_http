@@ -430,12 +430,14 @@ static inline int tucube_epoll_http_Parser_parseBody(struct tucube_Module* modul
 #undef TUCUBE_LOCAL_MODULE
 }
 
-int tucube_epoll_http_Parser_parse(struct tucube_Module* module, struct tucube_ClData* clData, struct tucube_epoll_http_Parser* parser, ssize_t readSize) {
+int tucube_epoll_http_Parser_parse(struct tucube_epoll_http_Parser* parser, ssize_t readSize, void* args[]) {
+#define TUCUBE_LOCAL_MODULE GONC_CAST(args[0], struct tucube_Module*)
+#define TUCUBE_LOCAL_CLDATA GONC_CAST(args[1], struct tucube_ClData*)
     parser->bufferSize = parser->tokenOffset + readSize;
     int result;
     if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN) {
-        if((result = tucube_epoll_http_Parser_parseHeaders(module, clData, parser)) != 0)
+        if((result = tucube_epoll_http_Parser_parseHeaders(TUCUBE_LOCAL_MODULE, TUCUBE_LOCAL_CLDATA, parser)) != 0)
             return result;
     }
-    return tucube_epoll_http_Parser_parseBody(module, clData, parser);
+    return tucube_epoll_http_Parser_parseBody(TUCUBE_LOCAL_MODULE, TUCUBE_LOCAL_CLDATA, parser);
 }
