@@ -1,6 +1,7 @@
 #ifndef _TUCUBE_EPOLL_HTTP_PARSER_H
 #define _TUCUBE_EPOLL_HTTP_PARSER_H
 
+#include <limits.h>
 #include <stdbool.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
@@ -49,7 +50,23 @@ struct tucube_epoll_http_Parser {
     char* token;
     size_t tokenOffset;
     ssize_t bodyRemainder;
-//    bool isKeepAlive;
+    ssize_t contentLength;
+
+    int (*onRequestStart)(void* args[]);
+    int (*onRequestMethod)(char*, ssize_t, void* args[]);
+    int (*onRequestUri)(char*, ssize_t, void* args[]);
+    int (*onRequestProtocol)(char*, ssize_t, void* args[]);
+    int (*onRequestScriptPath)(char*, ssize_t, void* args[]);
+    int (*onRequestContentType)(char*, ssize_t, void* args[]);
+    int (*onRequestContentLength)(char*, ssize_t, void* args[]);
+
+    int (*onRequestHeaderField)(char*, ssize_t, void* args[]);
+    int (*onRequestHeaderValue)(char*, ssize_t, void* args[]);
+    int (*onRequestHeadersFinish)(void* args[]);
+    int (*onRequestBodyStart)(void* args[]);
+    int (*onRequestBody)(char*, ssize_t, void* args[]);
+    int (*onRequestBodyFinish)(void* args[]);
+    int (*onRequestFinish)(void* args[]);
 };
 
 int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_t headerBufferCapacity, size_t bodyBufferCapacity);

@@ -98,6 +98,21 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
         TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity,
         TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity
     );
+    TUCUBE_LOCAL_CLDATA->parser->onRequestStart = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestStart;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestMethod = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestMethod;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestUri = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestUri;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestProtocol = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestProtocol;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestScriptPath = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestScriptPath;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestContentType = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestContentType;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestContentLength = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestContentLength;
+
+    TUCUBE_LOCAL_CLDATA->parser->onRequestHeaderField = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestHeaderField;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestHeaderValue = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestHeaderValue;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestHeadersFinish = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestHeadersFinish;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestBodyStart = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestBodyStart;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestBody = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestBody;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestBodyFinish = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestBodyFinish;
+    TUCUBE_LOCAL_CLDATA->parser->onRequestFinish = TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onRequestFinish;
 
     GONC_LIST_APPEND(clDataList, clData);
 
@@ -116,7 +131,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
                TUCUBE_LOCAL_CLDATA->parser,
                TUCUBE_LOCAL_CLDATA->clientSocket)) > 0) {
         int result;
-        if((result = tucube_epoll_http_Parser_parse(TUCUBE_LOCAL_CLDATA->parser, readSize, (void*[]){module, clData})) <= 0) {
+        if((result = tucube_epoll_http_Parser_parse(TUCUBE_LOCAL_CLDATA->parser, readSize, (void*[]){GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)})) <= 0) {
             if(TUCUBE_LOCAL_CLDATA->parser->state == TUCUBE_EPOLL_HTTP_PARSER_ERROR) {
                 warnx("%s: %u: Parser error", __FILE__, __LINE__);
                 return -1;
