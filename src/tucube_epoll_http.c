@@ -91,6 +91,7 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
     clData->pointer = malloc(1 * sizeof(struct tucube_epoll_http_ClData));
 
     TUCUBE_LOCAL_CLDATA->clientSocket = clientSocket;
+    TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
 
     TUCUBE_LOCAL_CLDATA->parser = malloc(1 * sizeof(struct tucube_epoll_http_Parser));
     tucube_epoll_http_Parser_init(
@@ -158,6 +159,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     }
     
     if(TUCUBE_LOCAL_CLDATA->isKeepAlive) {
+        TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
         tucube_epoll_http_Parser_reset(TUCUBE_LOCAL_CLDATA->parser);
         return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
     }
