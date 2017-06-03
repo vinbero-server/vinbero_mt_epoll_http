@@ -63,9 +63,29 @@ struct tucube_epoll_http_Parser {
     int (*onRequestFinish)(void* args[]);
 };
 
-int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_t headerBufferCapacity, size_t bodyBufferCapacity);
+static inline int tucube_epoll_http_Parser_init(struct tucube_epoll_http_Parser* parser, size_t headerBufferCapacity, size_t bodyBufferCapacity) {
+    parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN;
+    parser->headerBufferCapacity = headerBufferCapacity;
+    parser->bodyBufferCapacity = bodyBufferCapacity;
+    parser->buffer = malloc(1 * headerBufferCapacity * sizeof(char)); 
+    parser->bufferOffset = 0;
+    parser->bufferSize = 0;
+    parser->token = parser->buffer;
+    parser->tokenOffset = 0; 
+    parser->bodyRemainder = 0;
+    return 0;
+}
 
-int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser);
+static inline int tucube_epoll_http_Parser_reset(struct tucube_epoll_http_Parser* parser) {
+    parser->state = TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN;
+    parser->buffer = realloc(parser->buffer, parser->headerBufferCapacity * sizeof(char)); 
+    parser->bufferOffset = 0;
+    parser->bufferSize = 0;
+    parser->token = parser->buffer;
+    parser->tokenOffset = 0; 
+    parser->bodyRemainder = 0;
+    return 0;
+}
 
 int tucube_epoll_http_Parser_read(struct tucube_epoll_http_Parser* parser, int* clientSocket);
 
