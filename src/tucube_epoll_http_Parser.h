@@ -30,7 +30,6 @@ enum tucube_epoll_http_Parser_state {
     TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN,
     TUCUBE_EPOLL_HTTP_PARSER_BODY,
     TUCUBE_EPOLL_HTTP_PARSER_BODY_END,
-    TUCUBE_EPOLL_HTTP_PARSER_ERROR
 };
 
 struct tucube_epoll_http_Parser {
