@@ -2,9 +2,9 @@
 #define _TUCUBE_EPOLL_HTTP_H
 
 #include <stdbool.h>
+#include <gon_http_parser.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
-#include "tucube_epoll_http_Parser.h"
 #include "tucube_epoll_http_ResponseBody.h"
 
 struct tucube_epoll_http_Module {
@@ -49,7 +49,7 @@ struct tucube_epoll_http_Module {
 
 struct tucube_epoll_http_ClData {
     int* clientSocket;
-    struct tucube_epoll_http_Parser* parser;
+    struct gon_http_parser* parser;
     bool isKeepAlive;
 };
 
