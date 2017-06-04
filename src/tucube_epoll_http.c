@@ -6,13 +6,13 @@
 #include <string.h>
 #include <sys/sendfile.h>
 #include <unistd.h>
+#include <gon_http_parser.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
 #include <libgonc/gonc_cast.h>
 #include <libgonc/gonc_list.h>
 #include <libgonc/gonc_ltostr.h>
 #include "tucube_epoll_http.h"
-#include "tucube_epoll_http_Parser.h"
 #include "tucube_epoll_http_ResponseBody.h"
 
 int tucube_tcp_epoll_Module_init(struct tucube_Module_Config* moduleConfig, struct tucube_Module_List* moduleList) {
@@ -93,8 +93,8 @@ int tucube_tcp_epoll_Module_clInit(struct tucube_Module* module, struct tucube_C
     TUCUBE_LOCAL_CLDATA->clientSocket = clientSocket;
     TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
 
-    TUCUBE_LOCAL_CLDATA->parser = malloc(1 * sizeof(struct tucube_epoll_http_Parser));
-    tucube_epoll_http_Parser_init(
+    TUCUBE_LOCAL_CLDATA->parser = malloc(1 * sizeof(struct gon_http_parser));
+    gon_http_parser_init(
         TUCUBE_LOCAL_CLDATA->parser,
         TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity,
         TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity
@@ -128,11 +128,11 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
 #define TUCUBE_LOCAL_CLDATA GONC_CAST(clData->pointer, struct tucube_epoll_http_ClData*)
     ssize_t readSize;
 
-    while((readSize = tucube_epoll_http_Parser_read(
+    while((readSize = gon_http_parser_read(
                TUCUBE_LOCAL_CLDATA->parser,
                TUCUBE_LOCAL_CLDATA->clientSocket)) > 0) {
         int result;
-        if((result = tucube_epoll_http_Parser_parse(TUCUBE_LOCAL_CLDATA->parser, readSize, (void*[]){GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)})) == -1) {
+        if((result = gon_http_parser_parse(TUCUBE_LOCAL_CLDATA->parser, readSize, (void*[]){GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData)})) == -1) {
             warnx("%s: %u: Parser error", __FILE__, __LINE__);
             return -1;
         } else if(result == 0)
@@ -156,7 +156,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     
     if(TUCUBE_LOCAL_CLDATA->isKeepAlive) {
         TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
-        tucube_epoll_http_Parser_reset(TUCUBE_LOCAL_CLDATA->parser);
+        gon_http_parser_reset(TUCUBE_LOCAL_CLDATA->parser);
         return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
     }
     const char* connectionHeaderValue;
@@ -166,7 +166,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
             warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
             TUCUBE_LOCAL_CLDATA->isKeepAlive = true;
-            tucube_epoll_http_Parser_reset(TUCUBE_LOCAL_CLDATA->parser);
+            gon_http_parser_reset(TUCUBE_LOCAL_CLDATA->parser);
             return 2;
         }
         TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
