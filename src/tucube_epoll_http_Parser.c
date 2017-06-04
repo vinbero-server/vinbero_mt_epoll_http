@@ -3,12 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <tucube/tucube_Module.h>
-#include <tucube/tucube_ClData.h>
 #include <libgonc/gonc_cast.h>
 #include <libgonc/gonc_nstrncasecmp.h>
 #include <libgonc/gonc_nstrtoi.h>
-#include "tucube_epoll_http.h"
 #include "tucube_epoll_http_Parser.h"
 
 static inline char* tucube_epoll_http_Parser_getBufferPosition(struct tucube_epoll_http_Parser* parser) {
@@ -230,8 +227,7 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_epoll_http
                     parser->state = TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN;
                     return 0;
                 }
-            }
-            else
+            } else
                 return -1;
             break;
         default:
@@ -241,7 +237,6 @@ static inline int tucube_epoll_http_Parser_parseHeaders(struct tucube_epoll_http
 
     if(parser->headerBufferCapacity - parser->tokenOffset == 0) {
         warnx("%s: %u: A token is bigger than http_buffer", __FILE__, __LINE__);
-        return -1;
         return -1;
     }
     tucube_epoll_http_Parser_compactBuffer(parser);
