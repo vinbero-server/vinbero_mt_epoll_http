@@ -311,9 +311,7 @@ static inline int tucube_epoll_http_Parser_parseBody(struct tucube_epoll_http_Pa
 int tucube_epoll_http_Parser_parse(struct tucube_epoll_http_Parser* parser, ssize_t readSize, void* args[]) {
     parser->bufferSize = parser->tokenOffset + readSize;
     int result;
-    if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN) {
-        if((result = tucube_epoll_http_Parser_parseHeaders(parser, args)) != 0)
-            return result;
-    }
+    if(parser->state < TUCUBE_EPOLL_HTTP_PARSER_BODY_BEGIN && (result = tucube_epoll_http_Parser_parseHeaders(parser, args)) != 0)
+        return result;
     return tucube_epoll_http_Parser_parseBody(parser, args);
 }
