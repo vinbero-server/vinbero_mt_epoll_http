@@ -142,12 +142,10 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         if(errno == EAGAIN) {
 //            warnx("%s: %u: Client socket EAGAIN", __FILE__, __LINE__);
             return 1;
-        }
-        else if(errno == EWOULDBLOCK) {
+        } else if(errno == EWOULDBLOCK) {
             warnx("%s: %u: Client socket EWOULDBLOCK", __FILE__, __LINE__);
             return 1;
-        }
-        else
+        } else
             warn("%s: %u", __FILE__, __LINE__);
         return -1;
     }
@@ -162,12 +160,13 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
     }
     const char* connectionHeaderValue;
-    if(TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onGetRequestStringHeader(GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue) != -1) {
+    if(TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onGetRequestStringHeader(
+              GONC_LIST_ELEMENT_NEXT(module), GONC_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue
+      ) != -1) {
         if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
             warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
             TUCUBE_LOCAL_CLDATA->isKeepAlive = true;
             tucube_epoll_http_Parser_reset(TUCUBE_LOCAL_CLDATA->parser);
-//TODO: reset your parser
             return 2;
         }
         TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
