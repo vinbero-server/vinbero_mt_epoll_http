@@ -3,8 +3,6 @@
 
 #include <limits.h>
 #include <stdbool.h>
-#include <tucube/tucube_Module.h>
-#include <tucube/tucube_ClData.h>
 
 enum tucube_epoll_http_Parser_state {
     TUCUBE_EPOLL_HTTP_PARSER_HEADERS_BEGIN,
