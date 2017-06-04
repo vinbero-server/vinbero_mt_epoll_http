@@ -154,18 +154,13 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
         return -1;
     }
     
-    if(TUCUBE_LOCAL_CLDATA->isKeepAlive) {
-        TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
-        gon_http_parser_reset(TUCUBE_LOCAL_CLDATA->parser);
-        return 2; // Return value 2 means that this request is finished but it doesn't want to get the socket closed yet (because it is keep-alive)
-    }
     const char* connectionHeaderValue;
     if(TUCUBE_LOCAL_MODULE->tucube_epoll_http_Module_onGetRequestStringHeader(
               GON_C_LIST_ELEMENT_NEXT(module), GON_C_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue
       ) != -1) {
         if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
             warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
-            TUCUBE_LOCAL_CLDATA->isKeepAlive = true;
+            TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
             gon_http_parser_reset(TUCUBE_LOCAL_CLDATA->parser);
             return 2;
         }
