@@ -128,9 +128,11 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
 #define TUCUBE_LOCAL_CLDATA GON_C_CAST(clData->pointer, struct tucube_epoll_http_ClData*)
     ssize_t readSize;
 
-    while((readSize = gon_http_parser_read(
-               TUCUBE_LOCAL_CLDATA->parser,
-               TUCUBE_LOCAL_CLDATA->clientSocket)) > 0) {
+    while((readSize = read(
+              *TUCUBE_LOCAL_CLDATA->clientSocket,
+              gon_http_parser_getBufferPosition(TUCUBE_LOCAL_CLDATA->parser),
+              gon_http_parser_getAvailableBufferSize(TUCUBE_LOCAL_CLDATA->parser)
+           )) > 0) {
         int result;
         if((result = gon_http_parser_parse(TUCUBE_LOCAL_CLDATA->parser, readSize, (void*[]){GON_C_LIST_ELEMENT_NEXT(module), GON_C_LIST_ELEMENT_NEXT(clData)})) == -1) {
             warnx("%s: %u: Parser error", __FILE__, __LINE__);
