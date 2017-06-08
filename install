@@ -1,3 +1,4 @@
 sudo mkdir -p /usr/local/lib/tucube
 sudo gcc src/tucube_epoll_http.c -o /usr/local/lib/tucube/tucube_epoll_http.so -std=gnu99 -fPIC -shared -g -l gon_http_parser -Wl,-rpath,/usr/local/lib
 sudo cp src/tucube_epoll_http_ResponseBody.h /usr/local/include/tucube/
+sudo cp src/tucube_IHttp.h /usr/local/include/tucube/
