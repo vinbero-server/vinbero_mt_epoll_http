@@ -313,7 +313,7 @@ static inline int tucube_epoll_http_writeResponse(struct tucube_Module* module, 
 #undef TUCUBE_LOCAL_MODULE
 }
 
-int tucube_ClService_call(struct tucube_Module* module, struct tucube_ClData* clData, void* args[]) {
+int tucube_IClService_call(struct tucube_Module* module, struct tucube_ClData* clData, void* args[]) {
 #define TUCUBE_LOCAL_MODULE GON_C_CAST(module->pointer, struct tucube_epoll_http_Module*)
 #define TUCUBE_LOCAL_CLDATA GON_C_CAST(clData->pointer, struct tucube_epoll_http_ClData*)
     register int result = tucube_epoll_http_readRequest(module, clData);
