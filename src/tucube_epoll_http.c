@@ -360,7 +360,6 @@ int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* c
     free(TUCUBE_LOCAL_CLIENT_IO);
     free(clData->generic.pointer);
     free(clData);
-    warnx("epoll http cldestroy finish");
     return 0;
 }
 
