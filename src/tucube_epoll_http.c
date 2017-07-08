@@ -120,16 +120,15 @@ int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List*
 #undef TUCUBE_LOCAL_CLDATA
 #undef TUCUBE_LOCAL_PARSER
 }
-
 static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, struct tucube_ClData* clData) {
 #define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
 #define TUCUBE_LOCAL_CLDATA GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)
 #define TUCUBE_LOCAL_PARSER GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->parser
+#define TUCUBE_LOCAL_CLIENT_IO GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->clientIo
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
-    struct gaio_Io* clientIo = TUCUBE_LOCAL_CLDATA->clientIo;
     ssize_t readSize;
-    while((readSize = clientIo->read(
-              clientIo,
+    while((readSize = TUCUBE_LOCAL_CLIENT_IO->read(
+              TUCUBE_LOCAL_CLIENT_IO,
               gon_http_parser_getBufferPosition(TUCUBE_LOCAL_PARSER),
               gon_http_parser_getAvailableBufferSize(TUCUBE_LOCAL_PARSER)
            )) > 0) {
@@ -356,8 +355,7 @@ int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* c
     TUCUBE_LOCAL_MODULE->tucube_ICLocal_destroy(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData));
     free(TUCUBE_LOCAL_PARSER->buffer);
     free(TUCUBE_LOCAL_PARSER);
-    TUCUBE_LOCAL_CLIENT_IO->close(TUCUBE_LOCAL_CLIENT_IO);
-    free(TUCUBE_LOCAL_CLIENT_IO);
+    // CURRENTLY YOU CAN't FREE CLIENT_IO BECAUSE IT IS ON THE STACK
     free(clData->generic.pointer);
     free(clData);
     return 0;
