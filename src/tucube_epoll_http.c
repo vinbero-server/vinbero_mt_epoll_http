@@ -261,6 +261,7 @@ static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, stru
 
     int result;
     struct tucube_epoll_http_ResponseBody body;
+    struct gaio_Io bodyIo;
     switch(TUCUBE_LOCAL_MODULE->tucube_IHttp_onResponseBody(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData), &body)) {
         case -1:
             return -1;
@@ -274,7 +275,9 @@ static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, stru
 #pragma GCC diagnostic pop
                     break;
                 case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE:
-                    //TUCUBE_LOCAL_CLIENT_IO->sendfile(TUCUBE_LOCAL_CLIENT_IO, body.fd, NULL, body.size); this code is not working because of different types of arguments
+		    bodyIo.object.pointer = &body.fd;
+		    bodyIo.fileno = gaio_FdPointer_fileno;
+                    TUCUBE_LOCAL_CLIENT_IO->sendfile(TUCUBE_LOCAL_CLIENT_IO, &bodyIo, NULL, body.size);
                     break;
                 default:
                     return -1;
