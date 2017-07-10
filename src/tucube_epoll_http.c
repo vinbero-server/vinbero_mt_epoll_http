@@ -196,9 +196,15 @@ static inline int tucube_epoll_http_writeStatusCode(struct gaio_Io* clientIo, in
 
 static inline int tucube_epoll_http_writeHeader(struct gaio_Io* clientIo, const char* headerField, size_t headerFieldSize, const char* headerValue, size_t headerValueSize) {
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
     clientIo->write(clientIo, headerField, headerFieldSize);
+#pragma GCC diagnostic pop
     clientIo->write(clientIo, ": ", sizeof(": ") - 1);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
     clientIo->write(clientIo, headerValue, headerValueSize);
+#pragma GCC diagnostic pop
     tucube_epoll_http_writeCrlf(clientIo);
     return 0;
 }
@@ -262,10 +268,13 @@ static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, stru
             tucube_epoll_http_writeContentLength(TUCUBE_LOCAL_CLIENT_IO, body.size);
             switch(body.type) {
                 case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_STRING:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
                     TUCUBE_LOCAL_CLIENT_IO->write(TUCUBE_LOCAL_CLIENT_IO, body.chars, body.size);
+#pragma GCC diagnostic pop
                     break;
                 case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE:
-                    TUCUBE_LOCAL_CLIENT_IO->sendfile(TUCUBE_LOCAL_CLIENT_IO, body.fd, NULL, body.size);
+                    //TUCUBE_LOCAL_CLIENT_IO->sendfile(TUCUBE_LOCAL_CLIENT_IO, body.fd, NULL, body.size); this code is not working because of different types of arguments
                     break;
                 default:
                     return -1;
@@ -281,8 +290,10 @@ static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, stru
             tucube_epoll_http_writeCrlf(TUCUBE_LOCAL_CLIENT_IO);
 
             tucube_epoll_http_writeContentLength(TUCUBE_LOCAL_CLIENT_IO, body.size);
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
             TUCUBE_LOCAL_CLIENT_IO->write(TUCUBE_LOCAL_CLIENT_IO, body.chars, body.size);
+#pragma GCC diagnostic pop
             tucube_epoll_http_writeCrlf(TUCUBE_LOCAL_CLIENT_IO);
             do {
                 if((result = TUCUBE_LOCAL_MODULE->tucube_IHttp_onResponseBody(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData), &body)) == -1) {
