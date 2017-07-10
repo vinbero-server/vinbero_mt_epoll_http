@@ -275,7 +275,7 @@ static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, stru
 #pragma GCC diagnostic pop
                     break;
                 case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE:
-		    GAIO_INIT_NOP(&bodyIo);
+		    GAIO_NOP_INIT(&bodyIo);
 		    bodyIo.object.pointer = &body.fd;
 		    bodyIo.fileno = gaio_FdPointer_fileno;
                     TUCUBE_LOCAL_CLIENT_IO->sendfile(TUCUBE_LOCAL_CLIENT_IO, &bodyIo, NULL, body.size);
