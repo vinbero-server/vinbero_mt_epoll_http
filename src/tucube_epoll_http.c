@@ -374,6 +374,9 @@ int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* c
     free(clData->generic.pointer);
     free(clData);
     return 0;
+#undef TUCUBE_LOCAL_MODULE
+#undef TUCUBE_LOCAL_PARSER
+#undef TUCUBE_LOCAL_CLIENT_IO
 }
 
 int tucube_IBase_tlDestroy(struct tucube_Module* module) {
@@ -381,6 +384,7 @@ int tucube_IBase_tlDestroy(struct tucube_Module* module) {
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     TUCUBE_LOCAL_MODULE->tucube_IBase_tlDestroy(GENC_LIST_ELEMENT_NEXT(module));
     return 0;
+#undef TUCUBE_LOCAL_MODULE
 }
 
 int tucube_IBase_destroy(struct tucube_Module* module) {
@@ -391,4 +395,5 @@ int tucube_IBase_destroy(struct tucube_Module* module) {
     free(module->generic.pointer);
     free(module);
     return 0;
+#undef TUCUBE_LOCAL_MODULE
 }
