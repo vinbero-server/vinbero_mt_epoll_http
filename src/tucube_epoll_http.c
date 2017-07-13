@@ -365,7 +365,6 @@ int tucube_IClService_call(struct tucube_Module* module, struct tucube_ClData* c
 int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* clData) {
 #define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
 #define TUCUBE_LOCAL_PARSER GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->parser
-#define TUCUBE_LOCAL_CLIENT_IO GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->clientIo
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     TUCUBE_LOCAL_MODULE->tucube_ICLocal_destroy(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData));
     free(TUCUBE_LOCAL_PARSER->buffer);
@@ -376,7 +375,6 @@ int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* c
     return 0;
 #undef TUCUBE_LOCAL_MODULE
 #undef TUCUBE_LOCAL_PARSER
-#undef TUCUBE_LOCAL_CLIENT_IO
 }
 
 int tucube_IBase_tlDestroy(struct tucube_Module* module) {
