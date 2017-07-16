@@ -276,8 +276,8 @@ static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, stru
                     break;
                 case TUCUBE_EPOLL_HTTP_RESPONSE_BODY_FILE:
 		    GAIO_NOP_INIT(&bodyIo);
-		    bodyIo.object.pointer = &body.fd;
-		    bodyIo.fileno = gaio_FdPointer_fileno;
+		    bodyIo.object.integer = body.fd;
+		    bodyIo.fileno = gaio_Fd_fileno;
                     TUCUBE_LOCAL_CLIENT_IO->sendfile(TUCUBE_LOCAL_CLIENT_IO, &bodyIo, NULL, body.size);
                     break;
                 default:
@@ -369,7 +369,6 @@ int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* c
     TUCUBE_LOCAL_MODULE->tucube_ICLocal_destroy(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData));
     free(TUCUBE_LOCAL_PARSER->buffer);
     free(TUCUBE_LOCAL_PARSER);
-    // CURRENTLY YOU CAN't FREE CLIENT_IO BECAUSE IT IS ON THE STACK
     free(clData->generic.pointer);
     free(clData);
     return 0;
