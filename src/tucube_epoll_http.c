@@ -255,7 +255,6 @@ static inline int tucube_epoll_http_writeBody(struct tucube_Module* module, stru
         case -1:
             return -1;
         case 0:
-            tucube_epoll_http_writeCrlf(TUCUBE_LOCAL_CLIENT_IO);
             return 0;
     }
 
