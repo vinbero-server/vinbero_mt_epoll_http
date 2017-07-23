@@ -5,15 +5,18 @@
 
 struct tucube_IHttp_Response {
     struct gaio_Io* io;
-    int (*writeRaw)(struct tucube_IHttp_Response* response, char* buffer, size_t bufferSize);
+    struct tucube_IHttp_Response_Callbacks* callbacks;
+};
+
+struct tucube_IHttp_Response_Callbacks {
+    int (*writeBytes)(struct tucube_IHttp_Response* response, char* buffer, size_t bufferSize);
+    int (*writeIo)(struct tucube_IHttp_Response* response, struct gaio_Io* io, size_t writeSize);
     int (*writeCrLf)(struct tucube_IHttp_Response* response);
     int (*writeVersion)(struct tucube_IHttp_Response* response, int major, int minor);
     int (*writeStatusCode)(struct tucube_IHttp_Response* response, int statusCode);
     int (*writeIntHeader)(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, int headerValue);
     int (*writeDoubleHeader)(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, double headerValue);
     int (*writeStringHeader)(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, char* headerValue, size_t headerValueSize);
-    int (*writeBodyString)(struct tucube_IHttp_Response* response, char* bodyString, size_t bodyStringSize);
-    int (*writeBodyIo)(struct tucube_IHttp_Response* response, struct gaio_Io* bodyIo, size_t writeSize);
 };
 
 #define TUCUBE_IHTTP_FUNCTIONS                                                                                                                            \
