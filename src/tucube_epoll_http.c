@@ -25,6 +25,7 @@ struct tucube_epoll_http_Module {
 
     size_t parserHeaderBufferCapacity;
     size_t parserBodyBufferCapacity;
+    struct gon_http_parser_callbacks* parserCallbacks;
 };
 
 struct tucube_epoll_http_ClData {
@@ -62,6 +63,22 @@ int tucube_IBase_init(struct tucube_Module_Config* moduleConfig, struct tucube_M
     if(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity") != NULL)
         TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity"));
 
+    TUCUBE_LOCAL_MODULE->parserCallbacks = malloc(sizeof(struct gon_http_parser_callbacks));
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestStart;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestMethod = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestMethod;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestUri = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestUri;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestProtocol = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestProtocol;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestScriptPath = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestScriptPath;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestContentType = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentType;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestContentLength = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentLength;
+
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestHeaderField = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeaderField;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestHeaderValue = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeaderValue;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestHeadersFinish = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeadersFinish;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestBodyStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBodyStart;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestBody = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBody;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestBodyFinish = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBodyFinish;
+
     GENC_LIST_APPEND(moduleList, module);
 
     if(TUCUBE_LOCAL_MODULE->tucube_IBase_init(GENC_LIST_ELEMENT_NEXT(moduleConfig), moduleList, (void*[]){NULL}) == -1)
@@ -73,6 +90,7 @@ int tucube_IBase_init(struct tucube_Module_Config* moduleConfig, struct tucube_M
 int tucube_IBase_tlInit(struct tucube_Module* module, struct tucube_Module_Config* moduleConfig, void* args[]) {
 #define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+
     TUCUBE_LOCAL_MODULE->tucube_IBase_tlInit(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(moduleConfig), (void*[]){NULL});
 #undef TUCUBE_LOCAL_MODULE
     return 0;
@@ -171,21 +189,7 @@ int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List*
         TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity,
         TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity
     );
-    TUCUBE_LOCAL_PARSER->onRequestStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestStart;
-    TUCUBE_LOCAL_PARSER->onRequestMethod = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestMethod;
-    TUCUBE_LOCAL_PARSER->onRequestUri = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestUri;
-    TUCUBE_LOCAL_PARSER->onRequestProtocol = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestProtocol;
-    TUCUBE_LOCAL_PARSER->onRequestScriptPath = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestScriptPath;
-    TUCUBE_LOCAL_PARSER->onRequestContentType = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentType;
-    TUCUBE_LOCAL_PARSER->onRequestContentLength = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentLength;
-
-    TUCUBE_LOCAL_PARSER->onRequestHeaderField = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeaderField;
-    TUCUBE_LOCAL_PARSER->onRequestHeaderValue = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeaderValue;
-    TUCUBE_LOCAL_PARSER->onRequestHeadersFinish = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeadersFinish;
-    TUCUBE_LOCAL_PARSER->onRequestBodyStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBodyStart;
-    TUCUBE_LOCAL_PARSER->onRequestBody = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBody;
-    TUCUBE_LOCAL_PARSER->onRequestBodyFinish = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBodyFinish;
-
+    TUCUBE_LOCAL_PARSER->callbacks = TUCUBE_LOCAL_MODULE->parserCallbacks;
     GENC_LIST_APPEND(clDataList, clData);
 
     TUCUBE_LOCAL_CLDATA->clientResponse = malloc(sizeof(struct tucube_IHttp_Response));
@@ -311,6 +315,7 @@ int tucube_IBase_destroy(struct tucube_Module* module) {
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     TUCUBE_LOCAL_MODULE->tucube_IBase_destroy(GENC_LIST_ELEMENT_NEXT(module));
 //    dlclose(module->dl_handle);
+    free(TUCUBE_LOCAL_MODULE->parserCallbacks);
     free(module->generic.pointer);
     free(module);
     return 0;
