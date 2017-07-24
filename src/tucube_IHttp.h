@@ -17,6 +17,11 @@ struct tucube_IHttp_Response_Callbacks {
     int (*writeIntHeader)(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, int headerValue);
     int (*writeDoubleHeader)(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, double headerValue);
     int (*writeStringHeader)(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, char* headerValue, size_t headerValueSize);
+    int (*writeStringBody)(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize);
+    int (*writeIoBody)(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize);
+    int (*writeChunkedBodyStart)(struct tucube_IHttp_Response* response);
+    int (*writeChunkedStringBody)(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize);
+    int (*writeChunkedIoBody)(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize);
 };
 
 #define TUCUBE_IHTTP_FUNCTIONS                                                                                                                            \
