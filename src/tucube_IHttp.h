@@ -23,7 +23,8 @@ struct tucube_IHttp_Response_Callbacks {
 int tucube_IHttp_onRequestStart(void* args[]);                                                                                                            \
 int tucube_IHttp_onRequestMethod(char* token, ssize_t tokenSize, void* args[]);                                                                           \
 int tucube_IHttp_onRequestUri(char* token, ssize_t tokenSize, void* args[]);                                                                              \
-int tucube_IHttp_onRequestProtocol(char* token, ssize_t tokenSize, void* args[]);                                                                         \
+int tucube_IHttp_onRequestVersionMajor(int major, void* args[]);                                                                                          \
+int tucube_IHttp_onRequestVersionMinor(int minor, void* args[]);                                                                                          \
 int tucube_IHttp_onRequestScriptPath(char* token, ssize_t tokenSize, void* args[]);                                                                       \
 int tucube_IHttp_onRequestContentType(char* token, ssize_t tokenSize, void* args[]);                                                                      \
 int tucube_IHttp_onRequestContentLength(char* token, ssize_t tokenSize, void* args[]);                                                                    \
@@ -43,7 +44,8 @@ int tucube_IHttp_onRequestFinish(struct tucube_Module*, struct tucube_ClData*, v
 int (*tucube_IHttp_onRequestStart)(void*[]);                                                                                      \
 int (*tucube_IHttp_onRequestMethod)(char*, ssize_t, void*[]);                                                                     \
 int (*tucube_IHttp_onRequestUri)(char*, ssize_t, void*[]);                                                                        \
-int (*tucube_IHttp_onRequestProtocol)(char*, ssize_t, void*[]);                                                                   \
+int (*tucube_IHttp_onRequestVersionMajor)(int, void*[]);                                                                          \
+int (*tucube_IHttp_onRequestVersionMinor)(int, void*[]);                                                                          \
 int (*tucube_IHttp_onRequestScriptPath)(char*, ssize_t, void*[]);                                                                 \
 int (*tucube_IHttp_onRequestContentType)(char*, ssize_t, void*[]);                                                                \
 int (*tucube_IHttp_onRequestContentLength)(char*, ssize_t, void*[]);                                                              \
@@ -63,7 +65,8 @@ int (*tucube_IHttp_onRequestFinish)(struct tucube_Module*, struct tucube_ClData*
 TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestStart);            \
 TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestMethod);           \
 TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestUri);              \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestProtocol);         \
+TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestVersionMajor);     \
+TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestVersionMinor);     \
 TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestScriptPath);       \
 TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestContentType);      \
 TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestContentLength);    \
