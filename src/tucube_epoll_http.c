@@ -169,6 +169,30 @@ static int tucube_epoll_http_writeStringHeader(struct tucube_IHttp_Response* res
     return 0;
 }
 
+struct int tucube_epoll_writeStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
+    tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, stringBodySize);
+    response->io->callbacks->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->callbacks->write(response->io, stringBody, stringBodySize);
+    return 0;
+}
+
+struct int tucube_epoll_writeIoBody(struct tucube_IHttp_Response* response, struct gaio_Io* io, size_t bytesSize) {
+    tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, bytesSize);
+    response->io->callbacks->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->callbacks->sendfile(response->io, io, NULL, bytesSize);
+    return 0;
+}
+
+struct int tucube_epoll_writeChunkedStringBodyStart(struct tucube_IHttp_Response* response) {
+    tucube_epoll_http_writeStringHeader(response, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked") - 1);
+    response->io->callbacks->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    return 0;
+}
+
+struct int tucube_epoll_writeChunkedStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
+    return 0;
+}
+
 int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List* clDataList, void* args[]) {
 #define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
 #define TUCUBE_LOCAL_CLDATA GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)
