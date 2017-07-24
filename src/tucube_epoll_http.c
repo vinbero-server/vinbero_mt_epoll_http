@@ -67,7 +67,8 @@ int tucube_IBase_init(struct tucube_Module_Config* moduleConfig, struct tucube_M
     TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestStart;
     TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestMethod = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestMethod;
     TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestUri = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestUri;
-    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestProtocol = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestProtocol;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestVersionMajor = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestVersionMajor;
+    TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestVersionMinor = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestVersionMinor;
     TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestScriptPath = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestScriptPath;
     TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestContentType = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentType;
     TUCUBE_LOCAL_MODULE->parserCallbacks->onRequestContentLength = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentLength;
