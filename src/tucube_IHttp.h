@@ -5,7 +5,7 @@
 
 struct tucube_IHttp_Response {
     struct gaio_Io* io;
-    struct tucube_IHttp_Response_Methods* callbacks;
+    struct tucube_IHttp_Response_Methods* methods;
 };
 
 struct tucube_IHttp_Response_Methods {
