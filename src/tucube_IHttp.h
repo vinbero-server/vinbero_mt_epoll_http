@@ -5,10 +5,10 @@
 
 struct tucube_IHttp_Response {
     struct gaio_Io* io;
-    struct tucube_IHttp_Response_Callbacks* callbacks;
+    struct tucube_IHttp_Response_Methods* callbacks;
 };
 
-struct tucube_IHttp_Response_Callbacks {
+struct tucube_IHttp_Response_Methods {
     int (*writeBytes)(struct tucube_IHttp_Response* response, char* buffer, size_t bufferSize);
     int (*writeIo)(struct tucube_IHttp_Response* response, struct gaio_Io* io, size_t writeSize);
     int (*writeCrLf)(struct tucube_IHttp_Response* response);
