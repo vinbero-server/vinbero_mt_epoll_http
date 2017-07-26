@@ -249,7 +249,7 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
 #define TUCUBE_LOCAL_CLIENT_IO GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->clientIo
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     ssize_t readSize;
-    while((readSize = TUCUBE_LOCAL_CLIENT_IO->callbacks->read(
+    while((readSize = TUCUBE_LOCAL_CLIENT_IO->methods->read(
               TUCUBE_LOCAL_CLIENT_IO,
               gon_http_parser_getBufferPosition(TUCUBE_LOCAL_PARSER),
               gon_http_parser_getAvailableBufferSize(TUCUBE_LOCAL_PARSER)
@@ -302,11 +302,11 @@ int tucube_IClService_call(struct tucube_Module* module, struct tucube_ClData* c
     register int result = tucube_epoll_http_readRequest(module, clData);
     if(result != 0 && result != 2)
         return result;
-    if(TUCUBE_LOCAL_CLIENT_IO->callbacks->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_SETFL, TUCUBE_LOCAL_CLIENT_IO->callbacks->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_GETFL, 0) & ~O_NONBLOCK) == -1)
+    if(TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_SETFL, TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_GETFL, 0) & ~O_NONBLOCK) == -1)
         return -1;
     if(TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestFinish(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData), args) == -1)
         return -1;
-    if(TUCUBE_LOCAL_CLIENT_IO->callbacks->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_SETFL, TUCUBE_LOCAL_CLIENT_IO->callbacks->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_GETFL, 0) | O_NONBLOCK) == -1)
+    if(TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_SETFL, TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_GETFL, 0) | O_NONBLOCK) == -1)
         return -1;
     if(result == 2)
         return 1;
