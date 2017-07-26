@@ -96,37 +96,37 @@ int tucube_IBase_tlInit(struct tucube_Module* module, struct tucube_Module_Confi
 }
 
 static int tucube_epoll_http_writeBytes(struct tucube_IHttp_Response* response, char* bytes, size_t bytesSize) {
-    response->io->callbacks->write(response->io, bytes, bytesSize);
+    response->io->methods->write(response->io, bytes, bytesSize);
     return 0;
 }
 
 static int tucube_epoll_http_writeIo(struct tucube_IHttp_Response* response, struct gaio_Io* io, size_t bytesSize) {
-    response->io->callbacks->sendfile(response->io, io, NULL, bytesSize);
+    response->io->methods->sendfile(response->io, io, NULL, bytesSize);
     return 0;
 }
 
 static int tucube_epoll_http_writeCrLf(struct tucube_IHttp_Response* response) {
-    response->io->callbacks->write(response->io, "\r\n", sizeof("\r\n") - 1);
+    response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     return 0;
 }
 static int tucube_epoll_http_writeVersion(struct tucube_IHttp_Response* response, int major, int minor) {
-    response->io->callbacks->write(response->io, "HTTP/", sizeof("HTTP/") - 1);
+    response->io->methods->write(response->io, "HTTP/", sizeof("HTTP/") - 1);
 
     char* majorString;
     size_t majorStringSize;
     majorStringSize = genc_ltostr(major, 10, &majorString);
-    response->io->callbacks->write(response->io, majorString, majorStringSize);
+    response->io->methods->write(response->io, majorString, majorStringSize);
     free(majorString);
 
-    response->io->callbacks->write(response->io, ".", sizeof(".") - 1);
+    response->io->methods->write(response->io, ".", sizeof(".") - 1);
 
     char* minorString;
     size_t minorStringSize;
     minorStringSize = genc_ltostr(minor, 10, &minorString);
-    response->io->callbacks->write(response->io, minorString, minorStringSize);
+    response->io->methods->write(response->io, minorString, minorStringSize);
     free(minorString);
 
-    response->io->callbacks->write(response->io, " ", sizeof(" ") - 1);
+    response->io->methods->write(response->io, " ", sizeof(" ") - 1);
 
     return 0;
 }
@@ -134,25 +134,25 @@ static int tucube_epoll_http_writeStatusCode(struct tucube_IHttp_Response* respo
     char* statusCodeString;
     size_t statusCodeStringSize;
     statusCodeStringSize = genc_ltostr(statusCode, 10, &statusCodeString);
-    response->io->callbacks->write(response->io, statusCodeString, statusCodeStringSize);
+    response->io->methods->write(response->io, statusCodeString, statusCodeStringSize);
     free(statusCodeString);
 
-    response->io->callbacks->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
 
     return 0;
 }
 static int tucube_epoll_http_writeIntHeader(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, int headerValue) {
-    response->io->callbacks->write(response->io, headerField, headerFieldSize);
+    response->io->methods->write(response->io, headerField, headerFieldSize);
 
-    response->io->callbacks->write(response->io, ": ", sizeof(": ") - 1);
+    response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
 
     char* headerValueString;
     size_t headerValueStringSize;
     headerValueStringSize = genc_ltostr(headerValue, 10, &headerValueString);
-    response->io->callbacks->write(response->io, headerValueString, headerValueStringSize);
+    response->io->methods->write(response->io, headerValueString, headerValueStringSize);
     free(headerValueString);
 
-    response->io->callbacks->write(response->io, "\r\n", sizeof("\r\n") - 1);
+    response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
 
     return 0;
 }
@@ -161,31 +161,31 @@ static int tucube_epoll_http_writeDoubleHeader(struct tucube_IHttp_Response* res
     return 0;
 }
 static int tucube_epoll_http_writeStringHeader(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, char* headerValue, size_t headerValueSize) {
-    response->io->callbacks->write(response->io, headerField, headerFieldSize);
-    response->io->callbacks->write(response->io, ": ", sizeof(": ") - 1);
-    response->io->callbacks->write(response->io, headerValue, headerValueSize);
-    response->io->callbacks->write(response->io, "\r\n", sizeof("\r\n") - 1);
+    response->io->methods->write(response->io, headerField, headerFieldSize);
+    response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
+    response->io->methods->write(response->io, headerValue, headerValueSize);
+    response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
 
     return 0;
 }
 
 static int tucube_epoll_writeStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
     tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, stringBodySize);
-    response->io->callbacks->write(response->io, " \r\n", sizeof(" \r\n") - 1);
-    response->io->callbacks->write(response->io, stringBody, stringBodySize);
+    response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->methods->write(response->io, stringBody, stringBodySize);
     return 0;
 }
 
 static int tucube_epoll_writeIoBody(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
     tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, ioBodySize);
-    response->io->callbacks->write(response->io, " \r\n", sizeof(" \r\n") - 1);
-    response->io->callbacks->sendfile(response->io, ioBody, NULL, ioBodySize);
+    response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->methods->sendfile(response->io, ioBody, NULL, ioBodySize);
     return 0;
 }
 
 static int tucube_epoll_writeChunkedBodyStart(struct tucube_IHttp_Response* response) {
     tucube_epoll_http_writeStringHeader(response, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked") - 1);
-    response->io->callbacks->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
     return 0;
 }
 
@@ -220,16 +220,21 @@ int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List*
     GENC_LIST_APPEND(clDataList, clData);
 
     TUCUBE_LOCAL_CLDATA->clientResponse = malloc(sizeof(struct tucube_IHttp_Response));
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks = malloc(sizeof(struct tucube_IHttp_Response_Callbacks));
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods = malloc(sizeof(struct tucube_IHttp_Response_Callbacks));
     TUCUBE_LOCAL_CLDATA->clientResponse->io = TUCUBE_LOCAL_CLDATA->clientIo;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeBytes = tucube_epoll_http_writeBytes;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeIo = tucube_epoll_http_writeIo;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeCrLf = tucube_epoll_http_writeCrLf;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeVersion = tucube_epoll_http_writeVersion;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeStatusCode = tucube_epoll_http_writeStatusCode;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeIntHeader = tucube_epoll_http_writeIntHeader;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeDoubleHeader = tucube_epoll_http_writeDoubleHeader;
-    TUCUBE_LOCAL_CLDATA->clientResponse->callbacks->writeStringHeader = tucube_epoll_http_writeStringHeader;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeBytes = tucube_epoll_http_writeBytes;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIo = tucube_epoll_http_writeIo;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeCrLf = tucube_epoll_http_writeCrLf;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeVersion = tucube_epoll_http_writeVersion;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeStatusCode = tucube_epoll_http_writeStatusCode;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIntHeader = tucube_epoll_http_writeIntHeader;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeDoubleHeader = tucube_epoll_http_writeDoubleHeader;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeStringHeader = tucube_epoll_http_writeStringHeader;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeStringBody = tucube_epoll_http_writeStringBody;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIoBody = tucube_epoll_http_writeIoBody;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedBodyStart = tucube_epoll_http_writeChunkedBodyStart;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedStringBody = tucube_epoll_http_writeChunkedStringBody;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedIoBody = tucube_epoll_http_writeChunkedIoBody;
 
     TUCUBE_LOCAL_MODULE->tucube_ICLocal_init(GENC_LIST_ELEMENT_NEXT(module), clDataList, (void*[]){TUCUBE_LOCAL_CLDATA->clientResponse, NULL});
     return 0;
@@ -317,7 +322,7 @@ int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* c
 #define TUCUBE_LOCAL_PARSER GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->parser
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     TUCUBE_LOCAL_MODULE->tucube_ICLocal_destroy(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData));
-    free(TUCUBE_LOCAL_CLDATA->clientResponse->callbacks);
+    free(TUCUBE_LOCAL_CLDATA->clientResponse->methods);
     free(TUCUBE_LOCAL_CLDATA->clientResponse);
     free(TUCUBE_LOCAL_PARSER->buffer);
     free(TUCUBE_LOCAL_PARSER);
