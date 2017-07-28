@@ -169,31 +169,31 @@ static int tucube_epoll_http_writeStringHeader(struct tucube_IHttp_Response* res
     return 0;
 }
 
-static int tucube_epoll_writeStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
+static int tucube_epoll_http_writeStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
     tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, stringBodySize);
     response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
     response->io->methods->write(response->io, stringBody, stringBodySize);
     return 0;
 }
 
-static int tucube_epoll_writeIoBody(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
+static int tucube_epoll_http_writeIoBody(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
     tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, ioBodySize);
     response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
     response->io->methods->sendfile(response->io, ioBody, NULL, ioBodySize);
     return 0;
 }
 
-static int tucube_epoll_writeChunkedBodyStart(struct tucube_IHttp_Response* response) {
+static int tucube_epoll_http_writeChunkedBodyStart(struct tucube_IHttp_Response* response) {
     tucube_epoll_http_writeStringHeader(response, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked") - 1);
     response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
     return 0;
 }
 
-static int tucube_epoll_writeChunkedStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
+static int tucube_epoll_http_writeChunkedStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
     return 0;
 }
 
-static int tucube_epoll_writeChunkedIoBody(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
+static int tucube_epoll_http_writeChunkedIoBody(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
     return 0;
 }
 
@@ -220,7 +220,7 @@ int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List*
     GENC_LIST_APPEND(clDataList, clData);
 
     TUCUBE_LOCAL_CLDATA->clientResponse = malloc(sizeof(struct tucube_IHttp_Response));
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods = malloc(sizeof(struct tucube_IHttp_Response_Callbacks));
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods = malloc(sizeof(struct tucube_IHttp_Response_Methods));
     TUCUBE_LOCAL_CLDATA->clientResponse->io = TUCUBE_LOCAL_CLDATA->clientIo;
     TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeBytes = tucube_epoll_http_writeBytes;
     TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIo = tucube_epoll_http_writeIo;
