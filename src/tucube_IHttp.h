@@ -20,8 +20,7 @@ struct tucube_IHttp_Response_Methods {
     int (*writeStringBody)(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize);
     int (*writeIoBody)(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize);
     int (*writeChunkedBodyStart)(struct tucube_IHttp_Response* response);
-    int (*writeChunkedStringBody)(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize);
-    int (*writeChunkedIoBody)(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize);
+    int (*writeChunkedBody)(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize);
 };
 
 #define TUCUBE_IHTTP_FUNCTIONS                                                                                                                            \
