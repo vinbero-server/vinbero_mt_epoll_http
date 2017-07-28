@@ -109,6 +109,7 @@ static int tucube_epoll_http_writeCrLf(struct tucube_IHttp_Response* response) {
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     return 0;
 }
+
 static int tucube_epoll_http_writeVersion(struct tucube_IHttp_Response* response, int major, int minor) {
     response->io->methods->write(response->io, "HTTP/", sizeof("HTTP/") - 1);
 
@@ -130,6 +131,7 @@ static int tucube_epoll_http_writeVersion(struct tucube_IHttp_Response* response
 
     return 0;
 }
+
 static int tucube_epoll_http_writeStatusCode(struct tucube_IHttp_Response* response, int statusCode) {
     char* statusCodeString;
     size_t statusCodeStringSize;
@@ -171,21 +173,21 @@ static int tucube_epoll_http_writeStringHeader(struct tucube_IHttp_Response* res
 
 static int tucube_epoll_http_writeStringBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
     tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, stringBodySize);
-    response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->write(response->io, stringBody, stringBodySize);
     return 0;
 }
 
 static int tucube_epoll_http_writeIoBody(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
     tucube_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, ioBodySize);
-    response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->sendfile(response->io, ioBody, NULL, ioBodySize);
     return 0;
 }
 
 static int tucube_epoll_http_writeChunkedBodyStart(struct tucube_IHttp_Response* response) {
     tucube_epoll_http_writeStringHeader(response, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked") - 1);
-    response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
+    response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     return 0;
 }
 
