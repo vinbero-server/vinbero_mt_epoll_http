@@ -203,6 +203,12 @@ static int tucube_epoll_http_writeChunkedBody(struct tucube_IHttp_Response* resp
     return 0;
 }
 
+static int tucube_epoll_http_writeChunkedBodyEnd(struct tucube_IHttp_Response* response) {
+    response->io->methods->write(response->io, "0\r\n", sizeof("0\r\n") - 1);
+    response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
+    return 0;
+}
+
 int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List* clDataList, void* args[]) {
 #define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
 #define TUCUBE_LOCAL_CLDATA GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)
@@ -240,6 +246,7 @@ int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List*
     TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIoBody = tucube_epoll_http_writeIoBody;
     TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedBodyStart = tucube_epoll_http_writeChunkedBodyStart;
     TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedBody = tucube_epoll_http_writeChunkedBody;
+    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedBodyEnd = tucube_epoll_http_writeChunkedBodyEnd;
 
     TUCUBE_LOCAL_MODULE->tucube_ICLocal_init(GENC_LIST_ELEMENT_NEXT(module), clDataList, (void*[]){TUCUBE_LOCAL_CLDATA->clientResponse, NULL});
     return 0;

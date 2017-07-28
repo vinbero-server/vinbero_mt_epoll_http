@@ -21,6 +21,7 @@ struct tucube_IHttp_Response_Methods {
     int (*writeIoBody)(struct tucube_IHttp_Response* response, struct gaio_Io* ioBody, size_t ioBodySize);
     int (*writeChunkedBodyStart)(struct tucube_IHttp_Response* response);
     int (*writeChunkedBody)(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize);
+    int (*writeChunkedBodyEnd)(struct tucube_IHttp_Response* response);
 };
 
 #define TUCUBE_IHTTP_FUNCTIONS                                                                                                                            \
