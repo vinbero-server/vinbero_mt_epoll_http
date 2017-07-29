@@ -52,12 +52,12 @@ int tucube_IBase_init(struct tucube_Module_Config* moduleConfig, struct tucube_M
     TUCUBE_ICLOCAL_DLSYM(module, struct tucube_epoll_http_Module);
     TUCUBE_IHTTP_DLSYM(module, struct tucube_epoll_http_Module);
 
-    TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity = 1024;
+    TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity = 1024 * 1024;
 
     if(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserHeaderBufferCapacity") != NULL)
         TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserHeaderBufferCapacity"));
 
-    TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity = 1048576;
+    TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity = 10 * 1024 * 1024;
 
     if(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity") != NULL)
         TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity = json_integer_value(json_object_get(json_array_get(moduleConfig->json, 1), "tucube_epoll_http.parserBodyBufferCapacity"));
