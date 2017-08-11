@@ -12,7 +12,7 @@
 #include <tucube/tucube_ClData.h>
 #include <libgenc/genc_cast.h>
 #include <libgenc/genc_list.h>
-#include <libgenc/genc_uinttostr.h>
+#include <libgenc/genc_uIntToNStr.h>
 #include <tucube/tucube_IBase.h>
 #include <tucube/tucube_ICLocal.h>
 #include <gaio.h>
@@ -115,7 +115,7 @@ static int tucube_epoll_http_writeVersion(struct tucube_IHttp_Response* response
 
     char* majorString;
     size_t majorStringSize;
-    majorStringSize = genc_uinttostr(major, 10, &majorString);
+    majorStringSize = genc_uIntToNStr(major, 10, &majorString);
     response->io->methods->write(response->io, majorString, majorStringSize);
     free(majorString);
 
@@ -123,7 +123,7 @@ static int tucube_epoll_http_writeVersion(struct tucube_IHttp_Response* response
 
     char* minorString;
     size_t minorStringSize;
-    minorStringSize = genc_uinttostr(minor, 10, &minorString);
+    minorStringSize = genc_uIntToNStr(minor, 10, &minorString);
     response->io->methods->write(response->io, minorString, minorStringSize);
     free(minorString);
 
@@ -135,7 +135,7 @@ static int tucube_epoll_http_writeVersion(struct tucube_IHttp_Response* response
 static int tucube_epoll_http_writeStatusCode(struct tucube_IHttp_Response* response, int statusCode) {
     char* statusCodeString;
     size_t statusCodeStringSize;
-    statusCodeStringSize = genc_uinttostr(statusCode, 10, &statusCodeString);
+    statusCodeStringSize = genc_uIntToNStr(statusCode, 10, &statusCodeString);
     response->io->methods->write(response->io, statusCodeString, statusCodeStringSize);
     free(statusCodeString);
 
@@ -150,7 +150,7 @@ static int tucube_epoll_http_writeIntHeader(struct tucube_IHttp_Response* respon
 
     char* headerValueString;
     size_t headerValueStringSize;
-    headerValueStringSize = genc_uinttostr(headerValue, 10, &headerValueString);
+    headerValueStringSize = genc_uIntToNStr(headerValue, 10, &headerValueString);
     response->io->methods->write(response->io, headerValueString, headerValueStringSize);
     free(headerValueString);
 
@@ -194,7 +194,7 @@ static int tucube_epoll_http_writeChunkedBodyStart(struct tucube_IHttp_Response*
 static int tucube_epoll_http_writeChunkedBody(struct tucube_IHttp_Response* response, char* stringBody, size_t stringBodySize) {
     char* stringBodySizeString;
     size_t stringBodySizeStringSize;
-    stringBodySizeStringSize = genc_uinttostr(stringBodySize, 16, &stringBodySizeString);
+    stringBodySizeStringSize = genc_uIntToNStr(stringBodySize, 16, &stringBodySizeString);
     response->io->methods->write(response->io, stringBodySizeString, stringBodySizeStringSize);
     free(stringBodySizeString);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
