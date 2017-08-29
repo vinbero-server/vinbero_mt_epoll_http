@@ -52,10 +52,8 @@ int tucube_IBase_init(struct tucube_Module_Config* moduleConfig, struct tucube_M
     TUCUBE_ICLOCAL_DLSYM(module, struct tucube_epoll_http_Module);
     TUCUBE_IHTTP_DLSYM(module, struct tucube_epoll_http_Module);
 
-    TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity = 1024 * 1024;
-
     TUCUBE_MODULE_GET_CONFIG(moduleConfig, "tucube_epoll_http.parserHeaderBufferCapacity", integer, &(TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity), 1024 * 1024);
-    TUCUBE_MODULE_GET_CONFIG(moduleConfig, "tucube_epoll_http.parserBodyBufferCapacity", integer, &(TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity), 10 * 1024 * 1024);
+    TUCUBE_MODULE_GET_CONFIG(moduleConfig, "tucube_epoll_http.parserBodyBufferCapacity", integer, &(TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity), 10 * 1024 * 1024);
 
     TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestStart;
     TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestMethod = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestMethod;
