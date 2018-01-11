@@ -10,21 +10,22 @@
 #include <gon_http_parser.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
-#include <libgenc/genc_cast.h>
-#include <libgenc/genc_List.h>
+#include <libgenc/genc_Tree.h>
 #include <libgenc/genc_uIntToNStr.h>
-#include <tucube/tucube_IBase.h>
+#include <tucube/tucube_IBasic.h>
 #include <tucube/tucube_ICLocal.h>
 #include <gaio.h>
 #include "tucube_IHttp.h"
 
 struct tucube_epoll_http_Module {
-    TUCUBE_IBASE_FUNCTION_POINTERS;
-    TUCUBE_ICLOCAL_FUNCTION_POINTERS;
-    TUCUBE_IHTTP_FUNCTION_POINTERS;
     size_t parserHeaderBufferCapacity;
     size_t parserBodyBufferCapacity;
     struct gon_http_parser_callbacks parserCallbacks;
+};
+
+struct tucube_epoll_http_Interface {
+    TUCUBE_ICLOCAL_FUNCTION_POINTERS;
+    TUCUBE_IHTTP_FUNCTION_POINTERS;
 };
 
 struct tucube_epoll_http_ClData {
@@ -34,57 +35,59 @@ struct tucube_epoll_http_ClData {
     bool isKeepAlive;
 };
 
-TUCUBE_IBASE_FUNCTIONS;
+TUCUBE_IMODULE_FUNCTIONS;
 TUCUBE_ICLOCAL_FUNCTIONS;
 
-int tucube_IBase_init(struct tucube_Module_Config* moduleConfig, struct tucube_Module_List* moduleList, void* args[]) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
-    if(GENC_LIST_ELEMENT_NEXT(moduleConfig) == NULL)
-        errx(EXIT_FAILURE, "tucube_epoll_http requires another module");
+int tucube_IModule_init(struct tucube_Module* module, struct tucube_Config* config, void* args[]) {
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
+    module->localModule.pointer = malloc(1 * sizeof(struct tucube_epoll_http_Module));
+    if(GENC_TREE_NODE_CHILD_COUNT(module) != 1) {
+        warnx("%s: %u: %s: this module requires only one module", __FILE__, __LINE__, __FUNCTION__);
+        return -1;
+    }
+    struct tucube_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, 0);
+    childModule->interface = malloc(1 * sizeof(struct tucube_epoll_http_Interface));
+    struct tucube_epoll_http_Interface* childInterface = childModule->interface;
+    int errorVariable;
+    TUCUBE_ICLOCAL_DLSYM(childInterface, childModule->dlHandle, &errorVariable);
+    if(errorVariable == 1) return -1;
+    TUCUBE_IHTTP_DLSYM(childInterface, childModule->dlHandle, &errorVariable);
+    if(errorVariable == 1) return -1;
 
-    struct tucube_Module* module = malloc(1 * sizeof(struct tucube_Module));
-    GENC_LIST_ELEMENT_INIT(module);
-    module->generic.pointer = malloc(1 * sizeof(struct tucube_epoll_http_Module));
+    TUCUBE_CONFIG_GET(config, module, "tucube_epoll_http.parserHeaderBufferCapacity", integer, &localModule->parserHeaderBufferCapacity, 1024 * 1024);
+    TUCUBE_CONFIG_GET(config, module, "tucube_epoll_http.parserBodyBufferCapacity", integer, &localModule->parserBodyBufferCapacity, 10 * 1024 * 1024);
 
-    TUCUBE_MODULE_DLOPEN(module, moduleConfig);
-    TUCUBE_IBASE_DLSYM(module, struct tucube_epoll_http_Module);
-    TUCUBE_ICLOCAL_DLSYM(module, struct tucube_epoll_http_Module);
-    TUCUBE_IHTTP_DLSYM(module, struct tucube_epoll_http_Module);
+    localModule->parserCallbacks.onRequestStart = childInterface->tucube_IHttp_onRequestStart;
+    localModule->parserCallbacks.onRequestMethod = childInterface->tucube_IHttp_onRequestMethod;
+    localModule->parserCallbacks.onRequestUri = childInterface->tucube_IHttp_onRequestUri;
+    localModule->parserCallbacks.onRequestVersionMajor = childInterface->tucube_IHttp_onRequestVersionMajor;
+    localModule->parserCallbacks.onRequestVersionMinor = childInterface->tucube_IHttp_onRequestVersionMinor;
+    localModule->parserCallbacks.onRequestScriptPath = childInterface->tucube_IHttp_onRequestScriptPath;
+    localModule->parserCallbacks.onRequestContentType = childInterface->tucube_IHttp_onRequestContentType;
+    localModule->parserCallbacks.onRequestContentLength = childInterface->tucube_IHttp_onRequestContentLength;
 
-    TUCUBE_MODULE_GET_CONFIG(moduleConfig, "tucube_epoll_http.parserHeaderBufferCapacity", integer, &(TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity), 1024 * 1024);
-    TUCUBE_MODULE_GET_CONFIG(moduleConfig, "tucube_epoll_http.parserBodyBufferCapacity", integer, &(TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity), 10 * 1024 * 1024);
-
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestStart;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestMethod = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestMethod;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestUri = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestUri;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestVersionMajor = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestVersionMajor;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestVersionMinor = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestVersionMinor;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestScriptPath = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestScriptPath;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestContentType = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentType;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestContentLength = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestContentLength;
-
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestHeaderField = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeaderField;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestHeaderValue = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeaderValue;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestHeadersFinish = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestHeadersFinish;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestBodyStart = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBodyStart;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestBody = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBody;
-    TUCUBE_LOCAL_MODULE->parserCallbacks.onRequestBodyFinish = TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestBodyFinish;
-
-    GENC_LIST_APPEND(moduleList, module);
-
-    if(TUCUBE_LOCAL_MODULE->tucube_IBase_init(GENC_LIST_ELEMENT_NEXT(moduleConfig), moduleList, (void*[]){NULL}) == -1)
-        errx(EXIT_FAILURE, "%s: %u: tucube_IBase_init() failed", __FILE__, __LINE__);
+    localModule->parserCallbacks.onRequestHeaderField = childInterface->tucube_IHttp_onRequestHeaderField;
+    localModule->parserCallbacks.onRequestHeaderValue = childInterface->tucube_IHttp_onRequestHeaderValue;
+    localModule->parserCallbacks.onRequestHeadersFinish = childInterface->tucube_IHttp_onRequestHeadersFinish;
+    localModule->parserCallbacks.onRequestBodyStart = childInterface->tucube_IHttp_onRequestBodyStart;
+    localModule->parserCallbacks.onRequestBody = childInterface->tucube_IHttp_onRequestBody;
+    localModule->parserCallbacks.onRequestBodyFinish = childInterface->tucube_IHttp_onRequestBodyFinish;
 
     return 0;
 }
 
-int tucube_IBase_tlInit(struct tucube_Module* module, struct tucube_Module_Config* moduleConfig, void* args[]) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+int tucube_IModule_rInit(struct tucube_Module* module, struct tucube_Config* config, void* args[]) {
+    return 0;
+}
 
-    TUCUBE_LOCAL_MODULE->tucube_IBase_tlInit(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(moduleConfig), (void*[]){NULL});
-#undef TUCUBE_LOCAL_MODULE
+int tucube_ITLocal_init(struct tucube_Module* module, struct tucube_Config* config, void* args[]) {
+    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    return 0;
+}
+
+int tucube_ITLocal_rInit(struct tucube_Module* module, struct tucube_Config* config, void* args[]) {
+    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     return 0;
 }
 
@@ -202,65 +205,60 @@ static int tucube_epoll_http_writeChunkedBodyEnd(struct tucube_IHttp_Response* r
     return 0;
 }
 
-int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData_List* clDataList, void* args[]) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-#define TUCUBE_LOCAL_CLDATA GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)
-#define TUCUBE_LOCAL_PARSER GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->parser
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
-    struct tucube_ClData* clData = malloc(1 * sizeof(struct tucube_ClData));
-    GENC_LIST_ELEMENT_INIT(clData);
+int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData* clData, void* args[]) {
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
+    struct tucube_epoll_http_ClData* localClData = clData->generic.pointer;
     clData->generic.pointer = malloc(1 * sizeof(struct tucube_epoll_http_ClData));
 
-    TUCUBE_LOCAL_CLDATA->clientIo = ((struct gaio_Io*)args[0]);
+    localClData->clientIo = ((struct gaio_Io*)args[0]);
 
-    TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
+    localClData->isKeepAlive = false;
 
-    TUCUBE_LOCAL_PARSER = malloc(1 * sizeof(struct gon_http_parser));
+    localClData->parser = malloc(1 * sizeof(struct gon_http_parser));
     gon_http_parser_init(
-        TUCUBE_LOCAL_PARSER,
-        TUCUBE_LOCAL_MODULE->parserHeaderBufferCapacity,
-        TUCUBE_LOCAL_MODULE->parserBodyBufferCapacity
+        localClData->parser,
+        localModule->parserHeaderBufferCapacity,
+        localModule->parserBodyBufferCapacity
     );
-    TUCUBE_LOCAL_PARSER->callbacks = &(TUCUBE_LOCAL_MODULE->parserCallbacks);
-    GENC_LIST_APPEND(clDataList, clData);
+    localClData->parser->callbacks = &(localModule->parserCallbacks);
 
-    TUCUBE_LOCAL_CLDATA->clientResponse = malloc(sizeof(struct tucube_IHttp_Response));
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods = malloc(sizeof(struct tucube_IHttp_Response_Methods));
-    TUCUBE_LOCAL_CLDATA->clientResponse->io = TUCUBE_LOCAL_CLDATA->clientIo;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeBytes = tucube_epoll_http_writeBytes;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIo = tucube_epoll_http_writeIo;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeCrLf = tucube_epoll_http_writeCrLf;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeVersion = tucube_epoll_http_writeVersion;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeStatusCode = tucube_epoll_http_writeStatusCode;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIntHeader = tucube_epoll_http_writeIntHeader;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeDoubleHeader = tucube_epoll_http_writeDoubleHeader;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeStringHeader = tucube_epoll_http_writeStringHeader;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeStringBody = tucube_epoll_http_writeStringBody;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeIoBody = tucube_epoll_http_writeIoBody;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedBodyStart = tucube_epoll_http_writeChunkedBodyStart;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedBody = tucube_epoll_http_writeChunkedBody;
-    TUCUBE_LOCAL_CLDATA->clientResponse->methods->writeChunkedBodyEnd = tucube_epoll_http_writeChunkedBodyEnd;
+    localClData->clientResponse = malloc(sizeof(struct tucube_IHttp_Response));
+    localClData->clientResponse->methods = malloc(sizeof(struct tucube_IHttp_Response_Methods));
+    localClData->clientResponse->io = localClData->clientIo;
+    localClData->clientResponse->methods->writeBytes = tucube_epoll_http_writeBytes;
+    localClData->clientResponse->methods->writeIo = tucube_epoll_http_writeIo;
+    localClData->clientResponse->methods->writeCrLf = tucube_epoll_http_writeCrLf;
+    localClData->clientResponse->methods->writeVersion = tucube_epoll_http_writeVersion;
+    localClData->clientResponse->methods->writeStatusCode = tucube_epoll_http_writeStatusCode;
+    localClData->clientResponse->methods->writeIntHeader = tucube_epoll_http_writeIntHeader;
+    localClData->clientResponse->methods->writeDoubleHeader = tucube_epoll_http_writeDoubleHeader;
+    localClData->clientResponse->methods->writeStringHeader = tucube_epoll_http_writeStringHeader;
+    localClData->clientResponse->methods->writeStringBody = tucube_epoll_http_writeStringBody;
+    localClData->clientResponse->methods->writeIoBody = tucube_epoll_http_writeIoBody;
+    localClData->clientResponse->methods->writeChunkedBodyStart = tucube_epoll_http_writeChunkedBodyStart;
+    localClData->clientResponse->methods->writeChunkedBody = tucube_epoll_http_writeChunkedBody;
+    localClData->clientResponse->methods->writeChunkedBodyEnd = tucube_epoll_http_writeChunkedBodyEnd;
 
-    TUCUBE_LOCAL_MODULE->tucube_ICLocal_init(GENC_LIST_ELEMENT_NEXT(module), clDataList, (void*[]){TUCUBE_LOCAL_CLDATA->clientResponse, NULL});
     return 0;
-#undef TUCUBE_LOCAL_MODULE
-#undef TUCUBE_LOCAL_CLDATA
-#undef TUCUBE_LOCAL_PARSER
 }
+
 static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, struct tucube_ClData* clData) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-#define TUCUBE_LOCAL_CLDATA GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)
-#define TUCUBE_LOCAL_PARSER GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->parser
-#define TUCUBE_LOCAL_CLIENT_IO GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->clientIo
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
+    struct tucube_epoll_http_ClData* localClData = clData->generic.pointer;
+    struct tucube_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, 0);
+    struct tucube_ClData* childClData = &GENC_TREE_NODE_GET_CHILD(clData, 0);
+    struct tucube_epoll_http_Interface* childInterface = childModule->interface;
+
     ssize_t readSize;
-    while((readSize = TUCUBE_LOCAL_CLIENT_IO->methods->read(
-              TUCUBE_LOCAL_CLIENT_IO,
-              gon_http_parser_getBufferPosition(TUCUBE_LOCAL_PARSER),
-              gon_http_parser_getAvailableBufferSize(TUCUBE_LOCAL_PARSER)
+    while((readSize = localClData->clientIo->methods->read(
+              localClData->clientIo,
+              gon_http_parser_getBufferPosition(localClData->parser),
+              gon_http_parser_getAvailableBufferSize(localClData->parser)
            )) > 0) {
         int result;
-        if((result = gon_http_parser_parse(TUCUBE_LOCAL_PARSER, readSize, (void*[]){GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData)})) == -1) {
+        if((result = gon_http_parser_parse(localClData->parser, readSize, (void*[]){childModule, childClData})) == -1) {
             warnx("%s: %u: Parser error", __FILE__, __LINE__);
             return -1;
         } else if(result == 0)
@@ -283,77 +281,73 @@ static inline int tucube_epoll_http_readRequest(struct tucube_Module* module, st
     }
     
     const char* connectionHeaderValue;
-    if(TUCUBE_LOCAL_MODULE->tucube_IHttp_onGetRequestStringHeader(
-              GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData), "Connection", &connectionHeaderValue
-      ) != -1) {
+    if(childInterface->tucube_IHttp_onGetRequestStringHeader(childModule, childClData, "Connection", &connectionHeaderValue) != -1) {
         if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
             warnx("%s: %u: Keep-Alive Connection", __FILE__, __LINE__);
-            TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
-            gon_http_parser_reset(TUCUBE_LOCAL_PARSER);
+            localClData->isKeepAlive = false;
+            gon_http_parser_reset(localClData->parser);
             return 2; // request finished but this is keep-alive
         }
-        TUCUBE_LOCAL_CLDATA->isKeepAlive = false;
+        localClData->isKeepAlive = false;
     }
     return 0; // request finsihed
-#undef TUCUBE_LOCAL_MODULE
-#undef TUCUBE_LOCAL_CLDATA
-#undef TUCUBE_LOCAL_PARSER
 }
 
 int tucube_IClService_call(struct tucube_Module* module, struct tucube_ClData* clData, void* args[]) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-#define TUCUBE_LOCAL_CLIENT_IO GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->clientIo
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
+    struct tucube_epoll_http_ClData* localClData = clData->generic.pointer;
+    struct tucube_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, 0);
+    struct tucube_ClData* childClData = &GENC_TREE_NODE_GET_CHILD(clData, 0);
+    struct tucube_epoll_http_Interface* childInterface = childModule->interface;
+
     register int result = tucube_epoll_http_readRequest(module, clData);
     if(result != 0 && result != 2)
         return result;
-    if(TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_SETFL, TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_GETFL, 0) & ~O_NONBLOCK) == -1)
+    if(localClData->clientIo->methods->fcntl(localClData->clientIo, F_SETFL, localClData->clientIo->methods->fcntl(localClData->clientIo, F_GETFL, 0) & ~O_NONBLOCK) == -1)
         return -1;
-    if(TUCUBE_LOCAL_MODULE->tucube_IHttp_onRequestFinish(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData), args) == -1)
+    if(childInterface->tucube_IHttp_onRequestFinish(childModule, childClData, args) == -1)
         return -1;
-    if(TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_SETFL, TUCUBE_LOCAL_CLIENT_IO->methods->fcntl(TUCUBE_LOCAL_CLIENT_IO, F_GETFL, 0) | O_NONBLOCK) == -1)
+    if(localClData->clientIo->methods->fcntl(localClData->clientIo, F_SETFL, localClData->clientIo->methods->fcntl(localClData->clientIo, F_GETFL, 0) | O_NONBLOCK) == -1)
         return -1;
     if(result == 2)
         return 1;
 
     return 0;
-#undef TUCUBE_LOCAL_CLIENT_IO
-#undef TUCUBE_LOCAL_MODULE
 }
 
 int tucube_ICLocal_destroy(struct tucube_Module* module, struct tucube_ClData* clData) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-#define TUCUBE_LOCAL_CLDATA GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)
-#define TUCUBE_LOCAL_PARSER GENC_CAST(clData->generic.pointer, struct tucube_epoll_http_ClData*)->parser
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
-    TUCUBE_LOCAL_MODULE->tucube_ICLocal_destroy(GENC_LIST_ELEMENT_NEXT(module), GENC_LIST_ELEMENT_NEXT(clData));
-    free(TUCUBE_LOCAL_CLDATA->clientResponse->methods);
-    free(TUCUBE_LOCAL_CLDATA->clientResponse);
-    free(TUCUBE_LOCAL_PARSER->buffer);
-    free(TUCUBE_LOCAL_PARSER);
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
+    struct tucube_epoll_http_ClData* localClData = clData->generic.pointer;
+    free(localClData->clientResponse->methods);
+    free(localClData->clientResponse);
+    free(localClData->parser->buffer);
+    free(localClData->parser);
     free(clData->generic.pointer);
     free(clData);
     return 0;
-#undef TUCUBE_LOCAL_PARSER
-#undef TUCUBE_LOCAL_CLDATA
-#undef TUCUBE_LOCAL_MODULE
 }
 
-int tucube_IBase_tlDestroy(struct tucube_Module* module) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
-    TUCUBE_LOCAL_MODULE->tucube_IBase_tlDestroy(GENC_LIST_ELEMENT_NEXT(module));
+int tucube_ITLocal_destroy(struct tucube_Module* module) {
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
     return 0;
-#undef TUCUBE_LOCAL_MODULE
 }
 
-int tucube_IBase_destroy(struct tucube_Module* module) {
-#define TUCUBE_LOCAL_MODULE GENC_CAST(module->generic.pointer, struct tucube_epoll_http_Module*)
-    warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
-    TUCUBE_LOCAL_MODULE->tucube_IBase_destroy(GENC_LIST_ELEMENT_NEXT(module));
+int tucube_ITLocal_rDestroy(struct tucube_Module* module) {
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    return 0;
+}
+
+int tucube_IModule_destroy(struct tucube_Module* module) {
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    return 0;
+}
+
+int tucube_IModule_rDestroy(struct tucube_Module* module) {
+warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    free(module->localModule.pointer);
 //    dlclose(module->dl_handle);
-    free(module->generic.pointer);
-    free(module);
     return 0;
-#undef TUCUBE_LOCAL_MODULE
 }
