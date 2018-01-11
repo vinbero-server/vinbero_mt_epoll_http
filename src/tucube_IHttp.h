@@ -45,46 +45,67 @@ int tucube_IHttp_onGetRequestDoubleHeader(struct tucube_Module* module, struct t
 int tucube_IHttp_onGetRequestStringHeader(struct tucube_Module* module, struct tucube_ClData* clData, const char* headerField, const char** headerValue); \
 int tucube_IHttp_onRequestFinish(struct tucube_Module*, struct tucube_ClData*, void* args[])
 
-#define TUCUBE_IHTTP_FUNCTION_POINTERS                                                                                            \
-int (*tucube_IHttp_onRequestStart)(void*[]);                                                                                      \
-int (*tucube_IHttp_onRequestMethod)(char*, ssize_t, void*[]);                                                                     \
-int (*tucube_IHttp_onRequestUri)(char*, ssize_t, void*[]);                                                                        \
-int (*tucube_IHttp_onRequestVersionMajor)(int, void*[]);                                                                          \
-int (*tucube_IHttp_onRequestVersionMinor)(int, void*[]);                                                                          \
-int (*tucube_IHttp_onRequestScriptPath)(char*, ssize_t, void*[]);                                                                 \
-int (*tucube_IHttp_onRequestContentType)(char*, ssize_t, void*[]);                                                                \
-int (*tucube_IHttp_onRequestContentLength)(char*, ssize_t, void*[]);                                                              \
-int (*tucube_IHttp_onRequestHeaderField)(char*, ssize_t, void*[]);                                                                \
-int (*tucube_IHttp_onRequestHeaderValue)(char*, ssize_t, void*[]);                                                                \
-int (*tucube_IHttp_onRequestHeadersFinish)(void*[]);                                                                              \
-int (*tucube_IHttp_onRequestBodyStart)(void*[]);                                                                                  \
-int (*tucube_IHttp_onRequestBody)(char*, ssize_t, void*[]);                                                                       \
-int (*tucube_IHttp_onRequestBodyFinish)(void*[]);                                                                                 \
-int (*tucube_IHttp_onGetRequestContentLength)(struct tucube_Module*, struct tucube_ClData*, ssize_t*);                            \
-int (*tucube_IHttp_onGetRequestIntHeader)(struct tucube_Module*, struct tucube_ClData*, const char*, int*);                       \
-int (*tucube_IHttp_onGetRequestDoubleHeader)(struct tucube_Module*, struct tucube_ClData*, const char*, double*);                 \
-int (*tucube_IHttp_onGetRequestStringHeader)(struct tucube_Module*, struct tucube_ClData*, const char*, const char**);            \
+#define TUCUBE_IHTTP_FUNCTION_POINTERS                                                                                 \
+int (*tucube_IHttp_onRequestStart)(void*[]);                                                                           \
+int (*tucube_IHttp_onRequestMethod)(char*, ssize_t, void*[]);                                                          \
+int (*tucube_IHttp_onRequestUri)(char*, ssize_t, void*[]);                                                             \
+int (*tucube_IHttp_onRequestVersionMajor)(int, void*[]);                                                               \
+int (*tucube_IHttp_onRequestVersionMinor)(int, void*[]);                                                               \
+int (*tucube_IHttp_onRequestScriptPath)(char*, ssize_t, void*[]);                                                      \
+int (*tucube_IHttp_onRequestContentType)(char*, ssize_t, void*[]);                                                     \
+int (*tucube_IHttp_onRequestContentLength)(char*, ssize_t, void*[]);                                                   \
+int (*tucube_IHttp_onRequestHeaderField)(char*, ssize_t, void*[]);                                                     \
+int (*tucube_IHttp_onRequestHeaderValue)(char*, ssize_t, void*[]);                                                     \
+int (*tucube_IHttp_onRequestHeadersFinish)(void*[]);                                                                   \
+int (*tucube_IHttp_onRequestBodyStart)(void*[]);                                                                       \
+int (*tucube_IHttp_onRequestBody)(char*, ssize_t, void*[]);                                                            \
+int (*tucube_IHttp_onRequestBodyFinish)(void*[]);                                                                      \
+int (*tucube_IHttp_onGetRequestContentLength)(struct tucube_Module*, struct tucube_ClData*, ssize_t*);                 \
+int (*tucube_IHttp_onGetRequestIntHeader)(struct tucube_Module*, struct tucube_ClData*, const char*, int*);            \
+int (*tucube_IHttp_onGetRequestDoubleHeader)(struct tucube_Module*, struct tucube_ClData*, const char*, double*);      \
+int (*tucube_IHttp_onGetRequestStringHeader)(struct tucube_Module*, struct tucube_ClData*, const char*, const char**); \
 int (*tucube_IHttp_onRequestFinish)(struct tucube_Module*, struct tucube_ClData*, void*[])
 
-#define TUCUBE_IHTTP_DLSYM(module, modulePointerType)                                   \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestStart);            \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestMethod);           \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestUri);              \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestVersionMajor);     \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestVersionMinor);     \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestScriptPath);       \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestContentType);      \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestContentLength);    \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestHeaderField);      \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestHeaderValue);      \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestHeadersFinish);    \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestBodyStart);        \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestBody);             \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestBodyFinish);       \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onGetRequestContentLength); \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onGetRequestIntHeader);     \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onGetRequestDoubleHeader);  \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onGetRequestStringHeader);  \
-TUCUBE_MODULE_DLSYM(module, modulePointerType, tucube_IHttp_onRequestFinish)
+#define TUCUBE_IHTTP_DLSYM(interface, dlHandle, errorVariable)                                       \
+do {                                                                                                 \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestStart, errorVariable);            \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestMethod, errorVariable);           \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestUri, errorVariable);              \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestVersionMajor, errorVariable);     \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestVersionMinor, errorVariable);     \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestScriptPath, errorVariable);       \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestContentType, errorVariable);      \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestContentLength, errorVariable);    \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestHeaderField, errorVariable);      \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestHeaderValue, errorVariable);      \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestHeadersFinish, errorVariable);    \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestBodyStart, errorVariable);        \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestBody, errorVariable);             \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestBodyFinish, errorVariable);       \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onGetRequestContentLength, errorVariable); \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onGetRequestIntHeader, errorVariable);     \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onGetRequestDoubleHeader, errorVariable);  \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onGetRequestStringHeader, errorVariable);  \
+    if(*errorVariable == 1) break;                                                                    \
+    TUCUBE_MODULE_DLSYM(interface, dlHandle, tucube_IHttp_onRequestFinish, errorVariable);           \
+    if(*errorVariable == 1) break;                                                                    \
+} while(0)
 
 #endif
