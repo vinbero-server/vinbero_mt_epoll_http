@@ -10,6 +10,7 @@
 #include <gon_http_parser.h>
 #include <tucube/tucube_Module.h>
 #include <tucube/tucube_ClData.h>
+#include <libgenc/genc_args.h>
 #include <libgenc/genc_Tree.h>
 #include <libgenc/genc_uIntToNStr.h>
 #include <tucube/tucube_ITLocal.h>
@@ -259,7 +260,7 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
         struct tucube_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, index);
         struct tucube_ClData* childClData = &GENC_TREE_NODE_GET_CHILD(clData, index);
         struct tucube_epoll_http_Interface* childInterface = childModule->interface;
-        childInterface->tucube_ICLocal_init(childModule, childClData, (void*[]){localClData->clientResponse, NULL});
+        childInterface->tucube_ICLocal_init(childModule, childClData, GENC_ARGS(localClData->clientResponse, NULL));
     }
 
     return 0;
@@ -280,7 +281,7 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
               gon_http_parser_getAvailableBufferSize(localClData->parser)
            )) > 0) {
         int result;
-        if((result = gon_http_parser_parse(localClData->parser, readSize, (void*[]){childModule, childClData})) == -1) {
+        if((result = gon_http_parser_parse(localClData->parser, readSize, GENC_ARGS(childModule, childClData))) == -1) {
             warnx("%s: %u: Parser error", __FILE__, __LINE__);
             return -1;
         } else if(result == 0)
@@ -347,7 +348,6 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     free(localClData->parser->buffer);
     free(localClData->parser);
     free(clData->generic.pointer);
-    free(clData);
     return 0;
 }
 
