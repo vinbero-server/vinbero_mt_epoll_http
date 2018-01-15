@@ -12,6 +12,7 @@
 #include <tucube/tucube_ClData.h>
 #include <libgenc/genc_Tree.h>
 #include <libgenc/genc_uIntToNStr.h>
+#include <tucube/tucube_ITLocal.h>
 #include <tucube/tucube_IBasic.h>
 #include <tucube/tucube_ICLocal.h>
 #include <gaio.h>
@@ -24,6 +25,7 @@ struct tucube_epoll_http_Module {
 };
 
 struct tucube_epoll_http_Interface {
+    TUCUBE_ITLOCAL_FUNCTION_POINTERS;
     TUCUBE_ICLOCAL_FUNCTION_POINTERS;
     TUCUBE_IHTTP_FUNCTION_POINTERS;
 };
@@ -40,8 +42,10 @@ TUCUBE_ICLOCAL_FUNCTIONS;
 
 int tucube_IModule_init(struct tucube_Module* module, struct tucube_Config* config, void* args[]) {
 warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
-    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
+    module->name = "tucube_epoll_http";
+    module->version = "0.0.1";
     module->localModule.pointer = malloc(1 * sizeof(struct tucube_epoll_http_Module));
+    struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
     if(GENC_TREE_NODE_CHILD_COUNT(module) != 1) {
         warnx("%s: %u: %s: this module requires only one module", __FILE__, __LINE__, __FUNCTION__);
         return -1;
@@ -50,10 +54,21 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     childModule->interface = malloc(1 * sizeof(struct tucube_epoll_http_Interface));
     struct tucube_epoll_http_Interface* childInterface = childModule->interface;
     int errorVariable;
+    TUCUBE_ITLOCAL_DLSYM(childInterface, childModule->dlHandle, &errorVariable);
+    if(errorVariable == 1) {
+        warnx("module %s doesn't satisfy ITLOCAL interface", childModule->id);
+        return -1;
+    }
     TUCUBE_ICLOCAL_DLSYM(childInterface, childModule->dlHandle, &errorVariable);
-    if(errorVariable == 1) return -1;
+    if(errorVariable == 1) {
+        warnx("module %s doesn't satisfy ICLOCAL interface", childModule->id);
+        return -1;
+    }
     TUCUBE_IHTTP_DLSYM(childInterface, childModule->dlHandle, &errorVariable);
-    if(errorVariable == 1) return -1;
+    if(errorVariable == 1) {
+        warnx("module %s doesn't satisfy IHTTP interface", childModule->id);
+        return -1;
+    }
 
     TUCUBE_CONFIG_GET(config, module, "tucube_epoll_http.parserHeaderBufferCapacity", integer, &localModule->parserHeaderBufferCapacity, 1024 * 1024);
     TUCUBE_CONFIG_GET(config, module, "tucube_epoll_http.parserBodyBufferCapacity", integer, &localModule->parserBodyBufferCapacity, 10 * 1024 * 1024);
@@ -73,7 +88,6 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     localModule->parserCallbacks.onRequestBodyStart = childInterface->tucube_IHttp_onRequestBodyStart;
     localModule->parserCallbacks.onRequestBody = childInterface->tucube_IHttp_onRequestBody;
     localModule->parserCallbacks.onRequestBodyFinish = childInterface->tucube_IHttp_onRequestBodyFinish;
-
     return 0;
 }
 
@@ -83,6 +97,14 @@ int tucube_IModule_rInit(struct tucube_Module* module, struct tucube_Config* con
 
 int tucube_ITLocal_init(struct tucube_Module* module, struct tucube_Config* config, void* args[]) {
     warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    GENC_TREE_NODE_FOR_EACH_CHILD(module, index) {
+        struct tucube_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, index);
+        struct tucube_epoll_http_Interface* childInterface = childModule->interface;
+        if(childInterface->tucube_ITLocal_init(childModule, config, args) == -1) {
+            warnx("tucube_ITLocal_init() failed at module %s", childModule->id);
+            return -1;
+        }
+    }
     return 0;
 }
 
@@ -141,15 +163,12 @@ static int tucube_epoll_http_writeStatusCode(struct tucube_IHttp_Response* respo
 }
 static int tucube_epoll_http_writeIntHeader(struct tucube_IHttp_Response* response, char* headerField, size_t headerFieldSize, int headerValue) {
     response->io->methods->write(response->io, headerField, headerFieldSize);
-
     response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
-
     char* headerValueString;
     size_t headerValueStringSize;
     headerValueStringSize = genc_uIntToNStr(headerValue, 10, &headerValueString);
     response->io->methods->write(response->io, headerValueString, headerValueStringSize);
     free(headerValueString);
-
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
 
     return 0;
@@ -163,7 +182,6 @@ static int tucube_epoll_http_writeStringHeader(struct tucube_IHttp_Response* res
     response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
     response->io->methods->write(response->io, headerValue, headerValueSize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
-
     return 0;
 }
 
@@ -208,13 +226,11 @@ static int tucube_epoll_http_writeChunkedBodyEnd(struct tucube_IHttp_Response* r
 int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData* clData, void* args[]) {
 warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
-    struct tucube_epoll_http_ClData* localClData = clData->generic.pointer;
     clData->generic.pointer = malloc(1 * sizeof(struct tucube_epoll_http_ClData));
-
-    localClData->clientIo = ((struct gaio_Io*)args[0]);
+    struct tucube_epoll_http_ClData* localClData = clData->generic.pointer;
+    localClData->clientIo = args[0];
 
     localClData->isKeepAlive = false;
-
     localClData->parser = malloc(1 * sizeof(struct gon_http_parser));
     gon_http_parser_init(
         localClData->parser,
@@ -239,6 +255,12 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     localClData->clientResponse->methods->writeChunkedBodyStart = tucube_epoll_http_writeChunkedBodyStart;
     localClData->clientResponse->methods->writeChunkedBody = tucube_epoll_http_writeChunkedBody;
     localClData->clientResponse->methods->writeChunkedBodyEnd = tucube_epoll_http_writeChunkedBodyEnd;
+    GENC_TREE_NODE_FOR_EACH_CHILD(module, index) {
+        struct tucube_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, index);
+        struct tucube_ClData* childClData = &GENC_TREE_NODE_GET_CHILD(clData, index);
+        struct tucube_epoll_http_Interface* childInterface = childModule->interface;
+        childInterface->tucube_ICLocal_init(childModule, childClData, (void*[]){localClData->clientResponse, NULL});
+    }
 
     return 0;
 }
@@ -332,6 +354,14 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
 int tucube_ITLocal_destroy(struct tucube_Module* module) {
 warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     struct tucube_epoll_http_Module* localModule = module->localModule.pointer;
+    GENC_TREE_NODE_FOR_EACH_CHILD(module, index) {
+        struct tucube_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, index);
+        struct tucube_epoll_http_Interface* childInterface = childModule->interface;
+        if(childInterface->tucube_ITLocal_destroy(childModule) == -1) {
+            warnx("tucube_ITLocal_init() failed at module %s", childModule->id);
+            return -1;
+        }
+    }
     return 0;
 }
 
