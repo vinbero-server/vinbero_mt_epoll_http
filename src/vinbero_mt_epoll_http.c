@@ -14,15 +14,15 @@
 #include <vinbero_common/vinbero_common_Module.h>
 #include <vinbero_common/vinbero_common_ClData.h>
 #include <vinbero_common/vinbero_common_Log.h>
-#include <vinbero/vinbero_Interface_MODULE.h>
-#include <vinbero/vinbero_Interface_TLOCAL.h>
-#include <vinbero/vinbero_Interface_CLOCAL.h>
-#include <vinbero/vinbero_Interface_CLSERVICE.h>
+#include <vinbero/vinbero_interface_MODULE.h>
+#include <vinbero/vinbero_interface_TLOCAL.h>
+#include <vinbero/vinbero_interface_CLOCAL.h>
+#include <vinbero/vinbero_interface_CLSERVICE.h>
 #include <libgenc/genc_args.h>
 #include <libgenc/genc_Tree.h>
 #include <libgenc/genc_uIntToNStr.h>
 #include <gaio.h>
-#include "vinbero_Interface_HTTP.h"
+#include "vinbero_interface_HTTP.h"
 
 struct vinbero_mt_epoll_http_Module {
     size_t parserHeaderBufferCapacity;
@@ -32,7 +32,7 @@ struct vinbero_mt_epoll_http_Module {
 
 struct vinbero_mt_epoll_http_ClData {
     struct gaio_Io* clientIo;
-    struct vinbero_Interface_HTTP_Response* clientResponse;
+    struct vinbero_interface_HTTP_Response* clientResponse;
     struct gon_http_parser* parser;
     bool isKeepAlive;
 };
@@ -42,7 +42,7 @@ VINBERO_INTERFACE_TLOCAL_FUNCTIONS;
 VINBERO_INTERFACE_CLOCAL_FUNCTIONS;
 VINBERO_INTERFACE_CLSERVICE_FUNCTIONS;
 
-int vinbero_Interface_MODULE_init(struct vinbero_common_Module* module) {
+int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     int ret;
     vinbero_common_Module_init(module, "vinbero_mt_epoll_http", "0.0.1", true);
@@ -57,19 +57,19 @@ int vinbero_Interface_MODULE_init(struct vinbero_common_Module* module) {
     struct vinbero_common_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, 0);
 
 /*
-    struct vinbero_mt_epoll_http_Interface;
+    struct vinbero_mt_epoll_http_interface;
     int ret;
-    VINBERO_ITLOCAL_DLSYM(childInterface, childModule->dlHandle, &ret);
+    VINBERO_ITLOCAL_DLSYM(childinterface, childModule->dlHandle, &ret);
     if(ret == 1) {
         warnx("module %s doesn't satisfy ITLOCAL interface", childModule->id);
         return -1;
     }
-    VINBERO_ICLOCAL_DLSYM(childInterface, childModule->dlHandle, &ret);
+    VINBERO_ICLOCAL_DLSYM(childinterface, childModule->dlHandle, &ret);
     if(ret == 1) {
         warnx("module %s doesn't satisfy ICLOCAL interface", childModule->id);
         return -1;
     }
-    VINBERO_IHTTP_DLSYM(childInterface, childModule->dlHandle, &ret);
+    VINBERO_IHTTP_DLSYM(childinterface, childModule->dlHandle, &ret);
     if(ret == 1) {
         warnx("module %s doesn't satisfy IHTTP interface", childModule->id);
         return -1;
@@ -86,9 +86,9 @@ int vinbero_Interface_MODULE_init(struct vinbero_common_Module* module) {
 
     #define LOAD_PARSER_CALLBACK(fName) do { \
         (localModule)->parserCallbacks.fName = NULL; \
-        VINBERO_COMMON_DLSYM(&childModule->dlHandle, "vinbero_Interface_HTTP_"#fName, &localModule->parserCallbacks.fName, &ret); \
+        VINBERO_COMMON_DLSYM(&childModule->dlHandle, "vinbero_interface_HTTP_"#fName, &localModule->parserCallbacks.fName, &ret); \
         if(ret < 0) \
-            VINBERO_COMMON_LOG_ERROR("dlsym(%s) failed", "vinbero_Interface_HTTP_"#fName); \
+            VINBERO_COMMON_LOG_ERROR("dlsym(%s) failed", "vinbero_interface_HTTP_"#fName); \
     } while(0)
     LOAD_PARSER_CALLBACK(onRequestStart);
     LOAD_PARSER_CALLBACK(onRequestMethod);
@@ -108,12 +108,12 @@ int vinbero_Interface_MODULE_init(struct vinbero_common_Module* module) {
     return 0;
 }
 
-int vinbero_Interface_MODULE_rInit(struct vinbero_common_Module* module) {
+int vinbero_interface_MODULE_rInit(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     return 0;
 }
 
-int vinbero_Interface_TLOCAL_init(struct vinbero_common_Module* module) {
+int vinbero_interface_TLOCAL_init(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     int ret;
     GENC_TREE_NODE_FOR_EACH_CHILD(module, index) {
@@ -125,27 +125,27 @@ int vinbero_Interface_TLOCAL_init(struct vinbero_common_Module* module) {
     return 0;
 }
 
-int vinbero_Interface_TLOCAL_rInit(struct vinbero_common_Module* module) {
+int vinbero_interface_TLOCAL_rInit(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeBytes(struct vinbero_Interface_HTTP_Response* response, char* bytes, size_t bytesSize) {
+static int vinbero_mt_epoll_http_writeBytes(struct vinbero_interface_HTTP_Response* response, char* bytes, size_t bytesSize) {
     response->io->methods->write(response->io, bytes, bytesSize);
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeIo(struct vinbero_Interface_HTTP_Response* response, struct gaio_Io* io, size_t bytesSize) {
+static int vinbero_mt_epoll_http_writeIo(struct vinbero_interface_HTTP_Response* response, struct gaio_Io* io, size_t bytesSize) {
     response->io->methods->sendfile(response->io, io, NULL, bytesSize);
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeCrLf(struct vinbero_Interface_HTTP_Response* response) {
+static int vinbero_mt_epoll_http_writeCrLf(struct vinbero_interface_HTTP_Response* response) {
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeVersion(struct vinbero_Interface_HTTP_Response* response, int major, int minor) {
+static int vinbero_mt_epoll_http_writeVersion(struct vinbero_interface_HTTP_Response* response, int major, int minor) {
     response->io->methods->write(response->io, "HTTP/", sizeof("HTTP/") - 1);
 
     char* majorString;
@@ -167,7 +167,7 @@ static int vinbero_mt_epoll_http_writeVersion(struct vinbero_Interface_HTTP_Resp
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeStatusCode(struct vinbero_Interface_HTTP_Response* response, int statusCode) {
+static int vinbero_mt_epoll_http_writeStatusCode(struct vinbero_interface_HTTP_Response* response, int statusCode) {
     char* statusCodeString;
     size_t statusCodeStringSize;
     statusCodeStringSize = genc_uIntToNStr(statusCode, 10, &statusCodeString);
@@ -178,7 +178,7 @@ static int vinbero_mt_epoll_http_writeStatusCode(struct vinbero_Interface_HTTP_R
 
     return 0;
 }
-static int vinbero_mt_epoll_http_writeIntHeader(struct vinbero_Interface_HTTP_Response* response, char* headerField, size_t headerFieldSize, int headerValue) {
+static int vinbero_mt_epoll_http_writeIntHeader(struct vinbero_interface_HTTP_Response* response, char* headerField, size_t headerFieldSize, int headerValue) {
     response->io->methods->write(response->io, headerField, headerFieldSize);
     response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
     char* headerValueString;
@@ -190,11 +190,11 @@ static int vinbero_mt_epoll_http_writeIntHeader(struct vinbero_Interface_HTTP_Re
 
     return 0;
 }
-static int vinbero_mt_epoll_http_writeDoubleHeader(struct vinbero_Interface_HTTP_Response* response, char* headerField, size_t headerFieldSize, double headerValue) {
+static int vinbero_mt_epoll_http_writeDoubleHeader(struct vinbero_interface_HTTP_Response* response, char* headerField, size_t headerFieldSize, double headerValue) {
     // not implemented yet
     return 0;
 }
-static int vinbero_mt_epoll_http_writeStringHeader(struct vinbero_Interface_HTTP_Response* response, char* headerField, size_t headerFieldSize, char* headerValue, size_t headerValueSize) {
+static int vinbero_mt_epoll_http_writeStringHeader(struct vinbero_interface_HTTP_Response* response, char* headerField, size_t headerFieldSize, char* headerValue, size_t headerValueSize) {
     response->io->methods->write(response->io, headerField, headerFieldSize);
     response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
     response->io->methods->write(response->io, headerValue, headerValueSize);
@@ -202,26 +202,26 @@ static int vinbero_mt_epoll_http_writeStringHeader(struct vinbero_Interface_HTTP
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeStringBody(struct vinbero_Interface_HTTP_Response* response, char* stringBody, size_t stringBodySize) {
+static int vinbero_mt_epoll_http_writeStringBody(struct vinbero_interface_HTTP_Response* response, char* stringBody, size_t stringBodySize) {
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->write(response->io, stringBody, stringBodySize);
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeIoBody(struct vinbero_Interface_HTTP_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
+static int vinbero_mt_epoll_http_writeIoBody(struct vinbero_interface_HTTP_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
     vinbero_mt_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, ioBodySize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->sendfile(response->io, ioBody, NULL, ioBodySize);
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeChunkedBodyStart(struct vinbero_Interface_HTTP_Response* response) {
+static int vinbero_mt_epoll_http_writeChunkedBodyStart(struct vinbero_interface_HTTP_Response* response) {
     vinbero_mt_epoll_http_writeStringHeader(response, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked") - 1);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeChunkedBody(struct vinbero_Interface_HTTP_Response* response, char* stringBody, size_t stringBodySize) {
+static int vinbero_mt_epoll_http_writeChunkedBody(struct vinbero_interface_HTTP_Response* response, char* stringBody, size_t stringBodySize) {
     char* stringBodySizeString;
     size_t stringBodySizeStringSize;
     stringBodySizeStringSize = genc_uIntToNStr(stringBodySize, 16, &stringBodySizeString);
@@ -233,13 +233,13 @@ static int vinbero_mt_epoll_http_writeChunkedBody(struct vinbero_Interface_HTTP_
     return 0;
 }
 
-static int vinbero_mt_epoll_http_writeChunkedBodyEnd(struct vinbero_Interface_HTTP_Response* response) {
+static int vinbero_mt_epoll_http_writeChunkedBodyEnd(struct vinbero_interface_HTTP_Response* response) {
     response->io->methods->write(response->io, "0\r\n", sizeof("0\r\n") - 1);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     return 0;
 }
 
-int vinbero_Interface_CLOCAL_init(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, void* args[]) {
+int vinbero_interface_CLOCAL_init(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, void* args[]) {
     VINBERO_COMMON_LOG_TRACE2();
     int ret;
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
@@ -256,8 +256,8 @@ int vinbero_Interface_CLOCAL_init(struct vinbero_common_Module* module, struct v
     );
     localClData->parser->callbacks = &(localModule->parserCallbacks);
 
-    localClData->clientResponse = malloc(sizeof(struct vinbero_Interface_HTTP_Response));
-    localClData->clientResponse->methods = malloc(sizeof(struct vinbero_Interface_HTTP_Response_Methods));
+    localClData->clientResponse = malloc(sizeof(struct vinbero_interface_HTTP_Response));
+    localClData->clientResponse->methods = malloc(sizeof(struct vinbero_interface_HTTP_Response_Methods));
     localClData->clientResponse->io = localClData->clientIo;
     localClData->clientResponse->methods->writeBytes = vinbero_mt_epoll_http_writeBytes;
     localClData->clientResponse->methods->writeIo = vinbero_mt_epoll_http_writeIo;
@@ -334,7 +334,7 @@ static inline int vinbero_mt_epoll_http_readRequest(struct vinbero_common_Module
     return 0; // request finsihed
 }
 
-int vinbero_Interface_CLSERVICE_call(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, void* args[]) {
+int vinbero_interface_CLSERVICE_call(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, void* args[]) {
     VINBERO_COMMON_LOG_TRACE2();
     int ret;
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
@@ -361,7 +361,7 @@ int vinbero_Interface_CLSERVICE_call(struct vinbero_common_Module* module, struc
     return 0;
 }
 
-int vinbero_Interface_CLOCAL_destroy(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData) {
+int vinbero_interface_CLOCAL_destroy(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData) {
     VINBERO_COMMON_LOG_TRACE2();
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
     struct vinbero_mt_epoll_http_ClData* localClData = clData->generic.pointer;
@@ -373,7 +373,7 @@ int vinbero_Interface_CLOCAL_destroy(struct vinbero_common_Module* module, struc
     return 0;
 }
 
-int vinbero_Interface_TLOCAL_destroy(struct vinbero_common_Module* module) {
+int vinbero_interface_TLOCAL_destroy(struct vinbero_common_Module* module) {
     int ret;
     VINBERO_COMMON_LOG_TRACE2();
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
@@ -386,17 +386,17 @@ int vinbero_Interface_TLOCAL_destroy(struct vinbero_common_Module* module) {
     return 0;
 }
 
-int vinbero_Interface_TLOCAL_rDestroy(struct vinbero_common_Module* module) {
+int vinbero_interface_TLOCAL_rDestroy(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     return 0;
 }
 
-int vinbero_Interface_MODULE_destroy(struct vinbero_common_Module* module) {
+int vinbero_interface_MODULE_destroy(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     return 0;
 }
 
-int vinbero_Interface_MODULE_rDestroy(struct vinbero_common_Module* module) {
+int vinbero_interface_MODULE_rDestroy(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     free(module->localModule.pointer);
     return 0;
