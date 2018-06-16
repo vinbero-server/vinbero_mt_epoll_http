@@ -2,11 +2,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <gaio.h>
+#include <http_parser.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <gon_http_parser.h>
 #include <vinbero_common/vinbero_common_Error.h>
 #include <vinbero_common/vinbero_common_Status.h>
 #include <vinbero_common/vinbero_common_Call.h>
@@ -26,21 +26,108 @@
 
 struct vinbero_mt_epoll_http_Module {
     size_t parserHeaderBufferCapacity;
-    size_t parserBodyBufferCapacity;
-    struct gon_http_parser_callbacks parserCallbacks;
+//    size_t parserBodyBufferCapacity;
+    struct vinbero_interface_HTTP childInterface;
+    struct http_parser_settings parserCallbacks;
 };
 
 struct vinbero_mt_epoll_http_ClData {
     struct gaio_Io* clientIo;
     struct vinbero_interface_HTTP_Response* clientResponse;
-    struct gon_http_parser* parser;
+    http_parser parser;
     bool isKeepAlive;
 };
+
+struct vinbero_mt_epoll_http_ParserData {
+    struct vinbero_common_Module* module;
+    struct vinbero_common_ClData* clData;
+    char* headerBuffer;
+    bool firstBodyChunk;
+    bool headerBufferFlushed;
+}
 
 VINBERO_INTERFACE_MODULE_FUNCTIONS;
 VINBERO_INTERFACE_TLOCAL_FUNCTIONS;
 VINBERO_INTERFACE_CLOCAL_FUNCTIONS;
 VINBERO_INTERFACE_CLSERVICE_FUNCTIONS;
+
+static int
+vinbero_mt_epoll_http_on_message_begin(http_parser* parser) {
+    struct vinbero_common_http_ParserData* parserData = parser->data;
+    parserData->firstBodyChunk = true;
+    parserData->headerBufferFlushed = false;
+    return parserData->module->childInterface
+           .vinbero_interface_HTTP_onRequestStart(parserData->module, parserData->clData);
+
+}
+static int
+vinbero_mt_epoll_http_on_url(http_parser* parser, const char* at, size_t length) {
+    struct vinbero_common_http_ParserData* parserData = parser->data;
+    return parserData->module->childInterface
+           .vinbero_interface_HTTP_onRequestUri(parserData->module, parserData->clData,
+            at, length);
+}
+
+static int
+vinbero_mt_epoll_on_header_field(http_parser* parser, const char* at, size_t, length) {
+    struct vinbero_common_http_ParserData* parserData = parser->data;
+    // contentType, contentLength should be treated specially
+    return parserData->module->childInterface
+           .vinbero_interface_HTTP_onRequestHeaderField(parserData->module,
+            parserData->clData, at, length);
+
+}
+
+static int
+vinbero_mt_epoll_on_header_value(http_parser* parser, const char* at, size_t, length) {
+    struct vinbero_common_http_ParserData* parserData = parser->data;
+    return parserData->module->childInterface
+           .vinbero_interface_HTTP_onRequestHeaderValue(parserData->module,
+            parserData->clData, at, length);
+}
+
+static int
+vinbero_mt_epoll_on_headers_complete(http_parser* parser) {
+    struct vinbero_common_http_ParserData* parserData = parser->data;
+    parserData->module->childInterface
+    .vinbero_interface_HTTP_onRequestMethod(parserData->module, parserData->clData,
+     requestMethod, requestMethodLength);
+    parserData->module->childInterface
+    .vinbero_interface_HTTP_onRequestUri(parserData->module, parserData->clData,
+     requestMethod, requestMethodLength);
+    parserData->module->childInterface
+    .vinbero_interface_HTTP_onRequestVersionMajor(parserData->module, parserData->clData);
+    parserData->module->childInterface
+    .vinbero_interface_HTTP_onRequestVersionMinor(parserData->module, parserData->clData);
+
+
+    return parserData->module->childInterface
+           .vinbero_interface_HTTP_onRequestHeadersFinish(parserData->module,
+            parserData->clData);
+}
+
+static int
+vinbero_mt_epoll_on_body(http_parser* parser, const char* at, size_t, length) {
+    struct vinbero_common_http_ParserData* parserData = parser->data;
+    if(parserData->isFirstBodyChunk == true) {
+        parserData->isFirstBodyChunk = false;
+        return parserData->module->childInterface
+               .vinbero_interface_HTTP_onRequestBodyStart(parserData->module,
+                parserData->clData);
+    }
+    return parserData->module->childInterface
+           .vinbero_interface_HTTP_onRequestBody(parserData->module, parserData->clData,
+            at, length);
+}
+// onRequestBodyFinish is useless;
+// because any cleanup stuff you want to do is available at onRequestFinish
+static int
+vinbero_mt_epoll_on_message_complete(http_parser* parser, const char* at, size_t length) {
+    struct vinbero_common_http_ParserData* parserData = parser->data;
+    return parserData->module->childInterface
+           .vinbero_interface_HTTP_onRequestBodyFinish(parserData->module,
+            parserData->clData);
+}
 
 int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
@@ -48,63 +135,18 @@ int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     vinbero_common_Module_init(module, "vinbero_mt_epoll_http", "0.0.1", true);
     module->localModule.pointer = calloc(1, sizeof(struct vinbero_mt_epoll_http_Module));
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
-/*
-    if(GENC_TREE_NODE_CHILD_COUNT(module) != 1) {
-        warnx("%s: %u: %s: this module requires only one module", __FILE__, __LINE__, __FUNCTION__);
-        return -1;
-    }
-*/
     struct vinbero_common_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, 0);
-
-/*
-    struct vinbero_mt_epoll_http_interface;
-    int ret;
-    VINBERO_ITLOCAL_DLSYM(childinterface, childModule->dlHandle, &ret);
-    if(ret == 1) {
-        warnx("module %s doesn't satisfy ITLOCAL interface", childModule->id);
-        return -1;
-    }
-    VINBERO_ICLOCAL_DLSYM(childinterface, childModule->dlHandle, &ret);
-    if(ret == 1) {
-        warnx("module %s doesn't satisfy ICLOCAL interface", childModule->id);
-        return -1;
-    }
-    VINBERO_IHTTP_DLSYM(childinterface, childModule->dlHandle, &ret);
-    if(ret == 1) {
-        warnx("module %s doesn't satisfy IHTTP interface", childModule->id);
-        return -1;
-    }
-*/
-    int parserHeaderBufferCapacity = 0;
-    int parserBodyBufferCapacity = 0;
-
-    vinbero_common_Config_getInt(module->config, module, "vinbero_mt_epoll_http.parserHeaderBufferCapacity", &parserHeaderBufferCapacity, 1024 * 1024);
-    localModule->parserHeaderBufferCapacity = parserHeaderBufferCapacity;
-    vinbero_common_Config_getInt(module->config, module, "vinbero_mt_epoll_http.parserBodyBufferCapacity", &parserBodyBufferCapacity, 10 * 1024 * 1024);
-    localModule->parserHeaderBufferCapacity = parserBodyBufferCapacity;
-
-
-    #define LOAD_PARSER_CALLBACK(fName) do { \
-        (localModule)->parserCallbacks.fName = NULL; \
-        VINBERO_COMMON_DLSYM(&childModule->dlHandle, "vinbero_interface_HTTP_"#fName, &localModule->parserCallbacks.fName, &ret); \
-        if(ret < 0) \
-            VINBERO_COMMON_LOG_ERROR("dlsym(%s) failed", "vinbero_interface_HTTP_"#fName); \
-    } while(0)
-    LOAD_PARSER_CALLBACK(onRequestStart);
-    LOAD_PARSER_CALLBACK(onRequestMethod);
-    LOAD_PARSER_CALLBACK(onRequestUri);
-    LOAD_PARSER_CALLBACK(onRequestVersionMajor);
-    LOAD_PARSER_CALLBACK(onRequestVersionMinor);
-    LOAD_PARSER_CALLBACK(onRequestScriptPath);
-    LOAD_PARSER_CALLBACK(onRequestContentType);
-    LOAD_PARSER_CALLBACK(onRequestContentLength);
-    LOAD_PARSER_CALLBACK(onRequestHeaderField);
-    LOAD_PARSER_CALLBACK(onRequestHeaderValue);
-    LOAD_PARSER_CALLBACK(onRequestHeadersFinish);
-    LOAD_PARSER_CALLBACK(onRequestBodyStart);
-    LOAD_PARSER_CALLBACK(onRequestBody);
-    LOAD_PARSER_CALLBACK(onRequestBodyFinish);
-    #undef LOAD_PARSER_CALLBACK
+    VINBERO_INTERFACE_HTTP_DLSYM(&module->childInterface, &module->dlHandle, &ret);
+    module->parserCallbacks.on_message_begin;
+    module->parserCallbacks.on_url;
+    module->parserCallbacks.on_status = NULL;
+    module->parserCallbacks.on_header_field;
+    module->parserCallbacks.on_header_value;
+    module->parserCallbacks.on_headers_complete;
+    module->parserCallbacks.on_body;
+    module->parserCallbacks.on_message_complete;
+    module->parserCallbacks.on_chunk_header = NULL;
+    module->parserCallbacks.on_chunk_complete = NULL;
     return 0;
 }
 
