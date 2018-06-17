@@ -55,6 +55,7 @@ static int
 vinbero_mt_epoll_http_on_message_begin(http_parser* parser) {
     struct vinbero_common_http_ParserData* parserData = parser->data;
     parserData->firstBodyChunk = true;
+    parserData->headerBuffer = malloc(1024 * 8);
     parserData->headerBufferFlushed = false;
     return parserData->module->childInterface
            .vinbero_interface_HTTP_onRequestStart(parserData->module, parserData->clData);
@@ -63,6 +64,7 @@ vinbero_mt_epoll_http_on_message_begin(http_parser* parser) {
 static int
 vinbero_mt_epoll_http_on_url(http_parser* parser, const char* at, size_t length) {
     struct vinbero_common_http_ParserData* parserData = parser->data;
+    parserData->headerBuffer
     return parserData->module->childInterface
            .vinbero_interface_HTTP_onRequestUri(parserData->module, parserData->clData,
             at, length);
@@ -99,8 +101,6 @@ vinbero_mt_epoll_on_headers_complete(http_parser* parser) {
     .vinbero_interface_HTTP_onRequestVersionMajor(parserData->module, parserData->clData);
     parserData->module->childInterface
     .vinbero_interface_HTTP_onRequestVersionMinor(parserData->module, parserData->clData);
-
-
     return parserData->module->childInterface
            .vinbero_interface_HTTP_onRequestHeadersFinish(parserData->module,
             parserData->clData);
