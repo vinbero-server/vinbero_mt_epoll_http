@@ -71,7 +71,7 @@ vinbero_mt_epoll_http_on_url(http_parser* parser, const char* at, size_t length)
 }
 
 static int
-vinbero_mt_epoll_on_header_field(http_parser* parser, const char* at, size_t, length) {
+vinbero_mt_epoll_http_on_header_field(http_parser* parser, const char* at, size_t, length) {
     struct vinbero_common_http_ParserData* parserData = parser->data;
     // contentType, contentLength should be treated specially
     return parserData->module->childInterface
@@ -81,7 +81,7 @@ vinbero_mt_epoll_on_header_field(http_parser* parser, const char* at, size_t, le
 }
 
 static int
-vinbero_mt_epoll_on_header_value(http_parser* parser, const char* at, size_t, length) {
+vinbero_mt_epoll_http_on_header_value(http_parser* parser, const char* at, size_t, length) {
     struct vinbero_common_http_ParserData* parserData = parser->data;
     return parserData->module->childInterface
            .vinbero_interface_HTTP_onRequestHeaderValue(parserData->module,
@@ -89,7 +89,7 @@ vinbero_mt_epoll_on_header_value(http_parser* parser, const char* at, size_t, le
 }
 
 static int
-vinbero_mt_epoll_on_headers_complete(http_parser* parser) {
+vinbero_mt_epoll_http_on_headers_complete(http_parser* parser) {
     struct vinbero_common_http_ParserData* parserData = parser->data;
     parserData->module->childInterface
     .vinbero_interface_HTTP_onRequestMethod(parserData->module, parserData->clData,
@@ -107,7 +107,7 @@ vinbero_mt_epoll_on_headers_complete(http_parser* parser) {
 }
 
 static int
-vinbero_mt_epoll_on_body(http_parser* parser, const char* at, size_t, length) {
+vinbero_mt_epoll_http_on_body(http_parser* parser, const char* at, size_t, length) {
     struct vinbero_common_http_ParserData* parserData = parser->data;
     if(parserData->isFirstBodyChunk == true) {
         parserData->isFirstBodyChunk = false;
@@ -122,7 +122,7 @@ vinbero_mt_epoll_on_body(http_parser* parser, const char* at, size_t, length) {
 // onRequestBodyFinish is useless;
 // because any cleanup stuff you want to do is available at onRequestFinish
 static int
-vinbero_mt_epoll_on_message_complete(http_parser* parser, const char* at, size_t length) {
+vinbero_mt_epoll_http_on_message_complete(http_parser* parser, const char* at, size_t length) {
     struct vinbero_common_http_ParserData* parserData = parser->data;
     return parserData->module->childInterface
            .vinbero_interface_HTTP_onRequestBodyFinish(parserData->module,
@@ -136,15 +136,17 @@ int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     module->localModule.pointer = calloc(1, sizeof(struct vinbero_mt_epoll_http_Module));
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
     struct vinbero_common_Module* childModule = &GENC_TREE_NODE_GET_CHILD(module, 0);
-    VINBERO_INTERFACE_HTTP_DLSYM(&module->childInterface, &module->dlHandle, &ret);
-    module->parserCallbacks.on_message_begin;
-    module->parserCallbacks.on_url;
+    VINBERO_INTERFACE_HTTP_DLSYM(&module->childInterface, &childModule->dlHandle, &ret);
+    if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        return ret;
+    module->parserCallbacks.on_message_begin = vinbero_mt_epoll_http_on_message_begin;
+    module->parserCallbacks.on_url = vinbero_mt_epoll_http_on_url;
     module->parserCallbacks.on_status = NULL;
-    module->parserCallbacks.on_header_field;
-    module->parserCallbacks.on_header_value;
-    module->parserCallbacks.on_headers_complete;
-    module->parserCallbacks.on_body;
-    module->parserCallbacks.on_message_complete;
+    module->parserCallbacks.on_header_field = vinbero_mt_epoll_http_on_header_field;
+    module->parserCallbacks.on_header_value = vinbero_mt_epoll_http_on_header_value;
+    module->parserCallbacks.on_headers_complete = vinbero_mt_epoll_http_on_headers_complete;
+    module->parserCallbacks.on_body = vinbero_mt_epoll_http_on_body;
+    module->parserCallbacks.on_message_complete = vinbero_mt_epoll_http_on_message_complete;
     module->parserCallbacks.on_chunk_header = NULL;
     module->parserCallbacks.on_chunk_complete = NULL;
     return 0;
