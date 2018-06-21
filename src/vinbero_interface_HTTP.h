@@ -2,7 +2,7 @@
 #define _VINBERO_INTERFACE_HTTP_H
 
 #include <vinbero_common/vinbero_common_Module.h>
-#include <vinbero_common/vinbero_common_ClData.h>
+#include <vinbero_common/vinbero_common_ClModule.h>
 
 struct vinbero_interface_HTTP_Response {
     struct gaio_Io* io;
@@ -74,170 +74,169 @@ struct vinbero_interface_HTTP_Response_Methods {
 #define VINBERO_INTERFACE_HTTP_FUNCTIONS \
 int \
 vinbero_interface_HTTP_onRequestStart \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData); \
+(struct vinbero_common_ClModule* clModule); \
 \
 int \
 vinbero_interface_HTTP_onRequestMethod \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
 \
 int \
 vinbero_interface_HTTP_onRequestUri \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
 \
 int \
 vinbero_interface_HTTP_onRequestVersionMajor \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  int major); \
 \
 int \
 vinbero_interface_HTTP_onRequestVersionMinor \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  int minor); \
 \
 int \
 vinbero_interface_HTTP_onRequestContentLength \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  size_t contentLength); \
 \
 int \
 vinbero_interface_HTTP_onRequestContentType \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
 \
 int \
 vinbero_interface_HTTP_onRequestScriptPath \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
 \
 int \
 vinbero_interface_HTTP_onRequestHeaderField \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
 \
 int \
 vinbero_interface_HTTP_onRequestHeaderValue \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
 \
 int \
 vinbero_interface_HTTP_onRequestHeadersFinish \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData); \
+(struct vinbero_common_ClModule* clModule); \
 \
 int \
 vinbero_interface_HTTP_onRequestBodyStart \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData); \
+(struct vinbero_common_ClModule* clModule); \
 \
 int \
 vinbero_interface_HTTP_onRequestBody \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
 \
 int \
 vinbero_interface_HTTP_onRequestBodyFinish \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData); \
+(struct vinbero_common_ClModule* clModule); \
 \
 int \
 vinbero_interface_HTTP_onGetRequestIntHeader \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* headerField, int* headerValue); \
 \
 int \
 vinbero_interface_HTTP_onGetRequestDoubleHeader \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* headerField, double* headerValue); \
 \
 int \
 vinbero_interface_HTTP_onGetRequestStringHeader \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
  const char* headerField, const char** headerValue); \
 \
 int \
 vinbero_interface_HTTP_onGetRequestContentLength \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData, \
+(struct vinbero_common_ClModule* clModule, \
 size_t* contentLength); \
 \
 int \
 vinbero_interface_HTTP_onRequestFinish \
-(struct vinbero_common_Module* module, struct vinbero_common_ClData* clData)
+(struct vinbero_common_ClModule* clModule)
 
 #define VINBERO_INTERFACE_HTTP_FUNCTION_POINTERS \
 int \
 (*vinbero_interface_HTTP_onRequestStart) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*); \
+(struct vinbero_common_ClModule*); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestMethod) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, size_t); \
+(struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestUri) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, size_t)\
+(struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestVersionMajor) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, int); \
+(struct vinbero_common_ClModule*, int); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestVersionMinor) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, int); \
+(struct vinbero_common_ClModule*, int); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestHeaderField) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, size_t); \
+(struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestContentLength) \
-(struct vinbero_common_Module* struct vinbero_common_ClData*, size_t); \
+(struct vinbero_common_ClModule*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestContentType) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, size_t); \
+(struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestScriptPath) \
-(struct vinbero_common_Module*, struct vnbero_common_ClData*, const char*, size_t); \
+(struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestHeaderValue) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, size_t); \
+(struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestHeadersFinish) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*); \
+(struct vinbero_common_ClModule*); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestBodyStart) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*); \
+(struct vinbero_common_ClModule*); \
 int \
 (*vinbero_interface_HTTP_onRequestBody) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, size_t); \
+(struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestBodyFinish) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*); \
+(struct vinbero_common_ClModule*); \
 \
 int \
 (*vinbero_interface_HTTP_onGetRequestIntHeader) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, int*); \
+(struct vinbero_common_ClModule*, const char*, int*); \
 \
 int \
 (*vinbero_interface_HTTP_onGetRequestDoubleHeader) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, double*); \
+(struct vinbero_common_ClModule*, const char*, double*); \
 \
 int \
 (*vinbero_interface_HTTP_onGetRequestStringHeader) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, const char*, \
- const char**); \
+(struct vinbero_common_ClModule*, const char*, const char**); \
 \
 int \
 (*vinbero_interface_HTTP_onGetRequestContentLength) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*, size_t*); \
+(struct vinbero_common_ClModule*, size_t*); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestFinish) \
-(struct vinbero_common_Module*, struct vinbero_common_ClData*)
+(struct vinbero_common_ClModule*)
 
 struct vinbero_interface_HTTP {
     VINBERO_INTERFACE_HTTP_FUNCTION_POINTERS;
