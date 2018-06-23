@@ -112,6 +112,11 @@ vinbero_interface_HTTP_onRequestScriptPath \
  const char* token, size_t tokenSize); \
 \
 int \
+vinbero_interface_HTTP_onRequestKeepAlive \
+(struct vinbero_common_ClModule* clModule, \
+ bool isKeepAlive); \
+\
+int \
 vinbero_interface_HTTP_onRequestHeaderField \
 (struct vinbero_common_ClModule* clModule, \
  const char* token, size_t tokenSize); \
@@ -188,6 +193,10 @@ int \
 (struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
+(*vinbero_interface_HTTP_onRequestHeaderValue) \
+(struct vinbero_common_ClModule*, const char*, size_t); \
+\
+int \
 (*vinbero_interface_HTTP_onRequestContentLength) \
 (struct vinbero_common_ClModule*, size_t); \
 \
@@ -200,8 +209,8 @@ int \
 (struct vinbero_common_ClModule*, const char*, size_t); \
 \
 int \
-(*vinbero_interface_HTTP_onRequestHeaderValue) \
-(struct vinbero_common_ClModule*, const char*, size_t); \
+(*vinbero_interface_HTTP_onRequestKeepAlive) \
+(struct vinbero_common_ClModule*, bool); \
 \
 int \
 (*vinbero_interface_HTTP_onRequestHeadersFinish) \
@@ -266,6 +275,9 @@ struct vinbero_interface_HTTP {
     if(*ret < 0) break; \
     VINBERO_COMMON_MODULE_DLSYM \
     (interface, dlHandle, vinbero_interface_HTTP_onRequestScriptPath, ret); \
+    if(*ret < 0) break; \
+    VINBERO_COMMON_MODULE_DLSYM \
+    (interface, dlHandle, vinbero_interface_HTTP_onRequestKeepAlive, ret); \
     if(*ret < 0) break; \
     VINBERO_COMMON_MODULE_DLSYM \
     (interface, dlHandle, vinbero_interface_HTTP_onRequestHeaderField, ret); \
