@@ -361,7 +361,11 @@ int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     if(ret < VINBERO_COMMON_STATUS_SUCCESS)
         return ret;
 
-    localModule->parserBufferCapacity = 8 * 1024;
+    int parserBufferCapacity;
+    vinbero_common_Config_getInt(module->config, module, "vinbero_mt_epoll_http.parserBufferCapacity", &parserBufferCapacity, 4 * 1024);
+
+    localModule->parserBufferCapacity = parserBufferCapacity;
+
 
     localModule->responseMethods.writeBytes = vinbero_mt_epoll_http_writeBytes;
     localModule->responseMethods.writeIo = vinbero_mt_epoll_http_writeIo;
