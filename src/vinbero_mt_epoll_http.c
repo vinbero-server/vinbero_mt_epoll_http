@@ -46,6 +46,7 @@ struct vinbero_mt_epoll_http_ParserData {
     bool wasURLFinished;
     bool wasHeaderValueBefore;
     bool isFirstBodyChunk;
+    bool isMessageCompleted;
 };
 
 VINBERO_INTERFACE_MODULE_FUNCTIONS;
@@ -71,6 +72,7 @@ vinbero_mt_epoll_http_on_message_begin(http_parser* parser) {
     parserData->wasURLFinished = false;
     parserData->wasHeaderValueBefore = false;
     parserData->isFirstBodyChunk = true;
+    parserData->isMessageCompleted = false;
 
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
     struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
@@ -155,6 +157,7 @@ vinbero_mt_epoll_http_on_headers_complete(http_parser* parser) {
     int ret;
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
+    struct vinbero_mt_epoll_http_ClModule* localClModule = parserData->clModule->localClModule.pointer;
     struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
 
     if(parserData->wasHeaderValueBefore == true) {
@@ -166,6 +169,11 @@ vinbero_mt_epoll_http_on_headers_complete(http_parser* parser) {
         if(ret < VINBERO_COMMON_STATUS_SUCCESS)
             return ret;
     } 
+
+    localClModule->isKeepAlive = http_should_keep_alive(parser) != 0;
+    ret = localModule->childInterface
+           .vinbero_interface_HTTP_onRequestKeepAlive
+            (childClModule, localClModule->isKeepAlive);
 
     ret = localModule->childInterface
     .vinbero_interface_HTTP_onRequestMethod(childClModule,
@@ -215,6 +223,7 @@ vinbero_mt_epoll_http_on_message_complete(http_parser* parser) {
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
     struct vinbero_mt_epoll_http_ClModule* localClModule = parserData->clModule->localClModule.pointer;
     struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
+    parserData->isMessageCompleted = true;
     struct gaio_Io* clientIo = localClModule->clientIo;
     if(clientIo->methods->fcntl(clientIo, F_SETFL, clientIo->methods->fcntl(clientIo, F_GETFL, 0) & ~O_NONBLOCK) == -1)
         return VINBERO_COMMON_ERROR_UNKNOWN;
@@ -352,7 +361,11 @@ int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     if(ret < VINBERO_COMMON_STATUS_SUCCESS)
         return ret;
 
-    localModule->parserBufferCapacity = 8 * 1024;
+    int parserBufferCapacity;
+    vinbero_common_Config_getInt(module->config, module, "vinbero_mt_epoll_http.parserBufferCapacity", &parserBufferCapacity, 4 * 1024);
+
+    localModule->parserBufferCapacity = parserBufferCapacity;
+
 
     localModule->responseMethods.writeBytes = vinbero_mt_epoll_http_writeBytes;
     localModule->responseMethods.writeIo = vinbero_mt_epoll_http_writeIo;
@@ -456,12 +469,11 @@ vinbero_mt_epoll_http_readRequest(struct vinbero_common_ClModule* clModule) {
         return VINBERO_COMMON_ERROR_NO_SPACE;
     }
     while((readSize = clientIo->methods->read(clientIo, parserData->buffer + parserData->bufferSize, bufferFreeCapacity)) > 0) {
-        int ret;
+        VINBERO_COMMON_LOG_DEBUG("Read client socket %d bytes", readSize); 
         if((ret = http_parser_execute(parser, &localModule->parserCallbacks, parserData->buffer, readSize)) < readSize) {
             VINBERO_COMMON_LOG_ERROR("Parser error: %s %s", http_errno_name(parser->http_errno), http_errno_description(parser->http_errno));
             return VINBERO_COMMON_ERROR_INVALID_DATA;
-        } else if(ret == 0)
-            break;
+        }
     }
     if(readSize == -1) {
         if(errno == EAGAIN) {
@@ -475,20 +487,9 @@ vinbero_mt_epoll_http_readRequest(struct vinbero_common_ClModule* clModule) {
         return VINBERO_COMMON_ERROR_READ;
     }
     else if(readSize == 0) {
+        VINBERO_COMMON_LOG_DEBUG("Read client socket %d bytes", readSize); 
         VINBERO_COMMON_LOG_DEBUG("Client socket has been closed");
         return VINBERO_COMMON_STATUS_SUCCESS;
-    }
-    
-    const char* connectionHeaderValue;
-    VINBERO_COMMON_CALL(HTTP, onGetRequestStringHeader, childClModule->tlModule->module, &ret, childClModule, "Connection", &connectionHeaderValue);
-    if(ret != -1) {
-        if(strncasecmp(connectionHeaderValue, "Keep-Alive", sizeof("Keep-Alive")) == 0) {
-            VINBERO_COMMON_LOG_DEBUG("Keep-Alive Connection");
-            localClModule->isKeepAlive = true;
-            http_parser_init(&localClModule->parser, HTTP_REQUEST);
-            return VINBERO_COMMON_STATUS_CONTINUE; // request finished but this is keep-alive
-        }
-        localClModule->isKeepAlive = false;
     }
     return VINBERO_COMMON_STATUS_SUCCESS; // request finsihed
 }
