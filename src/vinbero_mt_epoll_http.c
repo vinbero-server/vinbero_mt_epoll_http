@@ -225,14 +225,14 @@ vinbero_mt_epoll_http_on_message_complete(http_parser* parser) {
     struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
     parserData->isMessageCompleted = true;
     struct gaio_Io* clientIo = localClModule->clientIo;
-    if(clientIo->methods->fcntl(clientIo, F_SETFL, clientIo->methods->fcntl(clientIo, F_GETFL, 0) & ~O_NONBLOCK) == -1)
+    if(fcntl(clientIo->methods->fileno(clientIo), F_SETFL, fcntl(clientIo->methods->fileno(clientIo), F_GETFL, 0) & ~O_NONBLOCK) == -1)
         return VINBERO_COMMON_ERROR_UNKNOWN;
     childClModule->arg = localClModule->clientIo;
     ret = localModule->childInterface.vinbero_interface_HTTP_onRequestFinish(childClModule);
     if(ret < VINBERO_COMMON_STATUS_SUCCESS)
         return ret;
 
-    if(clientIo->methods->fcntl(clientIo, F_SETFL, clientIo->methods->fcntl(clientIo, F_GETFL, 0) | O_NONBLOCK) == -1)
+    if(fcntl(clientIo->methods->fileno(clientIo), F_SETFL, fcntl(clientIo->methods->fileno(clientIo), F_GETFL, 0) | O_NONBLOCK) == -1)
         return VINBERO_COMMON_ERROR_UNKNOWN;
 
    return VINBERO_COMMON_STATUS_SUCCESS;
