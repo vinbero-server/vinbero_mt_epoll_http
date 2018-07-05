@@ -22,6 +22,7 @@
 #include <libgenc/genc_Tree.h>
 #include <libgenc/genc_uIntToNStr.h>
 #include <gaio.h>
+#include "vinbero_mt_epoll_http_Version.h"
 #include "vinbero_interface_HTTP.h"
 
 struct vinbero_mt_epoll_http_Module {
@@ -351,7 +352,7 @@ int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     VINBERO_COMMON_LOG_TRACE2();
     int ret;
 
-    vinbero_common_Module_init(module, "vinbero_mt_epoll_http", "0.0.1", true);
+    vinbero_common_Module_init(module, "vinbero_mt_epoll_http", VINBERO_MT_EPOLL_HTTP_VERSION, true);
     module->localModule.pointer = calloc(1, sizeof(struct vinbero_mt_epoll_http_Module));
 
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
