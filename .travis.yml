@@ -74,7 +74,7 @@ install:
   - pwd
   - cd http-parser
   - make
-  - sudo make install
+  - PREFIX=/usr sudo make install
   - cd ../
 
   - pwd
