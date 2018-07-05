@@ -20,7 +20,7 @@
 #include <vinbero/vinbero_interface_CLSERVICE.h>
 #include <libgenc/genc_Nstr_cat.h>
 #include <libgenc/genc_Tree.h>
-#include <libgenc/genc_uIntToNStr.h>
+#include <libgenc/genc_Uint_toNstr.h>
 #include <gaio.h>
 #include "vinbero_mt_epoll_http_Version.h"
 #include "vinbero_interface_HTTP.h"
@@ -259,7 +259,7 @@ static int vinbero_mt_epoll_http_writeVersion(struct vinbero_interface_HTTP_Resp
 
     char* majorString;
     size_t majorStringSize;
-    majorStringSize = genc_uIntToNStr(major, 10, &majorString);
+    majorStringSize = genc_Uint_toNstr(major, 10, &majorString);
     response->io->methods->write(response->io, majorString, majorStringSize);
     free(majorString);
 
@@ -267,7 +267,7 @@ static int vinbero_mt_epoll_http_writeVersion(struct vinbero_interface_HTTP_Resp
 
     char* minorString;
     size_t minorStringSize;
-    minorStringSize = genc_uIntToNStr(minor, 10, &minorString);
+    minorStringSize = genc_Uint_toNstr(minor, 10, &minorString);
     response->io->methods->write(response->io, minorString, minorStringSize);
     free(minorString);
 
@@ -279,7 +279,7 @@ static int vinbero_mt_epoll_http_writeVersion(struct vinbero_interface_HTTP_Resp
 static int vinbero_mt_epoll_http_writeStatusCode(struct vinbero_interface_HTTP_Response* response, int statusCode) {
     char* statusCodeString;
     size_t statusCodeStringSize;
-    statusCodeStringSize = genc_uIntToNStr(statusCode, 10, &statusCodeString);
+    statusCodeStringSize = genc_Uint_toNstr(statusCode, 10, &statusCodeString);
     response->io->methods->write(response->io, statusCodeString, statusCodeStringSize);
     free(statusCodeString);
 
@@ -292,7 +292,7 @@ static int vinbero_mt_epoll_http_writeIntHeader(struct vinbero_interface_HTTP_Re
     response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
     char* headerValueString;
     size_t headerValueStringSize;
-    headerValueStringSize = genc_uIntToNStr(headerValue, 10, &headerValueString);
+    headerValueStringSize = genc_Uint_toNstr(headerValue, 10, &headerValueString);
     response->io->methods->write(response->io, headerValueString, headerValueStringSize);
     free(headerValueString);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
@@ -333,7 +333,7 @@ static int vinbero_mt_epoll_http_writeChunkedBodyStart(struct vinbero_interface_
 static int vinbero_mt_epoll_http_writeChunkedBody(struct vinbero_interface_HTTP_Response* response, const char* stringBody, size_t stringBodySize) {
     char* stringBodySizeString;
     size_t stringBodySizeStringSize;
-    stringBodySizeStringSize = genc_uIntToNStr(stringBodySize, 16, &stringBodySizeString);
+    stringBodySizeStringSize = genc_Uint_toNstr(stringBodySize, 16, &stringBodySizeString);
     response->io->methods->write(response->io, stringBodySizeString, stringBodySizeStringSize);
     free(stringBodySizeString);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
