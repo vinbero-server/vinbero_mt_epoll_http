@@ -20,6 +20,14 @@ before_install:
   - cd ../
 
   - pwd
+  - git clone https://github.com/nodejs/http-parser
+  - cd http-parser
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+  - cd ../../
+
+  - pwd
   - git clone https://github.com/vinbero/libgenc
   - cd libgenc
   - mkdir build
@@ -65,6 +73,12 @@ install:
   - cd jansson
   - make
   - make check
+  - sudo make install
+  - cd ../
+
+  - pwd
+  - cd http-parser
+  - make
   - sudo make install
   - cd ../
 
