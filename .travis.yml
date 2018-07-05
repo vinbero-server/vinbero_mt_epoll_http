@@ -21,11 +21,6 @@ before_install:
 
   - pwd
   - git clone https://github.com/nodejs/http-parser
-  - cd http-parser
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
-  - cd ../../
 
   - pwd
   - git clone https://github.com/vinbero/libgenc
