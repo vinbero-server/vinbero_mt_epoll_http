@@ -1,0 +1,6 @@
+#ifndef _VINBERO_MT_EPOLL_HTTP_VERSION_H
+#define _VINBERO_MT_EPOLL_HTTP_VERSION_H
+
+#define VINBERO_MT_EPOLL_HTTP_VERSION "@vinbero_mt_epoll_http_version@"
+
+#endif
