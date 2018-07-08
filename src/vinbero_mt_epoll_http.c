@@ -230,8 +230,10 @@ vinbero_mt_epoll_http_on_message_complete(http_parser* parser) {
         return VINBERO_COMMON_ERROR_UNKNOWN;
     childClModule->arg = localClModule->clientIo;
     ret = localModule->childInterface.vinbero_interface_HTTP_onRequestFinish(childClModule);
-    if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+    if(ret < VINBERO_COMMON_STATUS_SUCCESS) {
+        VINBERO_COMMON_LOG_ERROR("vinbero_interface_HTTP_onRequestFinish() FAILED");
         return ret;
+    }
 
     if(fcntl(clientIo->methods->fileno(clientIo), F_SETFL, fcntl(clientIo->methods->fileno(clientIo), F_GETFL, 0) | O_NONBLOCK) == -1)
         return VINBERO_COMMON_ERROR_UNKNOWN;
