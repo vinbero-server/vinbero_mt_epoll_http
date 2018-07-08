@@ -473,7 +473,7 @@ vinbero_mt_epoll_http_readRequest(struct vinbero_common_ClModule* clModule) {
     }
     while((readSize = clientIo->methods->read(clientIo, parserData->buffer + parserData->bufferSize, bufferFreeCapacity)) > 0) {
         VINBERO_COMMON_LOG_DEBUG("Read client socket %d bytes", readSize); 
-        if((ret = http_parser_execute(parser, &localModule->parserCallbacks, parserData->buffer, readSize)) < readSize || parser->errno != HPE_OK) {
+        if((ret = http_parser_execute(parser, &localModule->parserCallbacks, parserData->buffer, readSize)) < readSize || HTTP_PARSER_ERRNO(parser) != HPE_OK) {
             VINBERO_COMMON_LOG_ERROR("Parser error: %s %s", http_errno_name(parser->http_errno), http_errno_description(parser->http_errno));
             return VINBERO_COMMON_ERROR_INVALID_DATA;
         }
