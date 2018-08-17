@@ -406,13 +406,14 @@ int vinbero_interface_MODULE_rInit(struct vinbero_common_Module* module) {
 int vinbero_interface_TLOCAL_init(struct vinbero_common_TlModule* tlModule) {
     VINBERO_COMMON_LOG_TRACE2();
     int ret;
-
+/*
     GENC_TREE_NODE_FOR_EACH_CHILD(tlModule, index) {
         struct vinbero_common_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
         VINBERO_COMMON_CALL(TLOCAL, init, childTlModule->module, &ret, childTlModule);
         if(ret < VINBERO_COMMON_STATUS_SUCCESS)
             return ret;
     }
+*/
     return VINBERO_COMMON_STATUS_SUCCESS;
 }
 
@@ -443,12 +444,15 @@ int vinbero_interface_CLOCAL_init(struct vinbero_common_ClModule* clModule) {
     localClModule->clientResponse.methods = &localModule->responseMethods;
     localClModule->clientResponse.io = localClModule->clientIo;
 
+
     GENC_TREE_NODE_FOR_EACH_CHILD(clModule, index) {
         struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(clModule, index);
         childClModule->arg = &localClModule->clientResponse;
+/*
         VINBERO_COMMON_CALL(CLOCAL, init, childClModule->tlModule->module, &ret, childClModule);
         if(ret < VINBERO_COMMON_STATUS_SUCCESS)
             return ret;
+*/
     }
 
     return VINBERO_COMMON_STATUS_SUCCESS;
@@ -525,6 +529,7 @@ int vinbero_interface_CLOCAL_destroy(struct vinbero_common_ClModule* clModule) {
 int vinbero_interface_TLOCAL_destroy(struct vinbero_common_TlModule* tlModule) {
     int ret;
     VINBERO_COMMON_LOG_TRACE2();
+/*
     GENC_TREE_NODE_FOR_EACH_CHILD(tlModule, index) {
         struct vinbero_common_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
         VINBERO_COMMON_CALL(TLOCAL, destroy, childTlModule->module, &ret, childTlModule);
@@ -532,6 +537,7 @@ int vinbero_interface_TLOCAL_destroy(struct vinbero_common_TlModule* tlModule) {
             return ret;
     }
     return VINBERO_COMMON_STATUS_SUCCESS;
+*/
 }
 
 int vinbero_interface_TLOCAL_rDestroy(struct vinbero_common_TlModule* tlModule) {
