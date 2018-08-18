@@ -314,6 +314,8 @@ static int vinbero_mt_epoll_http_writeStringHeader(struct vinbero_interface_HTTP
 }
 
 static int vinbero_mt_epoll_http_writeStringBody(struct vinbero_interface_HTTP_Response* response, const char* stringBody, size_t stringBodySize) {
+    // TODO: add keep-alive here
+    vinbero_mt_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, stringBodySize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->write(response->io, (void*)stringBody, stringBodySize);
     return VINBERO_COMMON_STATUS_SUCCESS;
@@ -444,17 +446,17 @@ int vinbero_interface_CLOCAL_init(struct vinbero_common_ClModule* clModule) {
     localClModule->clientResponse.methods = &localModule->responseMethods;
     localClModule->clientResponse.io = localClModule->clientIo;
 
-
+    clModule->arg = &localClModule->clientResponse;
+/*
     GENC_TREE_NODE_FOR_EACH_CHILD(clModule, index) {
         struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(clModule, index);
         childClModule->arg = &localClModule->clientResponse;
-/*
         VINBERO_COMMON_CALL(CLOCAL, init, childClModule->tlModule->module, &ret, childClModule);
         if(ret < VINBERO_COMMON_STATUS_SUCCESS)
             return ret;
-*/
-    }
 
+    }
+*/
     return VINBERO_COMMON_STATUS_SUCCESS;
 }
 
