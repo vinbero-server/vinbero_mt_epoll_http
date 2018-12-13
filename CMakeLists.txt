@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(vinbero_mt_epoll_http C)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+
 set(vinbero_mt_epoll_http_version "0.1.0")
 set(vinbero_mt_epoll_http_soversion "0.1")
 
