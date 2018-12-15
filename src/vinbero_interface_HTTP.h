@@ -5,6 +5,7 @@
 #include <vinbero_common/vinbero_common_ClModule.h>
 
 struct vinbero_interface_HTTP_Response {
+    struct vinbero_common_ClModule* clModule;
     struct gaio_Io* io;
     struct vinbero_interface_HTTP_Response_Methods* methods;
 };

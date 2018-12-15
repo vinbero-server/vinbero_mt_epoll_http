@@ -443,6 +443,7 @@ int vinbero_interface_CLOCAL_init(struct vinbero_common_ClModule* clModule) {
     parserData->buffer = malloc(localModule->parserBufferCapacity * sizeof(char));
     parserData->bufferSize = 0;
 
+    localClModule->clientResponse.clModule = clModule;
     localClModule->clientResponse.methods = &localModule->responseMethods;
     localClModule->clientResponse.io = localClModule->clientIo;
 
