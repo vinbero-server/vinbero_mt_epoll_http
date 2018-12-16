@@ -314,7 +314,11 @@ static int vinbero_mt_epoll_http_writeStringHeader(struct vinbero_interface_HTTP
 }
 
 static int vinbero_mt_epoll_http_writeStringBody(struct vinbero_interface_HTTP_Response* response, const char* stringBody, size_t stringBodySize) {
-    // TODO: add keep-alive here
+    struct vinbero_mt_epoll_http_ClModule* localClModule = response->clModule->localClModule.pointer;
+    if(localClModule->isKeepAlive == true)
+        vinbero_mt_epoll_http_writeStringHeader(response, "Connection", sizeof("Connection") - 1, "keep-alive", sizeof("keep-alive") - 1);
+    else
+        vinbero_mt_epoll_http_writeStringHeader(response, "Connection", sizeof("Connection") - 1, "close", sizeof("close") - 1);
     vinbero_mt_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, stringBodySize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->write(response->io, (void*)stringBody, stringBodySize);
