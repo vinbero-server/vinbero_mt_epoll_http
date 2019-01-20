@@ -198,16 +198,22 @@ vinbero_mt_epoll_http_on_headers_complete(http_parser* parser) {
 
 static int
 vinbero_mt_epoll_http_on_body(http_parser* parser, const char* at, size_t length) {
+    int ret;
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
     struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
 
     if(parserData->isFirstBodyChunk == true) {
         parserData->isFirstBodyChunk = false;
-        return localModule->childInterface
+        ret = localModule->childInterface
                .vinbero_interface_HTTP_onRequestBodyStart(childClModule);
+        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+            return ret;
+        return localModule->childInterface
+               .vinbero_interface_HTTP_onRequestBody(childClModule, at, length);
     }
     if(http_body_is_final(parser)) {
+        // TODO: figure out why this is never called
         return localModule->childInterface
                .vinbero_interface_HTTP_onRequestBodyFinish(childClModule);
     }
