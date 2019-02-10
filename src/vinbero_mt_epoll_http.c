@@ -7,18 +7,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <vinbero_common/vinbero_common_Error.h>
-#include <vinbero_common/vinbero_common_Status.h>
-#include <vinbero_common/vinbero_common_Call.h>
-#include <vinbero_common/vinbero_common_Config.h>
-#include <vinbero_common/vinbero_common_Module.h>
-#include <vinbero_common/vinbero_common_ClModule.h>
-#include <vinbero_common/vinbero_common_Log.h>
-#include <vinbero/vinbero_interface_MODULE.h>
-#include <vinbero/vinbero_interface_TLOCAL.h>
-#include <vinbero/vinbero_interface_CLOCAL.h>
-#include <vinbero/vinbero_interface_CLSERVICE.h>
-#include <vinbero/vinbero_interface_HTTP.h>
+#include <vinbero_com/vinbero_com_Error.h>
+#include <vinbero_com/vinbero_com_Status.h>
+#include <vinbero_com/vinbero_com_Call.h>
+#include <vinbero_com/vinbero_com_Config.h>
+#include <vinbero_com/vinbero_com_Module.h>
+#include <vinbero_com/vinbero_com_ClModule.h>
+#include <vinbero_com/vinbero_com_Log.h>
+#include <vinbero/vinbero_iface_MODULE.h>
+#include <vinbero/vinbero_iface_TLOCAL.h>
+#include <vinbero/vinbero_iface_CLOCAL.h>
+#include <vinbero/vinbero_iface_CLSERVICE.h>
+#include <vinbero/vinbero_iface_HTTP.h>
 #include <libgenc/genc_Nstr_cat.h>
 #include <libgenc/genc_Tree.h>
 #include <libgenc/genc_Uint_toNstr.h>
@@ -26,21 +26,21 @@
 #include "vinbero_mt_epoll_http_Version.h"
 
 struct vinbero_mt_epoll_http_Module {
-    struct vinbero_interface_HTTP childInterface;
+    struct vinbero_iface_HTTP childIface;
     struct http_parser_settings parserCallbacks;
-    struct vinbero_interface_HTTP_Response_Methods responseMethods;
+    struct vinbero_iface_HTTP_Response_Methods responseMethods;
     size_t parserBufferCapacity;
 };
 
 struct vinbero_mt_epoll_http_ClModule {
     struct gaio_Io* clientIo;
-    struct vinbero_interface_HTTP_Response clientResponse;
+    struct vinbero_iface_HTTP_Response clientResponse;
     http_parser parser;
     bool isKeepAlive;
 };
 
 struct vinbero_mt_epoll_http_ParserData {
-    struct vinbero_common_ClModule* clModule;
+    struct vinbero_com_ClModule* clModule;
     char* buffer;
     size_t bufferCapacity;
     size_t bufferSize;
@@ -50,10 +50,10 @@ struct vinbero_mt_epoll_http_ParserData {
     bool isMessageCompleted;
 };
 
-VINBERO_INTERFACE_MODULE_FUNCTIONS;
-VINBERO_INTERFACE_TLOCAL_FUNCTIONS;
-VINBERO_INTERFACE_CLOCAL_FUNCTIONS;
-VINBERO_INTERFACE_CLSERVICE_FUNCTIONS;
+VINBERO_IFACE_MODULE_FUNCTIONS;
+VINBERO_IFACE_TLOCAL_FUNCTIONS;
+VINBERO_IFACE_CLOCAL_FUNCTIONS;
+VINBERO_IFACE_CLSERVICE_FUNCTIONS;
 
 static int
 vinbero_mt_epoll_http_on_message_begin(http_parser* parser) {
@@ -76,13 +76,13 @@ vinbero_mt_epoll_http_on_message_begin(http_parser* parser) {
     parserData->isMessageCompleted = false;
 
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
 
 
-    return localModule->childInterface
-           .vinbero_interface_HTTP_onRequestStart
+    return localModule->childIface
+           .vinbero_iface_HTTP_onRequestStart
             (childClModule)
-            == VINBERO_COMMON_STATUS_SUCCESS ? 0 : -1;
+            == VINBERO_COM_STATUS_SUCCESS ? 0 : -1;
 }
 
 static int
@@ -91,8 +91,8 @@ vinbero_mt_epoll_http_on_url
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     if(genc_Nstr_cat
        (parserData->buffer, parserData->bufferCapacity,
-        &parserData->bufferSize, at, length) == -1) return VINBERO_COMMON_ERROR_NO_SPACE;
-    return VINBERO_COMMON_STATUS_SUCCESS;
+        &parserData->bufferSize, at, length) == -1) return VINBERO_COM_ERROR_NO_SPACE;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
 static int
@@ -101,32 +101,32 @@ vinbero_mt_epoll_http_on_header_field
     int ret;
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
 
     if(parserData->wasURLFinished == false) {
         parserData->wasURLFinished = true;
-        ret = localModule->childInterface
-              .vinbero_interface_HTTP_onRequestUri
+        ret = localModule->childIface
+              .vinbero_iface_HTTP_onRequestUri
                (childClModule, (const char*)parserData->buffer, parserData->bufferSize);
         parserData->bufferSize = 0;
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
     }
 
     if(parserData->wasHeaderValueBefore == true) {
         parserData->wasHeaderValueBefore = false;
-        ret = localModule->childInterface
-               .vinbero_interface_HTTP_onRequestHeaderValue
+        ret = localModule->childIface
+               .vinbero_iface_HTTP_onRequestHeaderValue
                 (childClModule, (const char*)parserData->buffer, parserData->bufferSize);
         parserData->bufferSize = 0;
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
     }
     if(genc_Nstr_cat
        (parserData->buffer, parserData->bufferCapacity,
-        &parserData->bufferSize, at, length) == -1) return VINBERO_COMMON_ERROR_NO_SPACE;
+        &parserData->bufferSize, at, length) == -1) return VINBERO_COM_ERROR_NO_SPACE;
 
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
 static int
@@ -134,23 +134,23 @@ vinbero_mt_epoll_http_on_header_value(http_parser* parser, const char* at, size_
     int ret;
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
 
     if(parserData->wasHeaderValueBefore == false) {
         parserData->wasHeaderValueBefore = true;
-        ret = localModule->childInterface
-               .vinbero_interface_HTTP_onRequestHeaderField
+        ret = localModule->childIface
+               .vinbero_iface_HTTP_onRequestHeaderField
                 (childClModule, (const char*)parserData->buffer, parserData->bufferSize);
         parserData->bufferSize = 0;
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
     }
 
     if(genc_Nstr_cat
        (parserData->buffer, parserData->bufferCapacity,
-        &parserData->bufferSize, at, length) == -1) return VINBERO_COMMON_ERROR_NO_SPACE;
+        &parserData->bufferSize, at, length) == -1) return VINBERO_COM_ERROR_NO_SPACE;
 
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
 static int
@@ -159,41 +159,41 @@ vinbero_mt_epoll_http_on_headers_complete(http_parser* parser) {
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
     struct vinbero_mt_epoll_http_ClModule* localClModule = parserData->clModule->localClModule.pointer;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
 
     if(parserData->wasHeaderValueBefore == true) {
         parserData->wasHeaderValueBefore = false;
-        ret = localModule->childInterface
-               .vinbero_interface_HTTP_onRequestHeaderValue
+        ret = localModule->childIface
+               .vinbero_iface_HTTP_onRequestHeaderValue
                 (childClModule, (const char*)parserData->buffer, parserData->bufferSize);
         parserData->bufferSize = 0;
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
     } 
 
     localClModule->isKeepAlive = http_should_keep_alive(parser) != 0;
-    ret = localModule->childInterface
-           .vinbero_interface_HTTP_onRequestKeepAlive
+    ret = localModule->childIface
+           .vinbero_iface_HTTP_onRequestKeepAlive
             (childClModule, localClModule->isKeepAlive);
 
-    ret = localModule->childInterface
-    .vinbero_interface_HTTP_onRequestMethod(childClModule,
+    ret = localModule->childIface
+    .vinbero_iface_HTTP_onRequestMethod(childClModule,
      http_method_str(parser->method), strlen(http_method_str(parser->method)));
-    if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+    if(ret < VINBERO_COM_STATUS_SUCCESS)
         return ret;
 
-    ret = localModule->childInterface
-    .vinbero_interface_HTTP_onRequestVersionMajor(childClModule, parser->http_major);
-    if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+    ret = localModule->childIface
+    .vinbero_iface_HTTP_onRequestVersionMajor(childClModule, parser->http_major);
+    if(ret < VINBERO_COM_STATUS_SUCCESS)
         return ret;
 
-    ret = localModule->childInterface
-    .vinbero_interface_HTTP_onRequestVersionMinor(childClModule, parser->http_minor);
-    if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+    ret = localModule->childIface
+    .vinbero_iface_HTTP_onRequestVersionMinor(childClModule, parser->http_minor);
+    if(ret < VINBERO_COM_STATUS_SUCCESS)
         return ret;
 
-    return localModule->childInterface
-           .vinbero_interface_HTTP_onRequestHeadersFinish(childClModule);
+    return localModule->childIface
+           .vinbero_iface_HTTP_onRequestHeadersFinish(childClModule);
 }
 
 static int
@@ -201,24 +201,24 @@ vinbero_mt_epoll_http_on_body(http_parser* parser, const char* at, size_t length
     int ret;
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
 
     if(parserData->isFirstBodyChunk == true) {
         parserData->isFirstBodyChunk = false;
-        ret = localModule->childInterface
-               .vinbero_interface_HTTP_onRequestBodyStart(childClModule);
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        ret = localModule->childIface
+               .vinbero_iface_HTTP_onRequestBodyStart(childClModule);
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
-        return localModule->childInterface
-               .vinbero_interface_HTTP_onRequestBody(childClModule, at, length);
+        return localModule->childIface
+               .vinbero_iface_HTTP_onRequestBody(childClModule, at, length);
     }
     if(http_body_is_final(parser)) {
         // TODO: figure out why this is never called
-        return localModule->childInterface
-               .vinbero_interface_HTTP_onRequestBodyFinish(childClModule);
+        return localModule->childIface
+               .vinbero_iface_HTTP_onRequestBodyFinish(childClModule);
     }
-    return localModule->childInterface
-           .vinbero_interface_HTTP_onRequestBody(childClModule, at, length);
+    return localModule->childIface
+           .vinbero_iface_HTTP_onRequestBody(childClModule, at, length);
 
 }
 // onRequestBodyFinish is useless;
@@ -229,40 +229,40 @@ vinbero_mt_epoll_http_on_message_complete(http_parser* parser) {
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct vinbero_mt_epoll_http_Module* localModule = parserData->clModule->tlModule->module->localModule.pointer;
     struct vinbero_mt_epoll_http_ClModule* localClModule = parserData->clModule->localClModule.pointer;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(parserData->clModule, 0);
     parserData->isMessageCompleted = true;
     struct gaio_Io* clientIo = localClModule->clientIo;
     if(fcntl(clientIo->methods->fileno(clientIo), F_SETFL, fcntl(clientIo->methods->fileno(clientIo), F_GETFL, 0) & ~O_NONBLOCK) == -1)
-        return VINBERO_COMMON_ERROR_UNKNOWN;
+        return VINBERO_COM_ERROR_UNKNOWN;
     childClModule->arg = localClModule->clientIo;
-    ret = localModule->childInterface.vinbero_interface_HTTP_onRequestFinish(childClModule);
-    if(ret < VINBERO_COMMON_STATUS_SUCCESS) {
-        VINBERO_COMMON_LOG_ERROR("vinbero_interface_HTTP_onRequestFinish() Failed");
+    ret = localModule->childIface.vinbero_iface_HTTP_onRequestFinish(childClModule);
+    if(ret < VINBERO_COM_STATUS_SUCCESS) {
+        VINBERO_COM_LOG_ERROR("vinbero_iface_HTTP_onRequestFinish() Failed");
         return ret;
     }
 
     if(fcntl(clientIo->methods->fileno(clientIo), F_SETFL, fcntl(clientIo->methods->fileno(clientIo), F_GETFL, 0) | O_NONBLOCK) == -1)
-        return VINBERO_COMMON_ERROR_UNKNOWN;
+        return VINBERO_COM_ERROR_UNKNOWN;
 
-   return VINBERO_COMMON_STATUS_SUCCESS;
+   return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeBytes(struct vinbero_interface_HTTP_Response* response, const char* bytes, size_t bytesSize) {
+static int vinbero_mt_epoll_http_writeBytes(struct vinbero_iface_HTTP_Response* response, const char* bytes, size_t bytesSize) {
     response->io->methods->write(response->io, (void*)bytes, bytesSize);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeIo(struct vinbero_interface_HTTP_Response* response, struct gaio_Io* io, size_t bytesSize) {
+static int vinbero_mt_epoll_http_writeIo(struct vinbero_iface_HTTP_Response* response, struct gaio_Io* io, size_t bytesSize) {
     response->io->methods->sendfile(response->io, io, NULL, bytesSize);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeCrLf(struct vinbero_interface_HTTP_Response* response) {
+static int vinbero_mt_epoll_http_writeCrLf(struct vinbero_iface_HTTP_Response* response) {
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeVersion(struct vinbero_interface_HTTP_Response* response, int major, int minor) {
+static int vinbero_mt_epoll_http_writeVersion(struct vinbero_iface_HTTP_Response* response, int major, int minor) {
     response->io->methods->write(response->io, "HTTP/", sizeof("HTTP/") - 1);
 
     char* majorString;
@@ -281,10 +281,10 @@ static int vinbero_mt_epoll_http_writeVersion(struct vinbero_interface_HTTP_Resp
 
     response->io->methods->write(response->io, " ", sizeof(" ") - 1);
 
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeStatusCode(struct vinbero_interface_HTTP_Response* response, int statusCode) {
+static int vinbero_mt_epoll_http_writeStatusCode(struct vinbero_iface_HTTP_Response* response, int statusCode) {
     char* statusCodeString;
     size_t statusCodeStringSize;
     statusCodeStringSize = genc_Uint_toNstr(statusCode, 10, &statusCodeString);
@@ -293,9 +293,9 @@ static int vinbero_mt_epoll_http_writeStatusCode(struct vinbero_interface_HTTP_R
 
     response->io->methods->write(response->io, " \r\n", sizeof(" \r\n") - 1);
 
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
-static int vinbero_mt_epoll_http_writeIntHeader(struct vinbero_interface_HTTP_Response* response, const char* headerField, size_t headerFieldSize, int headerValue) {
+static int vinbero_mt_epoll_http_writeIntHeader(struct vinbero_iface_HTTP_Response* response, const char* headerField, size_t headerFieldSize, int headerValue) {
     response->io->methods->write(response->io, (void*)headerField, headerFieldSize);
     response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
     char* headerValueString;
@@ -305,21 +305,21 @@ static int vinbero_mt_epoll_http_writeIntHeader(struct vinbero_interface_HTTP_Re
     free(headerValueString);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
 
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
-static int vinbero_mt_epoll_http_writeDoubleHeader(struct vinbero_interface_HTTP_Response* response, const char* headerField, size_t headerFieldSize, double headerValue) {
+static int vinbero_mt_epoll_http_writeDoubleHeader(struct vinbero_iface_HTTP_Response* response, const char* headerField, size_t headerFieldSize, double headerValue) {
     // not implemented yet
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
-static int vinbero_mt_epoll_http_writeStringHeader(struct vinbero_interface_HTTP_Response* response, const char* headerField, size_t headerFieldSize, const char* headerValue, size_t headerValueSize) {
+static int vinbero_mt_epoll_http_writeStringHeader(struct vinbero_iface_HTTP_Response* response, const char* headerField, size_t headerFieldSize, const char* headerValue, size_t headerValueSize) {
     response->io->methods->write(response->io, (void*)headerField, headerFieldSize);
     response->io->methods->write(response->io, ": ", sizeof(": ") - 1);
     response->io->methods->write(response->io, (void*)headerValue, headerValueSize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeStringBody(struct vinbero_interface_HTTP_Response* response, const char* stringBody, size_t stringBodySize) {
+static int vinbero_mt_epoll_http_writeStringBody(struct vinbero_iface_HTTP_Response* response, const char* stringBody, size_t stringBodySize) {
     struct vinbero_mt_epoll_http_ClModule* localClModule = response->clModule->localClModule.pointer;
     if(localClModule->isKeepAlive == true)
         vinbero_mt_epoll_http_writeStringHeader(response, "Connection", sizeof("Connection") - 1, "keep-alive", sizeof("keep-alive") - 1);
@@ -328,23 +328,23 @@ static int vinbero_mt_epoll_http_writeStringBody(struct vinbero_interface_HTTP_R
     vinbero_mt_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, stringBodySize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->write(response->io, (void*)stringBody, stringBodySize);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeIoBody(struct vinbero_interface_HTTP_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
+static int vinbero_mt_epoll_http_writeIoBody(struct vinbero_iface_HTTP_Response* response, struct gaio_Io* ioBody, size_t ioBodySize) {
     vinbero_mt_epoll_http_writeIntHeader(response, "Content-Length", sizeof("Content-Length") - 1, ioBodySize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->sendfile(response->io, ioBody, NULL, ioBodySize);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeChunkedBodyStart(struct vinbero_interface_HTTP_Response* response) {
+static int vinbero_mt_epoll_http_writeChunkedBodyStart(struct vinbero_iface_HTTP_Response* response) {
     vinbero_mt_epoll_http_writeStringHeader(response, "Transfer-Encoding", sizeof("Transfer-Encoding") - 1, "chunked", sizeof("chunked") - 1);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeChunkedBody(struct vinbero_interface_HTTP_Response* response, const char* stringBody, size_t stringBodySize) {
+static int vinbero_mt_epoll_http_writeChunkedBody(struct vinbero_iface_HTTP_Response* response, const char* stringBody, size_t stringBodySize) {
     char* stringBodySizeString;
     size_t stringBodySizeStringSize;
     stringBodySizeStringSize = genc_Uint_toNstr(stringBodySize, 16, &stringBodySizeString);
@@ -353,29 +353,29 @@ static int vinbero_mt_epoll_http_writeChunkedBody(struct vinbero_interface_HTTP_
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
     response->io->methods->write(response->io, (void*)stringBody, stringBodySize);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-static int vinbero_mt_epoll_http_writeChunkedBodyEnd(struct vinbero_interface_HTTP_Response* response) {
+static int vinbero_mt_epoll_http_writeChunkedBodyEnd(struct vinbero_iface_HTTP_Response* response) {
     response->io->methods->write(response->io, "0\r\n", sizeof("0\r\n") - 1);
     response->io->methods->write(response->io, "\r\n", sizeof("\r\n") - 1);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
-    VINBERO_COMMON_LOG_TRACE2();
+int vinbero_iface_MODULE_init(struct vinbero_com_Module* module) {
+    VINBERO_COM_LOG_TRACE2();
     int ret;
 
-    vinbero_common_Module_init(module, "vinbero_mt_epoll_http", VINBERO_MT_EPOLL_HTTP_VERSION, true);
+    vinbero_com_Module_init(module, "vinbero_mt_epoll_http", VINBERO_MT_EPOLL_HTTP_VERSION, true);
     module->localModule.pointer = calloc(1, sizeof(struct vinbero_mt_epoll_http_Module));
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
-    struct vinbero_common_Module* childModule = GENC_TREE_NODE_GET_CHILD(module, 0);
-    VINBERO_INTERFACE_HTTP_DLSYM(&localModule->childInterface, &childModule->dlHandle, &ret);
-    if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+    struct vinbero_com_Module* childModule = GENC_TREE_NODE_GET_CHILD(module, 0);
+    VINBERO_IFACE_HTTP_DLSYM(&localModule->childIface, &childModule->dlHandle, &ret);
+    if(ret < VINBERO_COM_STATUS_SUCCESS)
         return ret;
 
     int parserBufferCapacity;
-    vinbero_common_Config_getInt(module->config, module, "vinbero_mt_epoll_http.parserBufferCapacity", &parserBufferCapacity, 4 * 1024);
+    vinbero_com_Config_getInt(module->config, module, "vinbero_mt_epoll_http.parserBufferCapacity", &parserBufferCapacity, 4 * 1024);
 
     localModule->parserBufferCapacity = parserBufferCapacity;
 
@@ -404,35 +404,35 @@ int vinbero_interface_MODULE_init(struct vinbero_common_Module* module) {
     localModule->parserCallbacks.on_chunk_header = NULL;
     localModule->parserCallbacks.on_chunk_complete = NULL;
 
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_MODULE_rInit(struct vinbero_common_Module* module) {
-    VINBERO_COMMON_LOG_TRACE2();
-    return VINBERO_COMMON_STATUS_SUCCESS;
+int vinbero_iface_MODULE_rInit(struct vinbero_com_Module* module) {
+    VINBERO_COM_LOG_TRACE2();
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_TLOCAL_init(struct vinbero_common_TlModule* tlModule) {
-    VINBERO_COMMON_LOG_TRACE2();
+int vinbero_iface_TLOCAL_init(struct vinbero_com_TlModule* tlModule) {
+    VINBERO_COM_LOG_TRACE2();
     int ret;
 /*
     GENC_TREE_NODE_FOR_EACH_CHILD(tlModule, index) {
-        struct vinbero_common_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
-        VINBERO_COMMON_CALL(TLOCAL, init, childTlModule->module, &ret, childTlModule);
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        struct vinbero_com_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
+        VINBERO_COM_CALL(TLOCAL, init, childTlModule->module, &ret, childTlModule);
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
     }
 */
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_TLOCAL_rInit(struct vinbero_common_TlModule* tlModule) {
-    VINBERO_COMMON_LOG_TRACE2();
-    return VINBERO_COMMON_STATUS_SUCCESS;
+int vinbero_iface_TLOCAL_rInit(struct vinbero_com_TlModule* tlModule) {
+    VINBERO_COM_LOG_TRACE2();
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_CLOCAL_init(struct vinbero_common_ClModule* clModule) {
-    VINBERO_COMMON_LOG_TRACE2();
+int vinbero_iface_CLOCAL_init(struct vinbero_com_ClModule* clModule) {
+    VINBERO_COM_LOG_TRACE2();
     int ret;
 
     struct vinbero_mt_epoll_http_Module* localModule = clModule->tlModule->module->localModule.pointer;
@@ -457,111 +457,111 @@ int vinbero_interface_CLOCAL_init(struct vinbero_common_ClModule* clModule) {
     clModule->arg = &localClModule->clientResponse;
 /*
     GENC_TREE_NODE_FOR_EACH_CHILD(clModule, index) {
-        struct vinbero_common_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(clModule, index);
+        struct vinbero_com_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(clModule, index);
         childClModule->arg = &localClModule->clientResponse;
-        VINBERO_COMMON_CALL(CLOCAL, init, childClModule->tlModule->module, &ret, childClModule);
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        VINBERO_COM_CALL(CLOCAL, init, childClModule->tlModule->module, &ret, childClModule);
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
 
     }
 */
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
 static inline int
-vinbero_mt_epoll_http_readRequest(struct vinbero_common_ClModule* clModule) {
-    VINBERO_COMMON_LOG_TRACE2();
+vinbero_mt_epoll_http_readRequest(struct vinbero_com_ClModule* clModule) {
+    VINBERO_COM_LOG_TRACE2();
     int ret;
     struct vinbero_mt_epoll_http_Module* localModule = clModule->tlModule->module->localModule.pointer;
     struct vinbero_mt_epoll_http_ClModule* localClModule = clModule->localClModule.pointer;
     struct http_parser* parser = &localClModule->parser;
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct gaio_Io* clientIo = localClModule->clientIo;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(clModule, 0);
 
     ssize_t readSize;
     size_t bufferFreeCapacity = parserData->bufferCapacity - parserData->bufferSize;
     if(bufferFreeCapacity == 0) {
-        VINBERO_COMMON_LOG_ERROR("Parser buffer is full");
-        return VINBERO_COMMON_ERROR_NO_SPACE;
+        VINBERO_COM_LOG_ERROR("Parser buffer is full");
+        return VINBERO_COM_ERROR_NO_SPACE;
     }
     while((readSize = clientIo->methods->read(clientIo, parserData->buffer + parserData->bufferSize, bufferFreeCapacity)) > 0) {
-        VINBERO_COMMON_LOG_DEBUG("Read client socket %d bytes", readSize); 
+        VINBERO_COM_LOG_DEBUG("Read client socket %d bytes", readSize); 
         if((ret = http_parser_execute(parser, &localModule->parserCallbacks, parserData->buffer, readSize)) < readSize || HTTP_PARSER_ERRNO(parser) != HPE_OK) {
-            VINBERO_COMMON_LOG_ERROR("Parser error: %s %s", http_errno_name(parser->http_errno), http_errno_description(parser->http_errno));
-            return VINBERO_COMMON_ERROR_INVALID_DATA;
+            VINBERO_COM_LOG_ERROR("Parser error: %s %s", http_errno_name(parser->http_errno), http_errno_description(parser->http_errno));
+            return VINBERO_COM_ERROR_INVALID_DATA;
         }
     }
     if(readSize == -1) {
         if(errno == EAGAIN) {
-            VINBERO_COMMON_LOG_DEBUG("Client socket EAGAIN");
-            return VINBERO_COMMON_STATUS_AGAIN;
+            VINBERO_COM_LOG_DEBUG("Client socket EAGAIN");
+            return VINBERO_COM_STATUS_AGAIN;
         } else if(errno == EWOULDBLOCK) {
-            VINBERO_COMMON_LOG_DEBUG("Client socket EWOULDBLOCK");
-            return VINBERO_COMMON_STATUS_AGAIN;
+            VINBERO_COM_LOG_DEBUG("Client socket EWOULDBLOCK");
+            return VINBERO_COM_STATUS_AGAIN;
         } else
-            VINBERO_COMMON_LOG_ERROR("Client socket read() error");
-        return VINBERO_COMMON_ERROR_READ;
+            VINBERO_COM_LOG_ERROR("Client socket read() error");
+        return VINBERO_COM_ERROR_READ;
     }
     else if(readSize == 0) {
-        VINBERO_COMMON_LOG_DEBUG("Read client socket %d bytes", readSize); 
-        VINBERO_COMMON_LOG_DEBUG("Client socket has been closed");
-        return VINBERO_COMMON_STATUS_SUCCESS;
+        VINBERO_COM_LOG_DEBUG("Read client socket %d bytes", readSize); 
+        VINBERO_COM_LOG_DEBUG("Client socket has been closed");
+        return VINBERO_COM_STATUS_SUCCESS;
     }
-    return VINBERO_COMMON_STATUS_SUCCESS; // request finsihed
+    return VINBERO_COM_STATUS_SUCCESS; // request finsihed
 }
 
-int vinbero_interface_CLSERVICE_call(struct vinbero_common_ClModule* clModule) {
-    VINBERO_COMMON_LOG_TRACE2();
+int vinbero_iface_CLSERVICE_call(struct vinbero_com_ClModule* clModule) {
+    VINBERO_COM_LOG_TRACE2();
     int ret;
     struct vinbero_mt_epoll_http_ClModule* localClModule = clModule->localClModule.pointer;
     struct gaio_Io* clientIo = localClModule->clientIo;
-    struct vinbero_common_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(clModule, 0);
+    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_GET_CHILD(clModule, 0);
     ret = vinbero_mt_epoll_http_readRequest(clModule);
-    if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+    if(ret < VINBERO_COM_STATUS_SUCCESS)
         return ret;
 
-    if(ret == VINBERO_COMMON_STATUS_AGAIN || ret == VINBERO_COMMON_STATUS_CONTINUE)
-        return VINBERO_COMMON_STATUS_AGAIN;
+    if(ret == VINBERO_COM_STATUS_AGAIN || ret == VINBERO_COM_STATUS_CONTINUE)
+        return VINBERO_COM_STATUS_AGAIN;
 
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_CLOCAL_destroy(struct vinbero_common_ClModule* clModule) {
-    VINBERO_COMMON_LOG_TRACE2();
+int vinbero_iface_CLOCAL_destroy(struct vinbero_com_ClModule* clModule) {
+    VINBERO_COM_LOG_TRACE2();
     struct vinbero_mt_epoll_http_ClModule* localClModule = clModule->localClModule.pointer;
     struct vinbero_mt_epoll_http_ParserData* parserData = localClModule->parser.data;
     free(parserData->buffer);
     free(localClModule);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_TLOCAL_destroy(struct vinbero_common_TlModule* tlModule) {
+int vinbero_iface_TLOCAL_destroy(struct vinbero_com_TlModule* tlModule) {
     int ret;
-    VINBERO_COMMON_LOG_TRACE2();
+    VINBERO_COM_LOG_TRACE2();
 /*
     GENC_TREE_NODE_FOR_EACH_CHILD(tlModule, index) {
-        struct vinbero_common_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
-        VINBERO_COMMON_CALL(TLOCAL, destroy, childTlModule->module, &ret, childTlModule);
-        if(ret < VINBERO_COMMON_STATUS_SUCCESS)
+        struct vinbero_com_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
+        VINBERO_COM_CALL(TLOCAL, destroy, childTlModule->module, &ret, childTlModule);
+        if(ret < VINBERO_COM_STATUS_SUCCESS)
             return ret;
     }
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 */
 }
 
-int vinbero_interface_TLOCAL_rDestroy(struct vinbero_common_TlModule* tlModule) {
-    VINBERO_COMMON_LOG_TRACE2();
-    return VINBERO_COMMON_STATUS_SUCCESS;
+int vinbero_iface_TLOCAL_rDestroy(struct vinbero_com_TlModule* tlModule) {
+    VINBERO_COM_LOG_TRACE2();
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_MODULE_destroy(struct vinbero_common_Module* module) {
-    VINBERO_COMMON_LOG_TRACE2();
-    return VINBERO_COMMON_STATUS_SUCCESS;
+int vinbero_iface_MODULE_destroy(struct vinbero_com_Module* module) {
+    VINBERO_COM_LOG_TRACE2();
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
-int vinbero_interface_MODULE_rDestroy(struct vinbero_common_Module* module) {
-    VINBERO_COMMON_LOG_TRACE2();
+int vinbero_iface_MODULE_rDestroy(struct vinbero_com_Module* module) {
+    VINBERO_COM_LOG_TRACE2();
     free(module->localModule.pointer);
-    return VINBERO_COMMON_STATUS_SUCCESS;
+    return VINBERO_COM_STATUS_SUCCESS;
 }
