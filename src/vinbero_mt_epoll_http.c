@@ -374,7 +374,6 @@ static int vinbero_mt_epoll_http_writeChunkedBodyEnd(struct vinbero_iface_HTTP_R
 int vinbero_iface_MODULE_init(struct vinbero_com_Module* module) {
     VINBERO_COM_LOG_TRACE2();
     int ret;
-
     module->localModule.pointer = calloc(1, sizeof(struct vinbero_mt_epoll_http_Module));
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
     struct vinbero_com_Module* childModule = GENC_TREE_NODE_GET_CHILD(module, 0);
