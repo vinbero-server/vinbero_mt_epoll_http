@@ -55,6 +55,15 @@ VINBERO_IFACE_TLOCAL_FUNCTIONS;
 VINBERO_IFACE_CLOCAL_FUNCTIONS;
 VINBERO_IFACE_CLSERVICE_FUNCTIONS;
 
+VINBERO_COM_MODULE_META_INIT(
+    "vinbero_mt_epoll_http",
+    VINBERO_MT_EPOLL_HTTP_VERSION_MAJOR,
+    VINBERO_MT_EPOLL_HTTP_VERSION_MINOR,
+    VINBERO_MT_EPOLL_HTTP_VERSION_PATCH,
+    "TLOCAL,CLOCAL,CLSERVICE",
+    "TLOCAL,CLOCAL,HTTP"
+);
+
 static int
 vinbero_mt_epoll_http_on_message_begin(http_parser* parser) {
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
@@ -366,7 +375,6 @@ int vinbero_iface_MODULE_init(struct vinbero_com_Module* module) {
     VINBERO_COM_LOG_TRACE2();
     int ret;
 
-    vinbero_com_Module_init(module, "vinbero_mt_epoll_http", VINBERO_MT_EPOLL_HTTP_VERSION, true);
     module->localModule.pointer = calloc(1, sizeof(struct vinbero_mt_epoll_http_Module));
     struct vinbero_mt_epoll_http_Module* localModule = module->localModule.pointer;
     struct vinbero_com_Module* childModule = GENC_TREE_NODE_GET_CHILD(module, 0);
@@ -415,14 +423,6 @@ int vinbero_iface_MODULE_rInit(struct vinbero_com_Module* module) {
 int vinbero_iface_TLOCAL_init(struct vinbero_com_TlModule* tlModule) {
     VINBERO_COM_LOG_TRACE2();
     int ret;
-/*
-    GENC_TREE_NODE_FOR_EACH_CHILD(tlModule, index) {
-        struct vinbero_com_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
-        VINBERO_COM_CALL(TLOCAL, init, childTlModule->module, &ret, childTlModule);
-        if(ret < VINBERO_COM_STATUS_SUCCESS)
-            return ret;
-    }
-*/
     return VINBERO_COM_STATUS_SUCCESS;
 }
 
@@ -455,16 +455,6 @@ int vinbero_iface_CLOCAL_init(struct vinbero_com_ClModule* clModule) {
     localClModule->clientResponse.io = localClModule->clientIo;
 
     clModule->arg = &localClModule->clientResponse;
-/*
-    GENC_TREE_NODE_FOR_EACH_CHILD(clModule, index) {
-        struct vinbero_com_ClModule* childClModule = &GENC_TREE_NODE_GET_CHILD(clModule, index);
-        childClModule->arg = &localClModule->clientResponse;
-        VINBERO_COM_CALL(CLOCAL, init, childClModule->tlModule->module, &ret, childClModule);
-        if(ret < VINBERO_COM_STATUS_SUCCESS)
-            return ret;
-
-    }
-*/
     return VINBERO_COM_STATUS_SUCCESS;
 }
 
@@ -539,15 +529,6 @@ int vinbero_iface_CLOCAL_destroy(struct vinbero_com_ClModule* clModule) {
 int vinbero_iface_TLOCAL_destroy(struct vinbero_com_TlModule* tlModule) {
     int ret;
     VINBERO_COM_LOG_TRACE2();
-/*
-    GENC_TREE_NODE_FOR_EACH_CHILD(tlModule, index) {
-        struct vinbero_com_TlModule* childTlModule = &GENC_TREE_NODE_GET_CHILD(tlModule, index);
-        VINBERO_COM_CALL(TLOCAL, destroy, childTlModule->module, &ret, childTlModule);
-        if(ret < VINBERO_COM_STATUS_SUCCESS)
-            return ret;
-    }
-    return VINBERO_COM_STATUS_SUCCESS;
-*/
 }
 
 int vinbero_iface_TLOCAL_rDestroy(struct vinbero_com_TlModule* tlModule) {
