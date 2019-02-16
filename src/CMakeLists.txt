@@ -4,6 +4,7 @@ target_sources(
     PRIVATE
     vinbero_mt_epoll_http.c
 )
+target_compile_options(vinbero_mt_epoll_http PRIVATE -Wall)
 set_target_properties(
     vinbero_mt_epoll_http
     PROPERTIES
