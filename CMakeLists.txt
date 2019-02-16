@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(vinbero_mt_epoll_http C)
 include(cmake/gonapps-cmake-helper.cmake)
 gonapps_setBuildType()
