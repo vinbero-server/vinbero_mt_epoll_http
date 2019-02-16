@@ -424,7 +424,6 @@ int vinbero_iface_MODULE_rInit(struct vinbero_com_Module* module) {
 
 int vinbero_iface_TLOCAL_init(struct vinbero_com_TlModule* tlModule) {
     VINBERO_COM_LOG_TRACE2();
-    int ret;
     return VINBERO_COM_STATUS_SUCCESS;
 }
 
@@ -435,8 +434,6 @@ int vinbero_iface_TLOCAL_rInit(struct vinbero_com_TlModule* tlModule) {
 
 int vinbero_iface_CLOCAL_init(struct vinbero_com_ClModule* clModule) {
     VINBERO_COM_LOG_TRACE2();
-    int ret;
-
     struct vinbero_mt_epoll_http_Module* localModule = clModule->tlModule->module->localModule.pointer;
     clModule->localClModule.pointer = malloc(1 * sizeof(struct vinbero_mt_epoll_http_ClModule));
     struct vinbero_mt_epoll_http_ClModule* localClModule = clModule->localClModule.pointer;
@@ -469,8 +466,6 @@ vinbero_mt_epoll_http_readRequest(struct vinbero_com_ClModule* clModule) {
     struct http_parser* parser = &localClModule->parser;
     struct vinbero_mt_epoll_http_ParserData* parserData = parser->data;
     struct gaio_Io* clientIo = localClModule->clientIo;
-    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_RAW_GET(clModule, 0);
-
     ssize_t readSize;
     size_t bufferFreeCapacity = parserData->bufferCapacity - parserData->bufferSize;
     if(bufferFreeCapacity == 0) {
@@ -506,9 +501,6 @@ vinbero_mt_epoll_http_readRequest(struct vinbero_com_ClModule* clModule) {
 int vinbero_iface_CLSERVICE_call(struct vinbero_com_ClModule* clModule) {
     VINBERO_COM_LOG_TRACE2();
     int ret;
-    struct vinbero_mt_epoll_http_ClModule* localClModule = clModule->localClModule.pointer;
-    struct gaio_Io* clientIo = localClModule->clientIo;
-    struct vinbero_com_ClModule* childClModule = GENC_TREE_NODE_RAW_GET(clModule, 0);
     ret = vinbero_mt_epoll_http_readRequest(clModule);
     if(ret < VINBERO_COM_STATUS_SUCCESS)
         return ret;
@@ -529,8 +521,8 @@ int vinbero_iface_CLOCAL_destroy(struct vinbero_com_ClModule* clModule) {
 }
 
 int vinbero_iface_TLOCAL_destroy(struct vinbero_com_TlModule* tlModule) {
-    int ret;
     VINBERO_COM_LOG_TRACE2();
+    return VINBERO_COM_STATUS_SUCCESS;
 }
 
 int vinbero_iface_TLOCAL_rDestroy(struct vinbero_com_TlModule* tlModule) {

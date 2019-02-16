@@ -12,21 +12,21 @@ set_target_properties(
 )
 set_target_properties(
     vinbero_mt_epoll_http PROPERTIES
+    C_STANDARD 11
     VERSION ${version}
     SOVERSION ${soversion}
-    C_STANDARD 11
 )
 
-find_library(fastdl libfastdl.so REQUIRED)
-find_library(gaio libgaio.so REQUIRED)
+find_package(fastdl REQUIRED)
+find_package(gaio REQUIRED)
 find_package(vinbero_com REQUIRED)
 target_link_libraries(
     vinbero_mt_epoll_http
     PRIVATE
     http_parser
     vinbero_com::vinbero_com
-    ${fastdl}
-    ${gaio}
+    fastdl::fastdl
+    gaio::gaio
 )
 install(
     TARGETS vinbero_mt_epoll_http
