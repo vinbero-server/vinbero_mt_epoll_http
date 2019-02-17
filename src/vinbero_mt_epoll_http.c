@@ -23,7 +23,7 @@
 #include <libgenc/genc_Tree.h>
 #include <libgenc/genc_Uint_toNstr.h>
 #include <gaio.h>
-#include "vinbero_mt_epoll_http_Version.h"
+#include "config.h"
 
 VINBERO_COM_MODULE_META_NAME("vinbero_mt_epoll_http")
 VINBERO_COM_MODULE_META_LICENSE("MPL-2.0")

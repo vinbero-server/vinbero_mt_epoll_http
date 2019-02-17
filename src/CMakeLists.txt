@@ -1,25 +1,30 @@
+find_package(fastdl REQUIRED)
+find_package(gaio REQUIRED)
+find_package(vinbero_com REQUIRED)
+
 add_library(vinbero_mt_epoll_http MODULE)
+
 target_sources(
     vinbero_mt_epoll_http
     PRIVATE
     vinbero_mt_epoll_http.c
 )
 target_compile_options(vinbero_mt_epoll_http PRIVATE -Wall)
-set_target_properties(
-    vinbero_mt_epoll_http
-    PROPERTIES
-    PREFIX ""
-)
+
 set_target_properties(
     vinbero_mt_epoll_http PROPERTIES
     C_STANDARD 11
+    PREFIX ""
     VERSION ${version}
     SOVERSION ${soversion}
 )
 
-find_package(fastdl REQUIRED)
-find_package(gaio REQUIRED)
-find_package(vinbero_com REQUIRED)
+target_include_directories(
+    vinbero_mt_epoll_http
+    PRIVATE
+    ${PROJECT_BINARY_DIR}
+)
+
 target_link_libraries(
     vinbero_mt_epoll_http
     PRIVATE
@@ -28,6 +33,13 @@ target_link_libraries(
     fastdl::fastdl
     gaio::gaio
 )
+
+configure_file(
+    "${PROJECT_SOURCE_DIR}/src/config.h.in"
+    "${PROJECT_BINARY_DIR}/config.h"
+    @ONLY
+)
+
 install(
     TARGETS vinbero_mt_epoll_http
     LIBRARY DESTINATION lib/vinbero
