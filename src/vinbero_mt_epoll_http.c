@@ -457,6 +457,11 @@ int vinbero_iface_CLOCAL_init(struct vinbero_com_ClModule* clModule) {
     return VINBERO_COM_STATUS_SUCCESS;
 }
 
+int vinbero_iface_CLOCAL_rInit(struct vinbero_com_ClModule* clModule) {
+    VINBERO_COM_LOG_TRACE2();
+    return VINBERO_COM_STATUS_SUCCESS;
+}
+
 static inline int
 vinbero_mt_epoll_http_readRequest(struct vinbero_com_ClModule* clModule) {
     VINBERO_COM_LOG_TRACE2();
@@ -517,6 +522,11 @@ int vinbero_iface_CLOCAL_destroy(struct vinbero_com_ClModule* clModule) {
     struct vinbero_mt_epoll_http_ParserData* parserData = localClModule->parser.data;
     free(parserData->buffer);
     free(localClModule);
+    return VINBERO_COM_STATUS_SUCCESS;
+}
+
+int vinbero_iface_CLOCAL_rDestroy(struct vinbero_com_ClModule* clModule) {
+    VINBERO_COM_LOG_TRACE2();
     return VINBERO_COM_STATUS_SUCCESS;
 }
 
