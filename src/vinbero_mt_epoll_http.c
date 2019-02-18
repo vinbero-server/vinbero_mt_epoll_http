@@ -486,6 +486,14 @@ vinbero_mt_epoll_http_readRequest(struct vinbero_com_ClModule* clModule) {
     }
     if(readSize == -1) {
         if(errno == EAGAIN) {
+            if(parserData->isMessageCompleted == true) {
+                if(localClModule->isKeepAlive) {
+                    VINBERO_COM_LOG_DEBUG("HTTP connection Keep-Alive");
+                    return VINBERO_COM_STATUS_CONTINUE;
+                }
+                VINBERO_COM_LOG_DEBUG("HTTP connection close");
+                return VINBERO_COM_STATUS_SUCCESS;
+            }
             VINBERO_COM_LOG_DEBUG("Client socket EAGAIN");
             return VINBERO_COM_STATUS_AGAIN;
         } else if(errno == EWOULDBLOCK) {
@@ -496,8 +504,11 @@ vinbero_mt_epoll_http_readRequest(struct vinbero_com_ClModule* clModule) {
         return VINBERO_COM_ERROR_READ;
     }
     else if(readSize == 0) {
-        VINBERO_COM_LOG_DEBUG("Read client socket %d bytes", readSize); 
-        VINBERO_COM_LOG_DEBUG("Client socket has been closed");
+        if(localClModule->isKeepAlive) {
+            VINBERO_COM_LOG_DEBUG("HTTP connection Keep-Alive");
+            return VINBERO_COM_STATUS_CONTINUE;
+        }
+        VINBERO_COM_LOG_DEBUG("HTTP connection close");
         return VINBERO_COM_STATUS_SUCCESS;
     }
     return VINBERO_COM_STATUS_SUCCESS; // request finsihed
