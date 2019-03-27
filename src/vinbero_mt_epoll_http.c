@@ -14,11 +14,11 @@
 #include <vinbero_com/vinbero_com_Module.h>
 #include <vinbero_com/vinbero_com_ClModule.h>
 #include <vinbero_com/vinbero_com_Log.h>
-#include <vinbero/vinbero_iface_MODULE.h>
-#include <vinbero/vinbero_iface_TLOCAL.h>
-#include <vinbero/vinbero_iface_CLOCAL.h>
-#include <vinbero/vinbero_iface_CLSERVICE.h>
-#include <vinbero/vinbero_iface_HTTP.h>
+#include <vinbero_iface_MODULE/vinbero_iface_MODULE.h>
+#include <vinbero_iface_TLOCAL/vinbero_iface_TLOCAL.h>
+#include <vinbero_iface_CLOCAL/vinbero_iface_CLOCAL.h>
+#include <vinbero_iface_CLSERVICE/vinbero_iface_CLSERVICE.h>
+#include <vinbero_iface_HTTP/vinbero_iface_HTTP.h>
 #include <libgenc/genc_Nstr_cat.h>
 #include <libgenc/genc_Tree.h>
 #include <libgenc/genc_Uint_toNstr.h>
